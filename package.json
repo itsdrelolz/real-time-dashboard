@@ -1,38 +1,18 @@
 {
-<<<<<<< HEAD
-  "name": "team-task-backend",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.15.1",
-    "express": "^4.19.2"
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.14.2",
-    "prisma": "^5.15.1",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5"
-  }
-=======
   "name": "team-task",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "description": "A monorepo for the team-task project",
   "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC"
-  {
-  "private": true,
-  "workspaces": ["frontend", "backend"]
-}
-
->>>>>>> e3fed69a9ae257de4ef92ef9f2f34a479d5c72ea
 }
