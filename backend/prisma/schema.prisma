@@ -10,9 +10,11 @@ datasource db {
 model User {
   id           Int       @id @default(autoincrement())
   email        String    @unique
-  passwordHash String
+  password String
   role         Role      @default(MEMBER)
-  
+  firstName    String?
+  lastName     String? 
+  displayName  String
   ownedProjects Project[] @relation("OwnedProjects")
   assignedTasks Task[]    @relation("AssignedTasks")
   comments      Comment[]
