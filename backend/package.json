@@ -32,6 +32,7 @@
     "tsx": "^4.15.5",
     "typescript": "^5.4.5",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
-    "@typescript-eslint/parser": "^7.13.0"
+    "@typescript-eslint/parser": "^7.13.0",
+    "typescript-eslint": "^7.13.0"
   }
 }
