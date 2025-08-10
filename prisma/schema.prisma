@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(MEMBER)
+  
+  ownedProjects Project[] @relation("OwnedProjects")
+  assignedTasks Task[]    @relation("AssignedTasks")
+  comments      Comment[]
+}
+
+model Project {
+  id    Int    @id @default(autoincrement())
+  name  String
+  
+  ownerId Int
+  owner   User   @relation("OwnedProjects", fields: [ownerId], references: [id])
+  
+  tasks Task[]
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      Status   @default(TODO)
+  priority    Priority @default(MEDIUM)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+  
+  assigneeId Int?
+  assignee   User? @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  
+  comments Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  
+  userId Int
+  author User   @relation(fields: [userId], references: [id])
+  
+  taskId Int
+  task   Task   @relation(fields: [taskId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
