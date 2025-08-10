@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'backend/**'      
+      - 'backend/**'
       - '.github/workflows/backend-ci.yml'
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend 
+        working-directory: ./backend
 
     steps:
       - name: Checkout code
@@ -31,3 +31,4 @@ jobs:
 
       - name: Build project
         run: npm run build
+
