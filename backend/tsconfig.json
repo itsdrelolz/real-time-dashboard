@@ -15,12 +15,9 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
 
+    /* Module Settings */
     "moduleResolution": "Bundler",
     "module": "ESNext",
-    "noEmit": true,
-
-    "rootDir": ".",
-    "outDir": "dist",
 
     /* Library and Declaration Files */
     "lib": ["esnext"],
@@ -29,5 +26,5 @@
     "declarationMap": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.config.ts", "**/*.cjs"]
+  "exclude": ["node_modules", "dist"]
 }
