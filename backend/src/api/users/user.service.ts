@@ -1,6 +1,5 @@
 import { User } from '@prisma/client'; 
 import prisma  from '../../utils/prismaClient';
-import bcrypt from "bcryptjs";
 
 
 async function findUser(id: number): Promise<User | null> { 

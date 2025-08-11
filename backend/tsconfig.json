@@ -11,6 +11,12 @@
     "outDir": "./dist",
     "rootDir": "./src",
 
+    /* Path Alias Setup */
+    "baseUrl": ".",
+    "paths": {
+      "@/types/*": ["src/types/*"]
+    },
+
     /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
