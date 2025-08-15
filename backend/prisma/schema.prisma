@@ -7,26 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           String     @id @db.Uuid
-  email        String     @unique
-  role         Role       @default(MEMBER)
-  firstName    String?
-  lastName     String? 
-  displayName  String
+model Profile {
+  id          String    @id @db.Uuid
+  email       String    @unique
+  role        Role      @default(MEMBER)
+  firstName   String?
+  lastName    String?
+  displayName String
+
   ownedProjects Project[] @relation("OwnedProjects")
   assignedTasks Task[]    @relation("AssignedTasks")
   comments      Comment[]
+
+  @@map("profiles") // Explicitly maps model to the "profiles" table in the DB
 }
 
 model Project {
-  id       Int    @id @default(autoincrement())
-  name     String
-
-  ownerId  String @db.Uuid
-  owner    User   @relation("OwnedProjects", fields: [ownerId], references: [id])
-
-  tasks    Task[]
+  id      Int    @id @default(autoincrement())
+  name    String
+  ownerId String @db.Uuid
+  owner   Profile @relation("OwnedProjects", fields: [ownerId], references: [id])
+  tasks   Task[]
 }
 
 model Task {
@@ -37,28 +38,27 @@ model Task {
   priority    Priority @default(MEDIUM)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  projectId   Int
-  project     Project  @relation(fields: [projectId], references: [id])
-  
-  assigneeId  String?  @db.Uuid
-  assignee    User?    @relation("AssignedTasks", fields: [assigneeId], references: [id])
-  
-  comments    Comment[]
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+
+  assigneeId String? @db.Uuid
+  assignee   Profile? @relation("AssignedTasks", fields: [assigneeId], references: [id])
+
+  comments Comment[]
 }
 
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-  
-  userId    String   @db.Uuid
-  author    User     @relation(fields: [userId], references: [id])
-  
-  taskId    Int
-  task      Task     @relation(fields: [taskId], references: [id])
-}
 
+  userId String @db.Uuid
+  author Profile @relation(fields: [userId], references: [id])
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+}
 
 enum Role {
   ADMIN
@@ -77,4 +77,3 @@ enum Priority {
   MEDIUM
   HIGH
 }
-

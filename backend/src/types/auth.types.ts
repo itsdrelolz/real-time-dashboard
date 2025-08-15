@@ -1,15 +1,15 @@
 import type { Session as SupabaseSession } from '@supabase/supabase-js'; 
-import type { User as AppUser } from '@prisma/client'; 
+import type { Profile as AppUser } from '@prisma/client'; 
 
 
 
-export type User = AppUser; 
+export type Profile = AppUser; 
 
 export type Session = SupabaseSession; 
 
 
 export type AuthResponse = { 
-    user: User; 
+    profile: Profile; 
     session: Session;
 }; 
 

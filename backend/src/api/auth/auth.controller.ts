@@ -1,4 +1,4 @@
-import { signupUser } from './auth.services';
+import { signupUser, signinUser } from './auth.services';
 import { Request, Response } from 'express';
 import { isSupabaseAuthError } from '@/types/error.types';
 
@@ -20,7 +20,7 @@ export async function signupController(req: Request, res: Response) {
 	});
     } 
 
-    const { user, session } = await signupUser({ 
+    const { profile, session } = await signupUser({ 
 	email, 
 	password, 
 	displayName,
@@ -30,7 +30,7 @@ export async function signupController(req: Request, res: Response) {
 
     res.status(201).json({
 	message: 'User created successfully.',
-	user, 
+	profile, 
 	session,
     });
 
@@ -48,5 +48,47 @@ export async function signupController(req: Request, res: Response) {
 	});
     }
 };
+
+export async function signinController(req: Request, res: Response) { 
+    
+    try { 
+	const { email, password } = req.body; 
+
+	if (!email || !password) { 
+	    return res.status(400).json({
+	    error: 'Missing required fields', 
+	}); 
+
+    }
+
+
+
+    const { profile, session } = await signinUser({
+	email, 
+	password 
+    });
+
+    
+    res.status(200).json({ 
+	message: 'Logged in successfully.', 
+	profile, 
+	session, 
+    });
+
+    } catch(error: unknown) {
+	if (isSupabaseAuthError(error) && error.message.includes('Invalid login credentials')) { 
+
+	    return res.status(401).json({
+		error: 'Invalid email or password.'
+	    });
+	}
+
+	console.error('Sign in error:', error); 
+	res.status(500).json({
+	    error: 'Internal server error during sign-in',
+	});
+    }
+
+}
 
 
