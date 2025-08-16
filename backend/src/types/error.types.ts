@@ -1,15 +1,15 @@
+type SupabaseAuthError = {
+  status: number;
+  message: string;
+};
 
-
-type SupabaseAuthError = { 
-    status: number, 
-    message: string, 
-}; 
-
-export function isSupabaseAuthError(error: unknown): error is SupabaseAuthError {
+export function isSupabaseAuthError(
+  error: unknown,
+): error is SupabaseAuthError {
   return (
-    typeof error === 'object' &&
+    typeof error === "object" &&
     error !== null &&
-    'status' in error &&
-    'message' in error
+    "status" in error &&
+    "message" in error
   );
 }

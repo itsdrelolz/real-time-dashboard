@@ -1,94 +1,85 @@
-import { signupUser, signinUser } from './auth.services';
-import { Request, Response } from 'express';
-import { isSupabaseAuthError } from '@/types/error.types';
+import { signupUser, signinUser } from "./auth.services";
+import { Request, Response } from "express";
+import { isSupabaseAuthError } from "@/types/error.types";
 
-export async function signupController(req: Request, res: Response) { 
-    
-    try { 
+export async function signupController(req: Request, res: Response) {
+  try {
+    const { email, password, displayName, ...options } = req.body;
 
-    const { email, password, displayName, ...options } = req.body; 
+    if (!email || !password || !displayName) {
+      return res.status(400).json({
+        error: "Missing required fields",
+      });
+    }
 
-    if (!email || !password || !displayName) { 
-	return res.status(400).json({
-	    error: 'Missing required fields', 
-	}); 
-    } 
+    if (password.length < 6) {
+      return res.status(400).json({
+        error: "Password must be at least 6 characters long",
+      });
+    }
 
-    if (password.length < 6) { 
-	return res.status(400).json({
-	    error: 'Password must be at least 6 characters long', 
-	});
-    } 
-
-    const { profile, session } = await signupUser({ 
-	email, 
-	password, 
-	displayName,
-	...options,
-    })
-
+    const { profile, session } = await signupUser({
+      email,
+      password,
+      displayName,
+      ...options,
+    });
 
     res.status(201).json({
-	message: 'User created successfully.',
-	profile, 
-	session,
+      message: "User created successfully.",
+      profile,
+      session,
     });
-
-    } catch(error: unknown) {
-	if (isSupabaseAuthError(error) && error.message.includes('User already registered')) { 
-
-	    return res.status(409).json({
-		error: 'A user with this email already exists.'
-	    });
-	}
-
-	console.error('Sign up error:', error); 
-	res.status(500).json({
-	    error: 'Internal server error during signup',
-	});
-    }
-};
-
-export async function signinController(req: Request, res: Response) { 
-    
-    try { 
-	const { email, password } = req.body; 
-
-	if (!email || !password) { 
-	    return res.status(400).json({
-	    error: 'Missing required fields', 
-	}); 
-
+  } catch (error: unknown) {
+    if (
+      isSupabaseAuthError(error) &&
+      error.message.includes("User already registered")
+    ) {
+      return res.status(409).json({
+        error: "A user with this email already exists.",
+      });
     }
 
-
-
-    const { profile, session } = await signinUser({
-	email, 
-	password 
+    console.error("Sign up error:", error);
+    res.status(500).json({
+      error: "Internal server error during signup",
     });
-
-    
-    res.status(200).json({ 
-	message: 'Logged in successfully.', 
-	profile, 
-	session, 
-    });
-
-    } catch(error: unknown) {
-	if (isSupabaseAuthError(error) && error.message.includes('Invalid login credentials')) { 
-
-	    return res.status(401).json({
-		error: 'Invalid email or password.'
-	    });
-	}
-
-	console.error('Sign in error:', error); 
-	res.status(500).json({
-	    error: 'Internal server error during sign-in',
-	});
-    }
-
+  }
 }
 
+export async function signinController(req: Request, res: Response) {
+  try {
+    const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Missing required fields",
+      });
+    }
+
+    const { profile, session } = await signinUser({
+      email,
+      password,
+    });
+
+    res.status(200).json({
+      message: "Logged in successfully.",
+      profile,
+      session,
+    });
+  } catch (error: unknown) {
+    if (
+      isSupabaseAuthError(error) &&
+      error.message.includes("Invalid login credentials")
+    ) {
+      return res.status(401).json({
+        error: "Invalid email or password.",
+      });
+    }
+
+    console.error("Sign in error:", error);
+    res.status(500).json({
+      error: "Internal server error during sign-in",
+    });
+  }
+}

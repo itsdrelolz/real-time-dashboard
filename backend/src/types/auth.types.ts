@@ -1,17 +1,14 @@
-import type { Session as SupabaseSession } from '@supabase/supabase-js'; 
-import type { Profile as AppUser } from '@prisma/client'; 
+import type { Session as SupabaseSession } from "@supabase/supabase-js";
+import type { Profile as AppUser } from "@prisma/client";
 
+export type Profile = AppUser;
 
+export type Session = SupabaseSession;
 
-export type Profile = AppUser; 
-
-export type Session = SupabaseSession; 
-
-
-export type AuthResponse = { 
-    profile: Profile; 
-    session: Session;
-}; 
+export type AuthResponse = {
+  profile: Profile;
+  session: Session;
+};
 
 export type SignupParams = {
   email: string;
@@ -22,8 +19,6 @@ export type SignupParams = {
 };
 
 export type LoginParams = {
-  email:string;
+  email: string;
   password: string;
 };
-
-
