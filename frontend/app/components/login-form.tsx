@@ -1,73 +1,70 @@
-import { cn } from "~/lib/utils"
-import { Button } from "~/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm() {
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+
+  // We now handle the form submission with a standard React event handler.
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null); // Clear previous errors
+
+    const formData = new FormData(event.currentTarget);
+    const credentials = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Login failed. Please try again.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Login successful:", data);
+      // You would typically save the auth token here, e.g.:
+      // localStorage.setItem('authToken', data.token);
+
+      // Use the navigate function for redirection
+      navigate("/dashboard"); // Or wherever you want to go after login
+
+    } catch (err) {
+      setError("Network error. Could not connect to the server.");
+    }
+  }
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Login with Google
-                </Button>
-		<Button variant="outline" className="w-full">
-                  Login with Github
-                </Button>
-              </div>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
-                Sign up
-              </a>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+      <div className="flex flex-col p-6 space-y-1">
+        <h3 className="font-semibold tracking-tight text-2xl">Login</h3>
+        <p className="text-sm text-muted-foreground">Enter your email below to login to your account</p>
+      </div>
+      <div className="p-6 pt-0">
+        {/* Use a standard <form> with an onSubmit handler */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none" htmlFor="email">Email</label>
+            <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" id="email" name="email" placeholder="m@example.com" required type="email" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none" htmlFor="password">Password</label>
+            <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" id="password" name="password" required type="password" />
+          </div>
+
+          {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 w-full bg-primary text-primary-foreground hover:bg-primary/90" type="submit">
+            Log In
+          </button>
+        </form>
+      </div>
     </div>
-  )
+  );
 }
+

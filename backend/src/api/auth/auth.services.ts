@@ -25,8 +25,16 @@ export async function signupUser(params: SignupParams): Promise<AuthResponse> {
     throw new Error("Signup incomplete: No user or session returned.");
   }
 
-  const profile = await prisma.profile.findUniqueOrThrow({
-    where: { id: authData.user.id },
+  if (!authData.user.email) {
+    throw new Error("Signup incomplete: User was created but has no email.");
+  }
+    
+  const profile = await prisma.profile.create({
+    data: {
+      id: authData.user.id, 
+      email: authData.user.email,
+      displayName: displayName,
+    },
   });
 
   return { profile, session: authData.session };

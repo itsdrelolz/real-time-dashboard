@@ -12,6 +12,7 @@ datasource db {
 //
 // MODELS (public)
 //
+
 model Profile {
   id          String    @id @db.Uuid // FK to auth.users.id
   email       String    @unique
@@ -80,6 +81,7 @@ model Comment {
 //
 // ENUMS (public)
 //
+
 enum Role {
   ADMIN
   MEMBER
