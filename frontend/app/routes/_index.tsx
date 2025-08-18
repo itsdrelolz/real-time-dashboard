@@ -1,12 +1,13 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "~/welcome/welcome"
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+
+
+export default function Home() { 
+  return (
+    <div className="flex min-h-svh w-full items-center justify-center bg-gray-100 p-6 md:p-10">
+      <div className="w-full max-w-sm">
+	<h1>Hello World</h1> 
+	    </div>
+    </div>
+  );
 }
-// make dashboard the default page, but redirect to login if not authenticated 
-export default function Home() {
-  return <Welcome />;
-}
+
+

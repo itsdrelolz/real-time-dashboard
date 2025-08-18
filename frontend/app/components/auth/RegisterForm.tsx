@@ -23,7 +23,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -44,11 +44,6 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
 	if (data.session) { 
 		localStorage.setItem('userSession', JSON.stringify(data.session));
 	    }
-
-	    
-
-
-
 
       // if successful redirect to the dashboard page
       navigate("/dashboard");
