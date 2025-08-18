@@ -1,7 +1,7 @@
-import { signupUser, signinUser } from "./auth.services";
+import { signupUser, signinUser } from "./auth.service";
 import { Request, Response } from "express";
 import { isSupabaseAuthError } from "@/types/error.types";
-
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 export async function signupController(req: Request, res: Response) {
   try {
     const { email, password, displayName, ...options } = req.body;
@@ -83,3 +83,12 @@ export async function signinController(req: Request, res: Response) {
     });
   }
 }
+
+
+export async function getProfileController(req: AuthenticatedRequest, res: Response)  { 	 
+	if (req.user) { 
+	    res.status(200).json(req.user) 
+	} else { 
+	    res.status(404).json({error: 'User profile not found after authentication.'});
+	}
+    }
