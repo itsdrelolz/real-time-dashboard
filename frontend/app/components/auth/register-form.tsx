@@ -27,7 +27,6 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // CORRECTED: Changed `displayname` to `displayName` to match the backend
           displayName: userData.displayname,
           email: userData.email,
           password: userData.password,
@@ -38,10 +37,21 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
         const errorData = await response.json();
         setError(errorData.message || "Registration failed.");
         return;
-      }
+          }
+    
+	const data = await response.json();
+    
+	if (data.session) { 
+		localStorage.setItem('userSession', JSON.stringify(data.session));
+	    }
 
-      // On success, redirect to the login page
-      navigate("/login");
+	    
+
+
+
+
+      // if successful redirect to the dashboard page
+      navigate("/dashboard");
 
     } catch (err) {
       setError("Network error. Could not connect to the server.");
@@ -60,7 +70,6 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
             <div className="flex flex-col gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="displayname">Display name</Label>
-                {/* Corrected id and name attributes */}
                 <Input id="displayname" name="displayname" type="text" placeholder="yourusername" required />
               </div>
               <div className="grid gap-2">

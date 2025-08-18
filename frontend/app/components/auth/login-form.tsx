@@ -5,10 +5,9 @@ export function LoginForm() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  // We now handle the form submission with a standard React event handler.
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null); 
 
     const formData = new FormData(event.currentTarget);
     const credentials = Object.fromEntries(formData);
@@ -27,12 +26,16 @@ export function LoginForm() {
       }
 
       const data = await response.json();
-      console.log("Login successful:", data);
-      // You would typically save the auth token here, e.g.:
-      // localStorage.setItem('authToken', data.token);
+    
+	    
+	// subabase session object 
+      if (data.session) { 
+		localStorage.setItem('userSession', JSON.stringify(data.session)); 
+	}
 
-      // Use the navigate function for redirection
-      navigate("/dashboard"); // Or wherever you want to go after login
+    
+      console.log("Login successful:", data);
+      navigate("/dashboard"); 
 
     } catch (err) {
       setError("Network error. Could not connect to the server.");
@@ -46,7 +49,6 @@ export function LoginForm() {
         <p className="text-sm text-muted-foreground">Enter your email below to login to your account</p>
       </div>
       <div className="p-6 pt-0">
-        {/* Use a standard <form> with an onSubmit handler */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none" htmlFor="email">Email</label>
