@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "~/store/auth.store";
 
 export function LoginForm() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-
+const login = useAuthStore((state) => state.login);
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null); 
@@ -28,15 +29,14 @@ export function LoginForm() {
       const data = await response.json();
     
 	    
-	// subabase session object 
-      if (data.session) { 
-		localStorage.setItem('userSession', JSON.stringify(data.session)); 
-	}
-
+if (data.session && data.session.user) {
+        login(data.session, data.session.user);
+        navigate("/"); 
+      } else {
+         setError("Login response was missing session data.");
+      }
     
-      console.log("Login successful:", data);
-      navigate("/dashboard"); 
-
+	    
     } catch (err) {
       setError("Network error. Could not connect to the server.");
     }

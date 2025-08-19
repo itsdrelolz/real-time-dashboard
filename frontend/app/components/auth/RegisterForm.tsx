@@ -5,18 +5,18 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-
+import { useAuthStore } from "~/store/auth.store";
 export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-
+const login = useAuthStore((state) => state.login);
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     const formData = new FormData(event.currentTarget);
     const userData = Object.fromEntries(formData);
-
+    
     if (userData.password !== userData.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -41,12 +41,14 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
     
 	const data = await response.json();
     
-	if (data.session) { 
-		localStorage.setItem('userSession', JSON.stringify(data.session));
-	    }
+if (data.session && data.session.user) {
+        login(data.session, data.session.user);
+        navigate("/"); 
+      } else {
+         setError("Login response was missing session data.");
+      }
 
-      // if successful redirect to the dashboard page
-      navigate("/dashboard");
+
 
     } catch (err) {
       setError("Network error. Could not connect to the server.");
