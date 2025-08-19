@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { supabase } from "~/lib/supabase";
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
+import type { Profile } from "~/types/database.types";
 
 interface AuthState {
   session: Session | null;
-  profile: User | null;
+  profile: Profile | null;
   status: "loading" | "authenticated" | "unauthenticated";
-  login: (session: Session, profile: User) => void;
+  login: (session: Session, profile: Profile) => void;
   logout: () => void;
 }
 
@@ -50,3 +51,4 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     useAuthStore.setState({ session: null, profile: null, status: "unauthenticated" });
   }
 });
+

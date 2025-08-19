@@ -19,7 +19,7 @@ const logout = useAuthStore((state) => state.logout);
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
       {profile ? (
         <div>
-          <p>Welcome {profile.email}</p>
+          <p>Welcome {profile.displayName}</p>
           <button
             onClick={logout}
             className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"

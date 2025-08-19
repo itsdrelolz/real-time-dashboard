@@ -7,7 +7,6 @@ import type {
   AuthResponse,
 } from "@/types/auth.types";
 
-// AUTH SERVICES
 
 export async function signupUser(params: SignupParams): Promise<AuthResponse> {
   const { email, password, displayName, firstName, lastName } = params;
@@ -28,12 +27,14 @@ export async function signupUser(params: SignupParams): Promise<AuthResponse> {
   if (!authData.user.email) {
     throw new Error("Signup incomplete: User was created but has no email.");
   }
-    
+
   const profile = await prisma.profile.create({
     data: {
-      id: authData.user.id, 
+      id: authData.user.id,
       email: authData.user.email,
       displayName: displayName,
+      ...(firstName && { firstName }),
+      ...(lastName && { lastName }),
     },
   });
 
@@ -85,3 +86,4 @@ export async function getUserFromToken(jwt: string): Promise<Profile | null> {
 
   return profile;
 }
+
