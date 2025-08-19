@@ -6,10 +6,7 @@ import { supabase } from "~/lib/supabase";
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
 
-  const { login } = useAuthStore((state) => ({
-    login: state.login,
-  }));
-
+const login = useAuthStore((state) => state.login);
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);

@@ -6,11 +6,7 @@ import { supabase } from "~/lib/supabase";
 export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
 
-  const { login } = useAuthStore((state) => ({
-    login: state.login,
-  }));
-
-  // The problematic useEffect has been removed.
+const login = useAuthStore((state) => state.login);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

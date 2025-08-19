@@ -2,13 +2,12 @@ import { useEffect } from "react";
 import { useAuthStore } from "~/store/auth.store";
 
 export function Dashboard() {
-  const { profile, status, logout } = useAuthStore((state) => ({
-    profile: state.profile,
-    status: state.status,
-    logout: state.logout,
-  }));
 
-  useEffect(() => {
+const profile = useAuthStore((state) => state.profile);
+const status = useAuthStore((state) => state.status);
+const logout = useAuthStore((state) => state.logout);
+
+    useEffect(() => {
   }, [status, logout]);
 
   if (status === "loading") {
