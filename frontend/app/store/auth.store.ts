@@ -30,18 +30,22 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
     set({ session: null, profile: null, status: 'unauthenticated' }); 
     }, 
 
-    checkAuth: () => { 
+    checkAuth: async() => { 
     try { 
-    const sessionString = localStorage.getItem('userSession');
-    if (sessionString) { 
-    const session = JSON.parse(sessionString) as Session; 
+	    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, { 
+	    method: 'GET', 
+	    });
+    
+	    if (response.ok) { 
+    
+		const { user } = await response.json(); 
 
-    set({session, profile: session.user, status: 'authenticated'})
+		set({profile: user, session: user.session, status: 'authenticated' });	
     } else { 
     set({ status: 'unauthenticated'}); 
     }
     } catch (error) { 
-	set({ status: 'unauthenticated'});
+	    set({ session: null, profile: null, status: 'unauthenticated' });
 	}
 	},
 	}));

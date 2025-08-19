@@ -44,15 +44,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    const { checkAuth, status } = useAuthStore();
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const status = useAuthStore((state) => state.status);
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
   if (status === 'loading') {
-    return <div>Loading session...</div>
+    return <div>Loading...</div>;
   }
-  return <Outlet />;
+
+  return <Outlet />; 
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
