@@ -11,7 +11,6 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { useEffect } from "react";
 import { useAuthStore } from "~/store/auth.store";
-
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -42,7 +41,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
-
 export default function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const status = useAuthStore((state) => state.status);
