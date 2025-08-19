@@ -1,68 +1,52 @@
-import { create } from 'zustand'
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '~/lib/supabase';
+import { create } from "zustand";
+import { supabase } from "~/lib/supabase";
+import type { Session, User } from "@supabase/supabase-js";
 
 interface AuthState {
-    session: Session | null; 
-    profile: User | null;
-    status: 'loading' | 'authenticated' | 'unauthenticated'
+  session: Session | null;
+  profile: User | null;
+  status: "loading" | "authenticated" | "unauthenticated";
+  login: (session: Session, profile: User) => void;
+  logout: () => void;
 }
 
-type AuthActions = { 
-    login: (session: Session, profile: User) => void; 
-    logout: () => void;
-    checkAuth: () => void;
-}
+export const useAuthStore = create<AuthState>((set) => ({
+  session: null,
+  profile: null,
+  status: "loading",
 
-export const useAuthStore = create<AuthState & AuthActions>((set) => ({ 
+  login: (session, profile) => {
+    set({ session, profile, status: "authenticated" });
+  },
 
-    session: null, 
-    profile: null, 
-    status: 'loading',
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({ session: null, profile: null, status: "unauthenticated" });
+  },
+}));
 
-
-    login: (session, profile) => {
-    localStorage.setItem('userSession', JSON.stringify(session)); 
-    set({ session, profile, status: 'authenticated' });
-    }, 
-
-    logout: () => {
-    localStorage.removeItem('userSession');
-    set({ session: null, profile: null, status: 'unauthenticated' }); 
-    }, 
-
-   checkAuth: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      set({ session: null, profile: null, status: 'unauthenticated' });
-      return;
-    }
-
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === "SIGNED_IN" && session) {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (response.ok) {
         const profile = await response.json();
-        useAuthStore.getState().login(session, profile);
+        useAuthStore.setState({ session, profile, status: "authenticated" });
       } else {
         await supabase.auth.signOut();
+        useAuthStore.setState({ session: null, profile: null, status: "unauthenticated" });
       }
-    } catch (e) {
-      console.error("Auth check failed", e);
-        await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      await supabase.auth.signOut();
+      useAuthStore.setState({ session: null, profile: null, status: "unauthenticated" });
     }
-  },
-}));
-
-supabase.auth.onAuthStateChange((event, session) => {
-  const { checkAuth, logout } = useAuthStore.getState();
-
-  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    checkAuth();
-  } else if (event === 'SIGNED_OUT') {
-    logout();
+  } else if (event === "SIGNED_OUT") {
+    useAuthStore.setState({ session: null, profile: null, status: "unauthenticated" });
+  } else if (event === "INITIAL_SESSION" && !session) {
+    useAuthStore.setState({ session: null, profile: null, status: "unauthenticated" });
   }
-}); 
+});

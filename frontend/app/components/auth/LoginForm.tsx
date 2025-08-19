@@ -1,22 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+// No longer need useNavigate or useEffect here!
 import { useAuthStore } from "~/store/auth.store";
 import { supabase } from "~/lib/supabase";
 
 export function LoginForm() {
-  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  
-    const { login, status } = useAuthStore((state) => ({
-    login: state.login,
-    status: state.status,
-  }));
 
-    useEffect(() => {
-    if (status === "authenticated") {
-      navigate("/");
-    }
-  }, [status, navigate]);
+  const { login } = useAuthStore((state) => ({
+    login: state.login,
+  }));
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,23 +35,23 @@ export function LoginForm() {
 
       const { session } = await response.json();
 
- if (session) {
-  await supabase.auth.setSession(session);
+      if (session) {
+        await supabase.auth.setSession(session);
 
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-    headers: { Authorization: `Bearer ${session.access_token}` },
-  });
+        const profileResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
 
-  if (response.ok) {
-    const profile = await response.json();
-    login(session, profile);
-    navigate("/");
-  } else {
-    setError("Could not load user profile.");
-  }
-} else {
-  setError("Login response was missing session data.");
-}
+        if (profileResponse.ok) {
+          const profile = await profileResponse.json();
+          login(session, profile);
+          // No navigate() call needed. The state change will trigger GuestRoute to redirect.
+        } else {
+          setError("Could not load user profile.");
+        }
+      } else {
+        setError("Login response was missing session data.");
+      }
     } catch (err) {
       setError("Network error. Could not connect to the server.");
     }

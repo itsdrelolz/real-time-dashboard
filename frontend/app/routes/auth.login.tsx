@@ -1,12 +1,13 @@
-import { LoginForm } from "~/components/auth/LoginForm";
+import { GuestRoute } from '~/components/layout/GuestRoute';
+import { LoginForm } from '~/components/auth/LoginForm';
+// ... other imports
 
-export default function LoginPage() {
+export default function Login() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center bg-gray-100 p-6 md:p-10">
-      <div className="w-full max-w-sm">
+    <GuestRoute>
+      <div className="min-h-screen flex items-center justify-center">
         <LoginForm />
       </div>
-    </div>
+    </GuestRoute>
   );
 }
-

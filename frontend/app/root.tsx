@@ -41,21 +41,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
+
 export default function App() {
-  const checkAuth = useAuthStore((state) => state.checkAuth);
   const status = useAuthStore((state) => state.status);
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
 
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return <div>Loading application...</div>;
   }
 
-  return <Outlet />; 
+  return <Outlet />;
 }
-
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";

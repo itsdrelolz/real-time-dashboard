@@ -1,43 +1,36 @@
-import { useEffect } from "react"; 
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuthStore } from "~/store/auth.store";
-import { supabase } from "~/lib/supabase";
-export function Dashboard() { 
 
+export function Dashboard() {
+  const { profile, status, logout } = useAuthStore((state) => ({
+    profile: state.profile,
+    status: state.status,
+    logout: state.logout,
+  }));
 
-  const navigate = useNavigate();
+  useEffect(() => {
+  }, [status, logout]);
 
-    const { status, profile } = useAuthStore();
-    
-    
-    useEffect(() => { 
-    
-    if (status === 'unauthenticated') { 
-    
-    navigate('/login', { replace: true });
-	}
-}, [status, navigate]);
-
-if (status === 'loading') { 
-return <div>Verifying Authentication</div>
-
-}
-if (status === 'authenticated' && profile) {
-    return (
-      <div>
-        <h2>Dashboard</h2>
-        <p>Welcome, <strong>{profile.email}</strong>!</p>
-		<button
-  onClick={async () => {
-    await supabase.auth.signOut();
-  }}
->
-  Log Out
-</button>
-             </div>
-    );
+  if (status === "loading") {
+    return <div>Loading...</div>;
   }
 
-  return null;
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      {profile ? (
+        <div>
+          <p>Welcome {profile.email}</p>
+          <button
+            onClick={logout}
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <p>You are not logged in.</p>
+      )}
+    </div>
+  );
 }
-

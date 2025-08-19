@@ -1,46 +1,25 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { cn } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+// No longer need useNavigate or useEffect here!
 import { useAuthStore } from "~/store/auth.store";
 import { supabase } from "~/lib/supabase";
-import { useEffect } from "react";
-export function RegisterForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const navigate = useNavigate();
+
+export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
- 
-    const { login, status } = useAuthStore((state) => ({
+
+  const { login } = useAuthStore((state) => ({
     login: state.login,
-    status: state.status,
   }));
 
- useEffect(() => {
-    if (status === "authenticated") {
-      navigate("/");
-    }
-  }, [status, navigate]);
-
+  // The problematic useEffect has been removed.
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const userData = Object.fromEntries(formData);
+    const credentials = Object.fromEntries(formData);
 
-    if (userData.password !== userData.confirmPassword) {
+    if (credentials.password !== credentials.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
@@ -51,105 +30,119 @@ export function RegisterForm({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            displayName: userData.displayname,
-            email: userData.email,
-            password: userData.password,
-          }),
+          body: JSON.stringify(credentials),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || "Registration failed.");
+        setError(errorData.message || "Registration failed. Please try again.");
         return;
       }
 
-      const { session } = await response.json();
+      const { session, profile } = await response.json();
 
-	    if (session) {
-  await supabase.auth.setSession(session);
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-    headers: { Authorization: `Bearer ${session.access_token}` },
-  });
-
-  if (response.ok) {
-    const profile = await response.json();
-    login(session, profile);
-    navigate("/");
-  } else {
-    setError("Could not load user profile.");
-  }
-} else {
-  setError("Login response was missing session data.");
-}
+      if (session) {
+        await supabase.auth.setSession(session);
+        login(session, profile);
+        // No navigate() call needed.
+      } else {
+        setError("Registration response was missing session data.");
+      }
     } catch (err) {
       setError("Network error. Could not connect to the server.");
     }
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign Up</CardTitle>
-          <CardDescription>Create your account to get started.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="displayname">Display name</Label>
-                <Input
-                  id="displayname"
-                  name="displayname"
-                  type="text"
-                  placeholder="yourusername"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                />
-              </div>
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+      <div className="flex flex-col p-6 space-y-1">
+        <h3 className="font-semibold tracking-tight text-2xl">
+          Create an account
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Enter your email below to create your account
+        </p>
+      </div>
+      <div className="p-6 pt-0">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form inputs remain the same */}
+          <div className="space-y-2">
+            <label
+              className="text-sm font-medium leading-none"
+              htmlFor="fullName"
+            >
+              Full Name
+            </label>
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              id="fullName"
+              name="fullName"
+              placeholder="John Doe"
+              required
+              type="text"
+            />
+          </div>
 
-              {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+          <div className="space-y-2">
+            <label
+              className="text-sm font-medium leading-none"
+              htmlFor="email"
+            >
+              Email
+            </label>
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              id="email"
+              name="email"
+              placeholder="m@example.com"
+              required
+              type="email"
+            />
+          </div>
 
-              <div className="flex flex-col gap-3 pt-2">
-                <Button type="submit" className="w-full">
-                  Create Account
-                </Button>
-              </div>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link to="/login" className="underline underline-offset-4">
-                Sign in
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          <div className="space-y-2">
+            <label
+              className="text-sm font-medium leading-none"
+              htmlFor="password"
+            >
+              Password
+            </label>
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              id="password"
+              name="password"
+              required
+              type="password"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              className="text-sm font-medium leading-none"
+              htmlFor="confirmPassword"
+            >
+              Confirm Password
+            </label>
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+              type="password"
+            />
+          </div>
+
+          {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+
+          <button
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 w-full bg-primary text-primary-foreground hover:bg-primary/90"
+            type="submit"
+          >
+            Create account
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
