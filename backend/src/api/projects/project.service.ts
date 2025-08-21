@@ -4,7 +4,7 @@ import {
   CreateProjectData,
   AddProjectMemberData,
   DetailedProjectPayload,
-//  ProjectSummaryPayload,
+    ProjectSummaryPayload,
   Project,
   ProjectMember,
 } from "@/types";
@@ -27,50 +27,48 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
     return newProject;
 }
 
+export async function getProjectById(projectId: number): Promise<DetailedProjectPayload | null> { 
 
-export async function getProjectsForOwner(ownerId: string): Promise<DetailedProjectPayload[]> { 
-   
-  const projects = await prisma.project.findMany({
-    where: {
-      ownerId: ownerId, 
-    },
-   
-    include: {
-      owner: { select: { id: true, displayName: true } },
-      members: {
-        include: {
-          profile: { select: { id: true, displayName: true } },
-        },
-      },
-      tasks: {
-        include: {
-          assignee: { select: { id: true, displayName: true } },
-          comments: {
-            include: {
-              author: { select: { id: true, displayName: true } },
+    const project = await prisma.project.findUnique({ 
+    // include details that correspond to data type 
+    where: { 
+	id: projectId
+	},
+	include: { 
+	    tasks: {
+
+	});
+
+    return project;
+}
+
+export async function getProjectSummariesForUser(userId: string): Promise<ProjectSummaryPayload[]> {
+    const projects = await prisma.project.findMany({
+        where: {
+            members: {
+                some: {
+                    profileId: userId,
+                },
             },
-          },
         },
-      },
-    },
-  });
-
-    return projects
+        select: {
+            id: true,
+            name: true,
+        },
+    });
+    return projects;
 }
 
 
-export async function addMember(data: AddProjectMemberData): Promise<ProjectMember> { 
 
-    const newMember = await prisma.projectMember.create({ 
-    data: { 
-	profileId: data.profileId,
-	projectId: data.projectId,
-	}
-});
-    return newMember
+
+
+
+
+export async function updateProjectDetails(data: UpdateDetailsData): Promise<Project> { 
+
+
 }
-
-
 
 
 
@@ -83,6 +81,35 @@ export async function deleteProject(projectId: number): Promise<void> {
     }
     });
 }
+
+
+export async function addMemberToProject(data: AddProjectMemberData): Promise<ProjectMember> { 
+
+    const newMember = await prisma.projectMember.create({ 
+    data: { 
+	profileId: data.profileId,
+	projectId: data.projectId,
+	}
+});
+    return newMember
+}
+
+
+export async function removeMemberFromProject(projectId: number, profileId: string): Promise<void> { 
+
+
+}
+
+
+export async function getProjectMembers(projectId: number): Promise<Profile[]> {
+
+
+
+}
+
+
+
+
 
 
 
