@@ -4,7 +4,7 @@ import {
   CreateProjectData,
   AddProjectMemberData,
   DetailedProjectPayload,
-  ProjectSummaryPayload,
+//  ProjectSummaryPayload,
   Project,
   ProjectMember,
 } from "@/types";
@@ -18,7 +18,7 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
 	members: { 
 	create: [ 
 	{ 
-	profile: data.ownerId, 
+	profileId: data.ownerId, 
 	}, 
 	], 
 	},

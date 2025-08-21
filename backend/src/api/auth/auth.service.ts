@@ -1,11 +1,11 @@
 import prisma from "../../utils/prismaClient";
 import { supabase } from "../supabaseServer";
 import type {
-  Profile,
   SignupParams,
   LoginParams,
   AuthResponse,
 } from "@/types/auth.types";
+import type { Profile } from "@/types/profile.types";
 
 
 export async function signupUser(params: SignupParams): Promise<AuthResponse> {
