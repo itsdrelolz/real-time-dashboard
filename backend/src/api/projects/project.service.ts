@@ -33,11 +33,7 @@ export async function getProjectById(projectId: number): Promise<DetailedProject
     // include details that correspond to data type 
     where: { 
 	id: projectId
-	},
-	include: { 
-	    tasks: {
-
-	});
+	}
 
     return project;
 }
@@ -96,7 +92,14 @@ export async function addMemberToProject(data: AddProjectMemberData): Promise<Pr
 
 
 export async function removeMemberFromProject(projectId: number, profileId: string): Promise<void> { 
-
+    
+    await prisma.project.delete({ 
+	where: {
+		    id: projectId,
+		    profileId: profileId
+		    }
+		    }
+		    });
 
 }
 
