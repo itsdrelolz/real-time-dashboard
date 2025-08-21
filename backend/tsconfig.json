@@ -14,7 +14,7 @@
     /* Path Alias Setup */
     "baseUrl": ".",
     "paths": {
-  "@/*": ["src/*"]
+      "@/*": ["src/*"]
     },
 
     /* Strictness */

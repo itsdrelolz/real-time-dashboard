@@ -6,5 +6,5 @@ export type PublicProfile = Pick<Profile, "id" | "displayName">;
 
 export type CreateProfileData = Pick<
   Profile,
-  'id' | 'email' | 'displayName' | 'firstName' | 'lastName'
+  "id" | "email" | "displayName" | "firstName" | "lastName"
 >;

@@ -84,11 +84,15 @@ export async function signinController(req: Request, res: Response) {
   }
 }
 
-
-export async function getProfileController(req: AuthenticatedRequest, res: Response)  { 	 
-	if (req.user) { 
-	    res.status(200).json(req.user) 
-	} else { 
-	    res.status(404).json({error: 'User profile not found after authentication.'});
-	}
-    }
+export async function getProfileController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  if (req.user) {
+    res.status(200).json(req.user);
+  } else {
+    res
+      .status(404)
+      .json({ error: "User profile not found after authentication." });
+  }
+}

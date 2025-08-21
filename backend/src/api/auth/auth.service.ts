@@ -7,7 +7,6 @@ import type {
 } from "@/types/auth.types";
 import type { Profile } from "@/types/profile.types";
 
-
 export async function signupUser(params: SignupParams): Promise<AuthResponse> {
   const { email, password, displayName, firstName, lastName } = params;
 
@@ -86,4 +85,3 @@ export async function getUserFromToken(jwt: string): Promise<Profile | null> {
 
   return profile;
 }
-

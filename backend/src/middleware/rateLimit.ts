@@ -8,5 +8,3 @@ export const limiter = rateLimit({
   ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive
   // store: ... , // Redis, Memcached, etc. See below.
 });
-
-

@@ -1,12 +1,11 @@
 import type { Session as SupabaseSession } from "@supabase/supabase-js";
-import type { Profile } from "./profile.types"; 
-
+import type { Profile } from "./profile.types";
 
 export type Session = SupabaseSession;
 
 export type AuthResponse = {
-  profile: Profile; 
-session: Session;
+  profile: Profile;
+  session: Session;
 };
 
 export type SignupParams = {
