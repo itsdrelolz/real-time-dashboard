@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import { default as authRouter } from './auth/auth.routes';
-import { default as projectRouter } from './projects/project.routes';
+import { default as authRouter } from "./auth/auth.routes";
+import { default as projectRouter } from "./projects/project.routes";
 const app = express();
 
 app.use(cors());

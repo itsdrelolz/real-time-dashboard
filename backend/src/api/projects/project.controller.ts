@@ -161,19 +161,25 @@ export async function addProjectMembersController(
   }
 }
 
-
-export async function updateProjectController(req: Request, res: Response): Promise<Response> { 
-
-try {
+export async function updateProjectController(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  try {
     const projectId = parseInt(req.params.projectId as string, 10);
     if (isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project ID.' });
+      return res.status(400).json({ error: "Invalid project ID." });
     }
 
     const { name } = req.body;
 
-    if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
-      return res.status(400).json({ error: 'Project name must be a non-empty string.' });
+    if (
+      name !== undefined &&
+      (typeof name !== "string" || name.trim() === "")
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Project name must be a non-empty string." });
     }
 
     const updateData: UpdateProjectDetailsData = {
@@ -183,18 +189,17 @@ try {
     const updatedProject = await updateProjectDetails(projectId, updateData);
 
     return res.status(200).json(updatedProject);
-
   } catch (error) {
-    console.error('Failed to update project:', error);
-    return res.status(500).json({ error: 'An unexpected error occurred.' });
+    console.error("Failed to update project:", error);
+    return res.status(500).json({ error: "An unexpected error occurred." });
   }
 }
 
-
-
-
-export async function removeMemberFromProjectController(req: Request, res: Response): Promise<Response> { 
-   try {
+export async function removeMemberFromProjectController(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  try {
     const projectId = parseInt(req.params.projectId as string, 10);
     const { profileId } = req.body;
 
@@ -204,18 +209,13 @@ export async function removeMemberFromProjectController(req: Request, res: Respo
         .json({ error: "Invalid project ID or missing profile ID." });
     }
 
-
     await removeMemberFromProject(projectId, profileId);
-    
-    return res.status(204).send()
-    } catch (error) { 
+
+    return res.status(204).send();
+  } catch (error) {
     console.error("Error deleting project member:", error);
     return res.status(500).json({
       error: "Internal server error",
     });
-	
-    }
-
+  }
 }
-
-
