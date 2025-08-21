@@ -7,8 +7,7 @@ export type CommentWithAuthor = Comment & {
   author: PublicProfile;
 };
 
-export type CreateCommentData = Pick<Comment, 'content' | 'taskId' | 'userId'>;
-
+export type CreateCommentData = Pick<Comment, 'content' | 'taskId' | 'authorId'>;
 
 
 
