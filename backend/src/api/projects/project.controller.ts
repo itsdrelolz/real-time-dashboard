@@ -7,16 +7,16 @@ export async function createProjectController(req: Request, res: Response): Prom
     
     try { 
     
-	const { projectName , ownerId } = req.body; 
+	const { name , ownerId } = req.body; 
 
-	if (!projectName || !ownerId) { 
+	if (!name || !ownerId) { 
 	    return res.status(400).json({
 	    error: "Missing required fields",
 	    })
 	}
 
 	const newProject = await createProject({
-	    projectName, 
+	    name, 
 	    ownerId
 	})
     
