@@ -30,11 +30,4 @@ export type Task = {
   assigneeId: string | null;
 };
 
-export type Comment = {
-  id: number;
-  content: string;
-  createdAt: string;
-  userId: string;
-  taskId: number;
-};
 

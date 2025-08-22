@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuthStore } from "~/store/auth.store";
-
+import { supabase } from "~/lib/supabase";
+import { Sidebar } from "../layout/Sidebar";	
 export function Dashboard() {
 
 const profile = useAuthStore((state) => state.profile);
@@ -17,6 +18,7 @@ const logout = useAuthStore((state) => state.logout);
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+	< Sidebar />
       {profile ? (
         <div>
           <p>Welcome {profile.displayName}</p>

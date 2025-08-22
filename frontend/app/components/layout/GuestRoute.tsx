@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { NavLink } from "react-router";
 import { useAuthStore } from "~/store/auth.store";
 
 export function GuestRoute({ children }: { children: React.ReactNode }) {
@@ -9,7 +9,7 @@ export function GuestRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (status === "authenticated") {
-    return <Navigate to="/" replace />;
+    return <NavLink to="/projects/@me" replace />;
   }
 
   return <>{children}</>;

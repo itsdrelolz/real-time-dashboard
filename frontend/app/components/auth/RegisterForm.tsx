@@ -1,5 +1,4 @@
 import { useState } from "react";
-// No longer need useNavigate or useEffect here!
 import { useAuthStore } from "~/store/auth.store";
 import { supabase } from "~/lib/supabase";
 
