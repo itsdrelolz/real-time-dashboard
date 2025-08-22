@@ -1,7 +1,8 @@
-import { signupUser, signinUser } from "./auth.service";
+import { signupUser, signinUser, signoutUser } from "./auth.service";
 import { Request, Response } from "express";
 import { isSupabaseAuthError } from "@/types/error.types";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
+
 export async function signupController(req: Request, res: Response) {
   try {
     const { email, password, displayName, ...options } = req.body;
@@ -94,5 +95,27 @@ export async function getProfileController(
     res
       .status(404)
       .json({ error: "User profile not found after authentication." });
+  }
+}
+
+export async function signOutController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized: No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1] as string;
+
+    await signoutUser(token);
+
+    return res.status(204).send();
+  } catch (error: unknown) {
+    console.error("Sign out error:", error);
+    return res.status(500).json({ error: "Failed to sign out" });
   }
 }

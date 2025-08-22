@@ -11,6 +11,9 @@ import {
 } from "./project.service";
 import type { AddProjectMemberData, UpdateProjectDetailsData } from "@/types";
 
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
+import { RequestWithNumericParams } from "../../middleware/validationMiddleware";
+
 export async function createProjectController(
   req: Request,
   res: Response,
@@ -62,12 +65,16 @@ export async function getProjectByIdController(
   }
 }
 
-export async function getAllProjectsController(
-  req: Request,
+export async function getAllUserProjectsController(
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<Response> {
   try {
-    const { userId } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const projects = await getProjectSummariesForUser(userId);
 
@@ -196,20 +203,19 @@ export async function updateProjectController(
 }
 
 export async function removeMemberFromProjectController(
-  req: Request,
+  req: RequestWithNumericParams,
   res: Response,
 ): Promise<Response> {
   try {
-    const projectId = parseInt(req.params.projectId as string, 10);
-    const { profileId } = req.body;
+    const { projectId } = req.params;
 
-    if (isNaN(projectId) || !profileId) {
-      return res
-        .status(400)
-        .json({ error: "Invalid project ID or missing profile ID." });
+    const { profileId } = req.params;
+
+    if (!profileId) {
+      return res.status(400).json({ error: "Missing profile ID in URL." });
     }
 
-    await removeMemberFromProject(projectId, profileId);
+    await removeMemberFromProject(projectId, profileId as string);
 
     return res.status(204).send();
   } catch (error) {

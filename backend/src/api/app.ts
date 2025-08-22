@@ -3,14 +3,28 @@ import cors from "cors";
 import morgan from "morgan";
 import { default as authRouter } from "./auth/auth.routes";
 import { default as projectRouter } from "./projects/project.routes";
-const app = express();
+import dotenv from "dotenv";
+import helmet from "helmet";
+import { errorHandler } from "../middleware/errorHandler";
 
-app.use(cors());
+const app = express();
+app.use(helmet());
+app.use(cors({ origin: process.env.FRONTEND_URL }));
+dotenv.config();
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+  }),
+);
+
 app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
+
+app.use(errorHandler);
 app.get("/api", (_req, res) => {
   res.send("API is running");
 });

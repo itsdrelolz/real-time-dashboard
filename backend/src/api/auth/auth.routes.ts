@@ -3,6 +3,7 @@ import {
   signupController,
   signinController,
   getProfileController,
+  signOutController,
 } from "./auth.controller";
 import { limiter } from "../../middleware/rateLimit";
 import { authMiddleware } from "../../middleware/authMiddleware";
@@ -14,4 +15,6 @@ router.post("/register", signupController);
 router.post("/login", limiter, signinController);
 
 router.get("/me", authMiddleware, getProfileController);
+
+router.post("/signout", authMiddleware, signOutController);
 export default router;
