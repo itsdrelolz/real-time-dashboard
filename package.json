@@ -13,6 +13,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Andre Harper",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "5.5.4"
+  }
 }
+
