@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(
   err: Error,
   req: Request,
@@ -12,4 +11,6 @@ export function errorHandler(
   res.status(500).json({
     error: "An unexpected internal server error occurred.",
   });
+
+    next(err);
 }
