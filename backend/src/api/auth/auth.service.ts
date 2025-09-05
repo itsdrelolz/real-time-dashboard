@@ -1,11 +1,7 @@
 import prisma from "../../utils/prismaClient";
-import { supabase } from "../supabaseServer";
-import type {
-  SignupParams,
-  LoginParams,
-  AuthResponse,
-} from "@/types/auth.types";
-import type { Profile } from "@/types/profile.types";
+import {supabase} from "../supabaseServer";
+import type {AuthResponse, LoginParams, SignupParams,} from "@/types/auth.types";
+import type {Profile} from "@/types/profile.types";
 
 export async function signupUser(params: SignupParams): Promise<AuthResponse> {
   const { email, password, displayName, firstName, lastName } = params;
@@ -79,9 +75,7 @@ export async function getUserFromToken(jwt: string): Promise<Profile | null> {
     return null;
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { id: authUser.id },
+  return await prisma.profile.findUnique({
+    where: {id: authUser.id},
   });
-
-  return profile;
 }

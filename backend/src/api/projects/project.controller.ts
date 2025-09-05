@@ -11,8 +11,8 @@ import {
 } from "./project.service";
 import type { AddProjectMemberData, UpdateProjectDetailsData } from "@/types";
 
-import { AuthenticatedRequest } from "../../middleware/authMiddleware";
-import { RequestWithNumericParams } from "../../middleware/validationMiddleware";
+import { AuthenticatedRequest } from "@/middleware/authMiddleware";
+import { RequestWithNumericParams } from "@/middleware/validationMiddleware";
 
 export async function createProjectController(
   req: Request,

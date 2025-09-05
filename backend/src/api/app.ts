@@ -1,13 +1,13 @@
-import express from "express";
+import express, { Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { default as authRouter } from "./auth/auth.routes";
 import { default as projectRouter } from "./projects/project.routes";
 import dotenv from "dotenv";
 import helmet from "helmet";
-import { errorHandler } from "../middleware/errorHandler";
+import { errorHandler } from "@/middleware/errorHandler";
 
-const app = express();
+const app: Application = express();
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL }));
 dotenv.config();

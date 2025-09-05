@@ -1,13 +1,13 @@
 import prisma from "../../utils/prismaClient";
 import type {
-  CreateProjectData,
   AddProjectMemberData,
+  CreateProjectData,
   DetailedProjectPayload,
-  ProjectSummaryPayload,
-  UpdateProjectDetailsData,
   Project,
   ProjectMember,
   ProjectMemberProfile,
+  ProjectSummaryPayload,
+  UpdateProjectDetailsData,
 } from "@/types";
 
 /*
@@ -18,13 +18,13 @@ import type {
  * */
 
 export async function createProject(data: CreateProjectData): Promise<Project> {
-  const newProject = await prisma.project.create({
+  return await prisma.project.create({
     data: {
       name: data.name,
       ownerId: data.ownerId,
       channels: {
         create: [
-          { name: "general", description: "General project discussions" },
+          {name: "general", description: "General project discussions"},
         ],
       },
       members: {
@@ -36,21 +36,20 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
       },
     },
   });
-  return newProject;
 }
 
 export async function getProjectById(
   projectId: number,
 ): Promise<DetailedProjectPayload | null> {
-  const project = await prisma.project.findUnique({
+  return await prisma.project.findUnique({
     where: {
       id: projectId,
     },
     include: {
-      owner: { select: { id: true, displayName: true } },
+      owner: {select: {id: true, displayName: true}},
       members: {
         include: {
-          profile: { select: { id: true, displayName: true } },
+          profile: {select: {id: true, displayName: true}},
         },
       },
       tasks: true,
@@ -63,14 +62,12 @@ export async function getProjectById(
       },
     },
   });
-
-  return project;
 }
 
 export async function getProjectSummariesForUser(
   userId: string,
 ): Promise<ProjectSummaryPayload[]> {
-  const projects = await prisma.project.findMany({
+  return await prisma.project.findMany({
     where: {
       members: {
         some: {
@@ -83,20 +80,18 @@ export async function getProjectSummariesForUser(
       name: true,
     },
   });
-  return projects;
 }
 
 export async function updateProjectDetails(
   projectId: number,
   data: UpdateProjectDetailsData,
 ): Promise<Project> {
-  const updatedProject = await prisma.project.update({
-    where: { id: projectId },
+  return await prisma.project.update({
+    where: {id: projectId},
     data: {
       name: data.name,
     },
   });
-  return updatedProject;
 }
 
 export async function deleteProject(projectId: number): Promise<void> {
@@ -110,13 +105,12 @@ export async function deleteProject(projectId: number): Promise<void> {
 export async function addMemberToProject(
   data: AddProjectMemberData,
 ): Promise<ProjectMember> {
-  const newMember = await prisma.projectMember.create({
+  return await prisma.projectMember.create({
     data: {
       profileId: data.profileId,
       projectId: data.projectId,
     },
   });
-  return newMember;
 }
 
 export async function removeMemberFromProject(
@@ -136,7 +130,7 @@ export async function removeMemberFromProject(
 export async function getProjectMembers(
   projectId: number,
 ): Promise<ProjectMemberProfile[]> {
-  const members = await prisma.projectMember.findMany({
+  return await prisma.projectMember.findMany({
     where: {
       projectId: projectId,
     },
@@ -149,5 +143,4 @@ export async function getProjectMembers(
       },
     },
   });
-  return members;
 }

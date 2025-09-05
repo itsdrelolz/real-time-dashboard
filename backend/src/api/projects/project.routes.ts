@@ -1,9 +1,9 @@
 import { Router } from "express";
 import * as projectController from "./project.controller";
-import { authMiddleware } from "../../middleware/authMiddleware";
-import { validateNumericParams } from "../../middleware/validationMiddleware";
+import { authMiddleware } from "@/middleware/authMiddleware";
+import { validateNumericParams } from "@/middleware/validationMiddleware";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", authMiddleware, projectController.getAllUserProjectsController);
 

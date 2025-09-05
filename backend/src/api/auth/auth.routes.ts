@@ -5,9 +5,9 @@ import {
   getProfileController,
   signOutController,
 } from "./auth.controller";
-import { limiter } from "../../middleware/rateLimit";
-import { authMiddleware } from "../../middleware/authMiddleware";
-const router = Router();
+import { limiter } from "@/middleware/rateLimit";
+import { authMiddleware } from "@/middleware/authMiddleware";
+const router: Router = Router();
 
 router.post("/register", signupController);
 
