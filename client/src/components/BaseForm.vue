@@ -6,7 +6,4 @@
 </template>
 
 <script>
-import { defineEmit } from 'vue'
-
-defineEmit(['submit'])
 </script>

@@ -10,12 +10,12 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps } from 'vue';
 
 const props = defineProps({
   type: {
     type: String,
-    default: 'button'
+    default: 'button',
     validator: (value) => ['button', 'submit', 'reset'].includes(value),
   },
   disabled: {
@@ -24,7 +24,6 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['click']);
 </script>
 
 <style scoped>

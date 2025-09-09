@@ -1,0 +1,23 @@
+
+// Reset or Normalize
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// Global Variables
+
+$font-primary: "Montserrat", sans-serif;
+$font-secondary: "Open Sans", sans-serif;
+
+:root {
+
+}
+body {
+  font: 100% $font-primary;
+
+}
+
+
+
