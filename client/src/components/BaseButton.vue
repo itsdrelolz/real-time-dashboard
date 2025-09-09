@@ -1,4 +1,4 @@
-<template>
+<template >
   <button
     :type="type"
     :disabled="disabled"
@@ -10,7 +10,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
 
 const props = defineProps({
   type: {
