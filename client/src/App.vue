@@ -1,26 +1,29 @@
-<script setup>
-import Layout from '@/components/Layout.vue'
-import { RouterView } from 'vue-router'
-import './styles/main.scss'
-</script>
-
 <template>
-  <div class="app">
-    <Layout>
-      <div class="content-body">
-        <RouterView />
-      </div>
-    </Layout>
-  </div>
+  <component :is="layoutComponent">
+    <RouterView />
+  </component>
 </template>
 
-<style>
-.app {
-  min-height: 100vh;
-  background-color: white;
-}
+<script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import AuthLayout from '@/layouts/AuthLayout.vue';
+import MainLayout from '@/layouts/MainLayout.vue';
 
-.content-body {
-  min-height: 100vh;
+const route = useRoute();
+
+const layouts = {
+  AuthLayout,
+  MainLayout
+};
+
+const layoutComponent = computed(() => {
+  return layouts[route.meta.layout] || MainLayout;
+});
+</script>
+
+<style>
+body {
+  margin: 0;
 }
 </style>
