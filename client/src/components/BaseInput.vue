@@ -1,67 +1,63 @@
-<template>
-  <div class="base-input-wrapper">
-    <label v-if="label" class="base-input-label">{{ label }}</label>
-    <input
-      v-bind="$attrs"
-      :type="type"
-      :value="modelValue"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      @input="$emit('update:modelValue', $event.target.value)"
-      class="base-input"
-    />
-  </div>
-</template>
-
 <script setup>
-
-const props = defineProps({
+defineProps({
   modelValue: {
     type: [String, Number],
-    default: '',
-  },
-  label: {
-    type: String,
-    default: '',
+    default: ''
   },
   type: {
     type: String,
-    default: 'text',
+    default: 'text'
+  },
+  label: {
+    type: String,
+    default: ''
   },
   placeholder: {
     type: String,
-    default: '',
+    default: ''
   },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-});
+  autocomplete: {
+    type: String,
+    default: 'off'
+  }
+})
 
+const emit = defineEmits(['update:modelValue'])
 </script>
 
+<template>
+  <div class="field">
+    <label v-if="label" class="label">{{ label }}</label>
+    <p class="control has-icons-left" :class="{ 'has-icons-right': type === 'email' }">
+      <input
+        class="input"
+        :type="type"
+        :value="modelValue"
+        @input="emit('update:modelValue', $event.target.value)"
+        :placeholder="placeholder"
+        :autocomplete="autocomplete"
+      >
+      <span class="icon is-small is-left">
+        <i class="fas" :class="{
+          'fa-envelope': type === 'email',
+          'fa-lock': type === 'password',
+          'fa-user': type === 'text'
+        }"></i>
+      </span>
+      <span v-if="type === 'email'" class="icon is-small is-right">
+        <i class="fas fa-check"></i>
+      </span>
+    </p>
+  </div>
+</template>
+
 <style scoped>
-.base-input-wrapper {
-  margin-bottom: 1rem;
+.input {
+  background-color: white;
+  color: #363636;
 }
 
-.base-input-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-.base-input {
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.base-input:focus {
-  outline: none;
-  border-color: #42b983;
-  box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.2);
+.label {
+  color: #363636;
 }
 </style>

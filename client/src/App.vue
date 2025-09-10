@@ -1,23 +1,26 @@
 <script setup>
 import Layout from '@/components/Layout.vue'
-import LoginPage from '@/pages/LoginPage.vue'
+import { RouterView } from 'vue-router'
 import './styles/main.scss'
 </script>
 
 <template>
-  <Layout>
-    <div class="content-body">
-
-    <LoginPage>
-
-    </LoginPage>
-    </div>
-  </Layout>
+  <div class="app">
+    <Layout>
+      <div class="content-body">
+        <RouterView />
+      </div>
+    </Layout>
+  </div>
 </template>
 
-<style scoped>
+<style>
+.app {
+  min-height: 100vh;
+  background-color: white;
+}
 
-
-
-
+.content-body {
+  min-height: 100vh;
+}
 </style>

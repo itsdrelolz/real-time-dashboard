@@ -1,17 +1,45 @@
 @use "variables";
 
+@use "../../node_modules/bulma/bulma.scss";
+
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background-color: white;
+}
+
+
 
 .container {
+  background-color: white;
   width: 100%;
 }
 
 
 body {
   font-family: variables.$font-secondary;
+  color: black;
 }
 
 h1, h2, h3, h3 {
   font-family: variables.$font-primary;
+}
+
+.input {
+  background-color: white;
+  color: #363636;
+  border-color: #dbdbdb;
+}
+
+
+.button {
+  &.is-success {
+    background-color: #48c774;
+    color: white;
+  }
 }
 
 
@@ -23,4 +51,3 @@ h1, h2, h3, h3 {
   }
 }
 
-@import "@/../node_modules/bulma/bulma.sass";

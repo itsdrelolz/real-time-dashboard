@@ -1,8 +1,7 @@
 <template >
   <button
     :type="type"
-    :disabled="disabled"
-    class="base-button"
+    class="button"
     @click="$emit('click', $event)"
   >
     <slot></slot>
@@ -26,19 +25,8 @@ const props = defineProps({
 </script>
 
 <style scoped>
-.base-button {
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
 
-.base-button:hover {
-  background-color: #f0f0f0;
-}
 
-.base-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+
+
 </style>

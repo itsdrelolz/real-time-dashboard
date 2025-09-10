@@ -1,22 +1,33 @@
-
 <template>
-  <form @submit.prevent="$emit('submit', $event)">
-  <slot></slot>
-  </form>
+  <div class="form-container">
+    <form @submit.prevent="$emit('submit', $event)" class="form">
+      <slot></slot>
+    </form>
+  </div>
 </template>
 
-<script>
-</script>
-
 <style>
-form {
+.form-container {
+  max-width: 400px;
+  margin: 4rem auto 2rem;
+  border-radius: 6px;
+  padding: 2rem 2rem;
+  background-color: #fff;
+}
+
+.form {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  align-items: center;
-  align-self: center;
-  border: 1rem black;
-  
+  gap: 1.5rem;
+  width: 100%;
+}
 
+.form :deep(.field) {
+  width: 100%;
+}
+
+.form :deep(.button) {
+  width: 100%;
+  margin-top: 1rem;
 }
 </style>
