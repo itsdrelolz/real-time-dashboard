@@ -30,15 +30,19 @@ import BaseForm from '@/components/BaseForm.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import { ref } from 'vue'
+import { useAuthStore } from '../stores/auth'
 
+const name = ref('');
 const email = ref('');
 const password = ref('');
+
+const authStore = useAuthStore();
+
 
 
 const handleSubmit = async () => {
   try {
-    console.log('Attempting to register with:', { email: email.value, password: password.value });
-    console.log('Register successful!');
+    await authStore.signUp(email.value, password.value)
   } catch (error) {
     console.error('Register failed:', error);
   }

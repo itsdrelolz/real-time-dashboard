@@ -34,14 +34,13 @@
 
       <!-- Main content panel on the right -->
       <SplitterPanel :size="75">
-        <RouterView />
+        <slot />
       </SplitterPanel>
     </Splitter>
   </div>
 </template>
 
 <script setup>
-import { RouterView } from 'vue-router';
 </script>
 
 <style>
