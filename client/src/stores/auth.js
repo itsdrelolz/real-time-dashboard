@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabaseClient'
 import router from '@/router'
 import * as authService from '@/services/authServices';
-import { login } from '@/services/authServices'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -16,7 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = session?.user ?? null
   })
 
-  const signIn = async (email, password) => {
+  async function signIn(email, password) {
     try {
       const loginResponse = await authService.login(email, password);
 
@@ -31,7 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (error) throw error;
 
       userProfile.value = loginResponse.profile;
-      router.push('/')
+      await router.push('/')
 
     } catch (error) {
       console.error('Login Failed: ', error);
@@ -39,27 +38,28 @@ export const useAuthStore = defineStore('auth', () => {
       userProfile.value = null;
       throw error
     }
-  };
+  }
 
-  const signUp = async (email, password, displayName) => {
+
+  async function signUp(email, password, displayName) {
     try {
       await authService.register(email, password, displayName);
       alert('Registration successful! Please check your email or login.');
-      router.push('/login');
+      await router.push('/login');
     } catch(error) {
       console.error('Sign up failed:', error);
     }
   }
 
 
-  const signOut = async () => {
+  async function signOut() {
     await supabase.auth.signOut()
     user.value = null
     userProfile.value = null
-    router.push('/login')
+    await router.push('/login')
   }
 
-  const fetchUser = async () => {
+  async function fetchUser(){
     try {
       const { data, error } = await supabase.auth.getUser()
       if (error || !data.user) {
@@ -74,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const getProfile = async () => {
+  async function getProfile() {
     try {
       userProfile.value = await authService.getProfile()
     } catch (error) {
@@ -82,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
       userProfile.value = null
     }
   }
+
 
   return {
     user,
@@ -95,5 +96,8 @@ export const useAuthStore = defineStore('auth', () => {
     getProfile,
   }
 })
+
+
+
 
 

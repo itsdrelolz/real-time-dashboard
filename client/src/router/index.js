@@ -28,10 +28,13 @@ const router = createRouter({
   ],
 });
 
+
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  await authStore.fetchUser();
+  if (!authStore.authReady) {
+    await authStore.fetchUser();
+  }
 
   const isAuthenticated = authStore.isLoggedIn;
 

@@ -24,18 +24,18 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Run Tests 
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npm test
+        run: pnpm test
 
       - name: Run linter
-        run: npm run lint
+        run: pnpm run lint
       
       - name: Build project
-        run: npm run build
+        run: pnpm run build
 

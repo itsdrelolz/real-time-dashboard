@@ -18,6 +18,8 @@ import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 import SplitButton from 'primevue/splitbutton';
 import Toolbar from 'primevue/toolbar'
+import { Avatar } from 'primevue'
+import { Skeleton } from 'primevue'
 
 const app = createApp(App)
 
@@ -43,5 +45,7 @@ app.component('Splitter', Splitter)
 app.component('SplitterPanel', SplitterPanel)
 app.component('SplitButton', SplitButton)
 app.component('Toolbar', Toolbar)
+app.component('Avatar', Avatar)
+app.component('Skeleton', Skeleton)
 
 app.mount('#app')
