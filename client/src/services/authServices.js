@@ -1,22 +1,12 @@
 import apiFetch from './api';
 
 
-/*
-* Represents a profile's object data
-* @typedef {object} ProfileData
-* @property {number} id
-* @property {string} email
-* @property {string} role
-* @property {string} firstName
-* @property {string} lastName
-* @property {string} displayName
-* @property {Project[]} ownedProjects
-* @property {ProjectMember[]} memberships
-* @property {Message[]} messages
-* @property {Conversation[]} conversations
-*/
-
-
+/**
+ *
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{profile: import('./types/api.js').Profile, session: import('./types/api.js').SupabaseSession}>}
+ */
 
 export function login(email, password) {
   return apiFetch('auth/login', {
@@ -25,6 +15,12 @@ export function login(email, password) {
   });
 }
 
+/**
+ * @param {string} email
+ * @param {string} password
+ * @param {string} displayName
+ * @returns {Promise<{profile: import('./types/api.js').Profile, session: import('./types/api.js').SupabaseSession}>}
+ */
 
 export function register(email, password, displayName) {
   return apiFetch('auth/register', {
@@ -32,7 +28,11 @@ export function register(email, password, displayName) {
     body: JSON.stringify({ email, password, displayName }),
   });
 }
+
+
+/**
+ * @returns {Promise<import('./types/api.js').Profile>}
+ */
 export function getProfile() {
-  // GET is the default method, so we don't need to specify it.
   return apiFetch('auth/me');
 }

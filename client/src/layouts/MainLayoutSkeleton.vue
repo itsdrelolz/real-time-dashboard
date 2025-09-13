@@ -39,7 +39,6 @@
 </template>
 
 <script setup>
-// Import the Skeleton component to be used in the template
 import Skeleton from 'primevue/skeleton';
 </script>
 

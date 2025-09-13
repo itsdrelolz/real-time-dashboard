@@ -3,7 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import './styles/main.scss'
+import './styles/main.css'
 import '@fortawesome/fontawesome-free/js/all.js'
 
 import PrimeVue from 'primevue/config';
@@ -20,6 +20,8 @@ import SplitButton from 'primevue/splitbutton';
 import Toolbar from 'primevue/toolbar'
 import { Avatar } from 'primevue'
 import { Skeleton } from 'primevue'
+import { Form } from '@primevue/forms';
+
 
 const app = createApp(App)
 
@@ -47,5 +49,6 @@ app.component('SplitButton', SplitButton)
 app.component('Toolbar', Toolbar)
 app.component('Avatar', Avatar)
 app.component('Skeleton', Skeleton)
+app.component('Form', Form)
 
 app.mount('#app')

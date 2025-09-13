@@ -1,9 +1,11 @@
 <template>
   <MainLayoutSkeleton v-if="!authStore.authReady" />
 
-  <component :is="layoutComponent" v-else>
+  <component :is="layoutComponent" v-else-if="layoutComponent">
     <RouterView />
   </component>
+
+  <RouterView v-else />
 </template>
 
 <script setup>
@@ -11,7 +13,6 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-import AuthLayout from '@/layouts/AuthLayout.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import MainLayoutSkeleton from '@/layouts/MainLayoutSkeleton.vue';
 
@@ -19,12 +20,11 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 const layouts = {
-  AuthLayout,
   MainLayout,
 };
 
 const layoutComponent = computed(() => {
-  return layouts[route.meta.layout] || MainLayoutSkeleton;
+  return layouts[route.meta.layout];
 });
 </script>
 

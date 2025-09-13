@@ -1,11 +1,21 @@
-@use "variables";
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+body {
+  font-family: 'Open Sans', sans-serif;
+}
 
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* Prevents scrollbars on the body */
+  overflow: hidden;
 }
 
 .container {
@@ -14,13 +24,7 @@ html, body {
 }
 
 
-body {
-  font-family: variables.$font-secondary;
-}
 
-h1, h2, h3, h3 {
-  font-family: variables.$font-primary;
-}
 
 .input {
   background-color: white;
@@ -29,12 +33,7 @@ h1, h2, h3, h3 {
 }
 
 
-.button {
-  &.is-success {
-    background-color: #48c774;
-    color: white;
-  }
-}
+
 
 
 
@@ -44,3 +43,4 @@ h1, h2, h3, h3 {
     margin: 0 auto;
   }
 }
+
