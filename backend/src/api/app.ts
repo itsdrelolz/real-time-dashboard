@@ -9,7 +9,7 @@ import { errorHandler } from "@/middleware/errorHandler";
 
 const app: Application = express();
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+
 dotenv.config();
 app.use(
   cors({
@@ -24,9 +24,10 @@ app.use(morgan("dev"));
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
 
-app.use(errorHandler);
 app.get("/api", (_req, res) => {
   res.send("API is running");
 });
+
+app.use(errorHandler);
 
 export default app;

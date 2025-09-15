@@ -5,7 +5,7 @@ import type { CreateChannelData, CreateTaskChannelData } from "@/types";
 
 export async function createChannel(data: CreateChannelData) {
     try {
-         await prisma.channel.create({
+        return await prisma.channel.create({
             data: {
                 name: data.name,
                 description: data.description,
