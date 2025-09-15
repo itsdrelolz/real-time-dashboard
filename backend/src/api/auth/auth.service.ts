@@ -60,7 +60,7 @@ export async function signinUser(params: LoginParams): Promise<AuthResponse> {
   return { profile, session: authData.session };
 }
 
-export async function signoutUser(jwt: string): Promise<void> {
+export async function signOutUser(jwt: string): Promise<void> {
   const { error } = await supabase.auth.admin.signOut(jwt);
   if (error) throw error;
 }

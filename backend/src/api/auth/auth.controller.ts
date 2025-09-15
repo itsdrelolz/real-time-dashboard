@@ -1,4 +1,4 @@
-import { signupUser, signinUser, signoutUser } from "./auth.service";
+import { signupUser, signinUser, signOutUser } from "./auth.service";
 import { Request, Response } from "express";
 import { isSupabaseAuthError } from "@/types/error.types";
 import { AuthenticatedRequest } from "@/middleware/authMiddleware";
@@ -111,7 +111,7 @@ export async function signOutController(
 
     const token = authHeader.split(" ")[1] as string;
 
-    await signoutUser(token);
+    await signOutUser(token);
 
     return res.status(204).send();
   } catch (error: unknown) {

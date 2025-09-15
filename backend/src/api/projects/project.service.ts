@@ -18,129 +18,177 @@ import type {
  * */
 
 export async function createProject(data: CreateProjectData): Promise<Project> {
-  return await prisma.project.create({
-    data: {
-      name: data.name,
-      ownerId: data.ownerId,
-      channels: {
-        create: [
-          {name: "general", description: "General project discussions"},
-        ],
-      },
-      members: {
-        create: [
-          {
-            profileId: data.ownerId,
-          },
-        ],
-      },
-    },
-  });
+    try {
+
+        return await prisma.project.create({
+            data: {
+                name: data.name,
+                ownerId: data.ownerId,
+                channels: {
+                    create: [
+                        {name: "general", description: "General project discussions"},
+                    ],
+                },
+                members: {
+                    create: [
+                        {
+                            profileId: data.ownerId,
+                        },
+                    ],
+                },
+            },
+        });
+    } catch (error) {
+        console.error("Error creating project:", error);
+        throw error;
+    }
 }
 
 export async function getProjectById(
   projectId: number,
 ): Promise<DetailedProjectPayload | null> {
-  return await prisma.project.findUnique({
-    where: {
-      id: projectId,
-    },
-    include: {
-      owner: {select: {id: true, displayName: true}},
-      members: {
-        include: {
-          profile: {select: {id: true, displayName: true}},
-        },
-      },
-      tasks: true,
-      channels: {
-        select: {
-          id: true,
-          name: true,
-          taskId: true,
-        },
-      },
-    },
-  });
+    try {
+
+        return await prisma.project.findUnique({
+            where: {
+                id: projectId,
+            },
+            include: {
+                owner: {select: {id: true, displayName: true}},
+                members: {
+                    include: {
+                        profile: {select: {id: true, displayName: true}},
+                    },
+                },
+                tasks: true,
+                channels: {
+                    select: {
+                        id: true,
+                        name: true,
+                        taskId: true,
+                    },
+                },
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching project details:", error);
+        throw error;
+    }
 }
 
 export async function getProjectSummariesForUser(
   userId: string,
 ): Promise<ProjectSummaryPayload[]> {
-  return await prisma.project.findMany({
-    where: {
-      members: {
-        some: {
-          profileId: userId,
-        },
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+
+    try {
+        return await prisma.project.findMany({
+            where: {
+                members: {
+                    some: {
+                        profileId: userId,
+                    },
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching project summaries:", error);
+        throw error;
+    }
 }
 
 export async function updateProjectDetails(
   projectId: number,
   data: UpdateProjectDetailsData,
 ): Promise<Project> {
-  return await prisma.project.update({
-    where: {id: projectId},
-    data: {
-      name: data.name,
-    },
-  });
+    try {
+        return await prisma.project.update({
+            where: {id: projectId},
+            data: {
+                name: data.name,
+            },
+        });
+    } catch (error) {
+        console.error("Error updating project details:", error);
+        throw error;
+    }
 }
 
 export async function deleteProject(projectId: number): Promise<void> {
-  await prisma.project.delete({
-    where: {
-      id: projectId,
-    },
-  });
+
+    try {
+
+        await prisma.project.delete({
+            where: {
+                id: projectId,
+            },
+        });
+    } catch (error) {
+        console.error("Error deleting project:", error);
+        throw error;
+    }
 }
 
 export async function addMemberToProject(
   data: AddProjectMemberData,
 ): Promise<ProjectMember> {
-  return await prisma.projectMember.create({
-    data: {
-      profileId: data.profileId,
-      projectId: data.projectId,
-    },
-  });
+    try {
+
+        return await prisma.projectMember.create({
+            data: {
+                profileId: data.profileId,
+                projectId: data.projectId,
+            },
+        });
+
+    } catch (error) {
+        console.error("Error adding project member:", error);
+        throw error;
+    }
 }
 
 export async function removeMemberFromProject(
   projectId: number,
   profileId: string,
 ): Promise<void> {
-  await prisma.projectMember.delete({
-    where: {
-      projectId_profileId: {
-        projectId: projectId,
-        profileId: profileId,
-      },
-    },
-  });
+    try {
+        await prisma.projectMember.delete({
+            where: {
+                projectId_profileId: {
+                    projectId: projectId,
+                    profileId: profileId,
+                },
+            },
+        });
+    } catch (error) {
+        console.error("Error deleting project member:", error);
+        throw error;
+    }
 }
 
 export async function getProjectMembers(
   projectId: number,
 ): Promise<ProjectMemberProfile[]> {
-  return await prisma.projectMember.findMany({
-    where: {
-      projectId: projectId,
-    },
-    include: {
-      profile: {
-        select: {
-          id: true,
-          displayName: true,
-        },
-      },
-    },
-  });
+    try {
+        return await prisma.projectMember.findMany({
+            where: {
+                projectId: projectId,
+            },
+            include: {
+                profile: {
+                    select: {
+                        id: true,
+                        displayName: true,
+                    },
+                },
+            },
+        });
+
+    } catch (error) {
+        console.error("Error fetching project members:", error);
+        throw error;
+    }
 }

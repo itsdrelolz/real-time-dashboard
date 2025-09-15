@@ -3,21 +3,21 @@ FROM node:20-alpine AS builder
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci
+RUN pnpm ci
 
 COPY . .
 
 RUN npx prisma generate
 
 # Build the TypeScript project
-RUN npm run build
+RUN pnpm run build
 
 FROM node:20-alpine AS production
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN pnpm ci --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
 
@@ -27,4 +27,4 @@ COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]

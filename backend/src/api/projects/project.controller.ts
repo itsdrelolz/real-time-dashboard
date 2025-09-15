@@ -9,13 +9,15 @@ import {
   updateProjectDetails,
   removeMemberFromProject,
 } from "./project.service";
+
+
 import type { AddProjectMemberData, UpdateProjectDetailsData } from "@/types";
 
 import { AuthenticatedRequest } from "@/middleware/authMiddleware";
 import { RequestWithNumericParams } from "@/middleware/validationMiddleware";
 
 export async function createProjectController(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<Response> {
   try {
@@ -45,7 +47,7 @@ export async function createProjectController(
 }
 
 export async function getProjectByIdController(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<Response> {
   try {
@@ -91,9 +93,10 @@ export async function getAllUserProjectsController(
 }
 
 export async function deleteProjectController(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<Response> {
+
   try {
     const projectId = parseInt(req.params.projectId as string, 10);
 
@@ -115,7 +118,7 @@ export async function deleteProjectController(
 }
 
 export async function getProjectMembersController(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
 ): Promise<Response> {
   try {
