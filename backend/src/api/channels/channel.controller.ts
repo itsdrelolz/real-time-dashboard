@@ -6,6 +6,7 @@ import {
     updateChannel,
     deleteChannel,
 } from "./channel.service";
+
 import { AuthenticatedRequest } from "@/middleware/authMiddleware";
 import { getProjectById, getProjectOwnerId } from "@/api/projects/project.service";
 
@@ -39,37 +40,6 @@ export async function getAllChannelsForProjectController(req: AuthenticatedReque
     }
 }
 
-export async function getChannelByIdController(req: AuthenticatedRequest, res: Response) {
-    try {
-        const channelId = parseInt(req.params.channelId as string, 10);
-        const userId = req.user?.id;
-
-        if (!userId) {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-        if (isNaN(channelId)) {
-            return res.status(400).json({ error: "Invalid Channel ID." });
-        }
-
-        const channel = await getChannelById(channelId);
-        if (!channel) {
-            return res.status(404).json({ error: "Channel not found." });
-        }
-
-        const project = await getProjectById(channel.projectId);
-        const isMember = project?.members.some(member => member.profileId === userId);
-
-        if (!isMember) {
-            return res.status(403).json({ error: "Forbidden: You are not a member of this project." });
-        }
-
-        return res.status(200).json({ channel });
-    } catch (error) {
-        console.error('Error retrieving channel: ', error);
-        return res.status(500).json({ error: "Internal server error" });
-    }
-}
-
 export async function createChannelController(req: AuthenticatedRequest, res: Response) {
     try {
         const { projectId, name, description } = req.body;
@@ -79,7 +49,7 @@ export async function createChannelController(req: AuthenticatedRequest, res: Re
             return res.status(401).json({ error: "Unauthorized" });
         }
         if (!projectId || !name) {
-            return res.status(400).json({ error: "Missing required fields: projectId and name are required." });
+            return res.status(400).json({ error: "Missing required fields" });
         }
 
         const project = await getProjectById(projectId);
