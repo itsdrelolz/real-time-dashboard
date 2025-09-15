@@ -26,16 +26,46 @@ export async function getAllChannelsForProjectController(req: AuthenticatedReque
             return res.status(404).json({ error: "Project not found." });
         }
 
-        // Authorization: User must be a member to view channels
         const isMember = project.members.some(member => member.profileId === userId);
         if (!isMember) {
             return res.status(403).json({ error: "Forbidden: You are not a member of this project." });
         }
 
         const channels = await getAllChannelsForProject(projectId);
-        return res.status(200).json({ message: "Channels retrieved successfully", channels });
+        return res.status(200).json({ channels });
     } catch (error) {
         console.error("Error retrieving channels:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export async function getChannelByIdController(req: AuthenticatedRequest, res: Response) {
+    try {
+        const channelId = parseInt(req.params.channelId as string, 10);
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        if (isNaN(channelId)) {
+            return res.status(400).json({ error: "Invalid Channel ID." });
+        }
+
+        const channel = await getChannelById(channelId);
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found." });
+        }
+
+        const project = await getProjectById(channel.projectId);
+        const isMember = project?.members.some(member => member.profileId === userId);
+
+        if (!isMember) {
+            return res.status(403).json({ error: "Forbidden: You are not a member of this project." });
+        }
+
+        return res.status(200).json({ channel });
+    } catch (error) {
+        console.error('Error retrieving channel: ', error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }
@@ -49,20 +79,19 @@ export async function createChannelController(req: AuthenticatedRequest, res: Re
             return res.status(401).json({ error: "Unauthorized" });
         }
         if (!projectId || !name) {
-            return res.status(400).json({ error: "Missing required fields" });
+            return res.status(400).json({ error: "Missing required fields: projectId and name are required." });
         }
 
-        // Authorization: User must be a member to create a channel
         const project = await getProjectById(projectId);
         const isMember = project?.members.some(member => member.profileId === userId);
         if (!isMember) {
             return res.status(403).json({ error: "Forbidden: You must be a member to create a channel." });
         }
 
-        const newChannel = await createChannel({ projectId, name, description: description || '' });
-        return res.status(201).json({ message: "Channel created successfully", newChannel });
+        const newChannel = await createChannel({ projectId, name, description: description || null });
+        return res.status(201).json({ message: "Channel created successfully", channel: newChannel });
     } catch (error) {
-        console.error("Error creating channel: ", error);
+        console.error('Error creating channel: ', error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }
@@ -88,7 +117,6 @@ export async function updateChannelController(req: AuthenticatedRequest, res: Re
             return res.status(404).json({ error: "Channel not found." });
         }
 
-        // Authorization: Only the project owner can update channels
         const ownerId = await getProjectOwnerId(channel.projectId);
         if (ownerId !== userId) {
             return res.status(403).json({ error: "Forbidden: You are not authorized to update this channel." });
@@ -119,16 +147,15 @@ export async function deleteChannelController(req: AuthenticatedRequest, res: Re
             return res.status(404).json({ error: "Channel not found." });
         }
 
-        // Authorization: Only the project owner can delete channels
         const ownerId = await getProjectOwnerId(channel.projectId);
         if (ownerId !== userId) {
-            return res.status(403).json({ error: "You are not authorized to delete this channel." });
+            return res.status(403).json({ error: "Forbidden: You are not authorized to delete this channel." });
         }
 
         await deleteChannel(channelId);
         return res.status(204).send();
     } catch (error) {
-        console.error("Error deleting channel: ", error);
+        console.error('Error deleting channel: ', error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }

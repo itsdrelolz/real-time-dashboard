@@ -10,6 +10,7 @@ import type {
     UpdateProjectDetailsData,
 } from "@/types";
 
+
 export async function createProject(data: CreateProjectData): Promise<Project> {
     try {
         return await prisma.project.create({

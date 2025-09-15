@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import { registerMessageHandlers } from './messageHandlers';
 
 
 export const initializeSocketIO = (io: Server) =>
