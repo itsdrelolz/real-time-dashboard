@@ -12,12 +12,27 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-
+import { socket, initializeSocketListeners, connectSocket } from '@/services/socketService';
+import { onMounted, watch } from 'vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import MainLayoutSkeleton from '@/layouts/MainLayoutSkeleton.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();
+
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (isLoggedIn) {
+    connectSocket();
+  } else {
+    socket.disconnect();
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  initializeSocketListeners();
+});
+
+
 
 const layouts = {
   MainLayout,

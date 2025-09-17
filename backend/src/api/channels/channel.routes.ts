@@ -7,23 +7,15 @@ const router: Router = Router();
 
 router.use(authMiddleware);
 
-router.post("/", channelController.createChannelController);
+const channelIdValidator = validateNumericParams("channelId");
 
+// GET /api/channels/:channelId - Gets a single channel
+router.get("/:channelId", channelIdValidator, channelController.getChannelByIdController);
 
-router.get(
-    "/:channelId",
-    validateNumericParams("channelId"),
-    channelController.getAllChannelsForProjectController,
-);
+// PATCH /api/channels/:channelId - Updates a single channel
+router.patch("/:channelId", channelIdValidator, channelController.updateChannelController);
 
-
-
-router.delete(
-    "/:channelId",
-    validateNumericParams("channelId"),
-    channelController.deleteChannelController,
-);
-
+// DELETE /api/channels/:channelId - Deletes a single channel
+router.delete("/:channelId", channelIdValidator, channelController.deleteChannelController);
 
 export default router;
-

@@ -15,18 +15,16 @@
 <script setup>
 import { ref } from 'vue';
 import { useChannelStore } from '@/stores/channel';
-// You'll need a socket instance. For now, we'll mock it.
-// In a real app, you would initialize this in a dedicated file.
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:3000"); // Your backend URL
+import { socket } from '@/services/socketService';
+// 👇 Import the shared socket instance
 
 const newMessage = ref('');
 const channelStore = useChannelStore();
 
 const sendMessage = () => {
-  if (!newMessage.value.trim()) return;
+  if (!newMessage.value.trim() || !channelStore.currentChannel) return;
 
+  // 👇 Use the imported socket to emit the message
   socket.emit('newChannelMessage', {
     channelId: channelStore.currentChannel.id,
     content: newMessage.value

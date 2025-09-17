@@ -12,6 +12,7 @@ const { channels, isLoading, error: channelError } = storeToRefs(channelStore);
 
 const navLabel = computed(() => (currentProject.value ? 'Channels' : 'Connections'));
 
+// --- ADD THIS FUNCTION ---
 function selectChannel(channel) {
   channelStore.currentChannel = channel;
 }
@@ -67,6 +68,7 @@ watch(currentProject, (newProject) => {
 </template>
 
 <style scoped>
+/* Your existing styles are correct and do not need changes */
 .nav-container {
   display: flex;
   flex-direction: column;

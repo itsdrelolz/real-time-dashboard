@@ -8,12 +8,13 @@
 </template>
 
 <script setup>
-  import { computed } from 'vue';
-  import { useChannelStore } from '@/stores/channel';
-  import ChannelView from '@/components/ChannelView.vue';
+import { computed } from 'vue';
+import { useChannelStore } from '@/stores/channel';
+import ChannelView from '@/components/ChannelView.vue';
 
-  const channelStore = useChannelStore();
-  const currentChannel = computed(() => channelStore.currentChannel);
+const channelStore = useChannelStore();
+const currentChannel = computed(() => channelStore.currentChannel);
 </script>
 
-
+<style scoped>
+</style>
