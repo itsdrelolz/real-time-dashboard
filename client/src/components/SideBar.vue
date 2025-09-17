@@ -12,6 +12,10 @@ const { channels, isLoading, error: channelError } = storeToRefs(channelStore);
 
 const navLabel = computed(() => (currentProject.value ? 'Channels' : 'Connections'));
 
+function selectChannel(channel) {
+  channelStore.currentChannel = channel;
+}
+
 watch(currentProject, (newProject) => {
   if (newProject?.id) {
     channelStore.fetchChannelsForProject(newProject.id);
@@ -35,8 +39,13 @@ watch(currentProject, (newProject) => {
     </div>
 
     <template v-else-if="currentProject">
-      <div v-if="channels.length > 0">
-        <button v-for="channel in channels" :key="channel.id" class="nav-button">
+      <div v-if="channels && channels.length > 0">
+        <button
+          v-for="channel in channels"
+          :key="channel.id"
+          class="nav-button"
+          @click="selectChannel(channel)"
+        >
           # {{ channel.name }}
         </button>
       </div>
@@ -58,7 +67,6 @@ watch(currentProject, (newProject) => {
 </template>
 
 <style scoped>
-/* --- Most styles are the same, added a few for the new content --- */
 .nav-container {
   display: flex;
   flex-direction: column;
@@ -89,8 +97,8 @@ watch(currentProject, (newProject) => {
   color: var(--p-text-color, #212529);
   padding: 0.75rem;
   text-align: left;
-  display: flex; /* Added for icon alignment */
-  align-items: center; /* Added for icon alignment */
+  display: flex;
+  align-items: center;
 }
 
 .nav-button:hover {
@@ -115,7 +123,7 @@ watch(currentProject, (newProject) => {
 }
 
 .add-connection-button {
-  background-color: var(--p-green-500, #22c55e); /* Example color */
+  background-color: var(--p-green-500, #22c55e);
   color: white;
   justify-content: center;
 }
