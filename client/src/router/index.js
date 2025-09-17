@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import LoginPage from '@/pages/LoginPage.vue';
-import RegisterPage from '@/pages/RegisterPage.vue';
-import HomePage from '@/pages/HomePage.vue';
-import { useAuthStore } from '@/stores/auth';
+import { createRouter, createWebHistory } from 'vue-router'
+import LoginPage from '@/pages/LoginPage.vue'
+import RegisterPage from '@/pages/RegisterPage.vue'
+import HomePage from '@/pages/HomePage.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,25 +26,24 @@ const router = createRouter({
       meta: { layout: 'MainLayout', requiresAuth: true },
     },
   ],
-});
-
+})
 
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   if (!authStore.authReady) {
-    await authStore.fetchUser();
+    await authStore.fetchUser()
   }
 
-  const isAuthenticated = authStore.isLoggedIn;
+  const isAuthenticated = authStore.isLoggedIn
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'login' });
+    next({ name: 'login' })
   } else if (to.meta.requiresGuest && isAuthenticated) {
-    next({ name: 'home' });
+    next({ name: 'home' })
   } else {
-    next();
+    next()
   }
-});
+})
 
-export default router;
+export default router

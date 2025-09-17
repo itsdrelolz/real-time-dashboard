@@ -17,7 +17,6 @@
  * @property {SupabaseUser} user
  */
 
-
 /**
  * =================================================================
  * PRISMA MODEL TYPES

@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabaseClient'
 import router from '@/router'
-import * as authService from '@/services/authServices';
+import * as authService from '@/services/authServices'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -17,40 +17,37 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function signIn(email, password) {
     try {
-      const loginResponse = await authService.login(email, password);
+      const loginResponse = await authService.login(email, password)
 
       if (!loginResponse.session?.access_token || !loginResponse.session?.refresh_token) {
-        throw new Error("Login response did not include the required tokens.");
+        throw new Error('Login response did not include the required tokens.')
       }
 
       const { error } = await supabase.auth.setSession({
         access_token: loginResponse.session.access_token,
         refresh_token: loginResponse.session.refresh_token,
-      });
-      if (error) throw error;
+      })
+      if (error) throw error
 
-      userProfile.value = loginResponse.profile;
+      userProfile.value = loginResponse.profile
       await router.push('/')
-
     } catch (error) {
-      console.error('Login Failed: ', error);
-      user.value = null;
-      userProfile.value = null;
+      console.error('Login Failed: ', error)
+      user.value = null
+      userProfile.value = null
       throw error
     }
   }
 
-
   async function signUp(email, password, displayName) {
     try {
-      await authService.register(email, password, displayName);
-      alert('Registration successful! Please check your email or login.');
-      await router.push('/login');
-    } catch(error) {
-      console.error('Sign up failed:', error);
+      await authService.register(email, password, displayName)
+      alert('Registration successful! Please check your email or login.')
+      await router.push('/login')
+    } catch (error) {
+      console.error('Sign up failed:', error)
     }
   }
-
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -59,7 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
     await router.push('/login')
   }
 
-  async function fetchUser(){
+  async function fetchUser() {
     try {
       const { data, error } = await supabase.auth.getUser()
       if (error || !data.user) {
@@ -67,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
       } else {
         user.value = data.user
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e)
     } finally {
       authReady.value = true
@@ -83,7 +80,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-
   return {
     user,
     userProfile,
@@ -96,8 +92,3 @@ export const useAuthStore = defineStore('auth', () => {
     getProfile,
   }
 })
-
-
-
-
-

@@ -4,14 +4,16 @@
   padding: 0;
 }
 
-
-
 body {
   font-family: 'Open Sans', sans-serif;
 }
 
+.container {
+  width: 100%;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -23,19 +25,11 @@ html, body {
   width: 100%;
 }
 
-
-
-
 .input {
   background-color: white;
   color: #363636;
   border-color: #dbdbdb;
 }
-
-
-
-
-
 
 @media (min-width: 768px) {
   .container {
@@ -43,4 +37,3 @@ html, body {
     margin: 0 auto;
   }
 }
-

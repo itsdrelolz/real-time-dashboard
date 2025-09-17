@@ -1,5 +1,4 @@
-import apiFetch from './api';
-
+import apiFetch from './api'
 
 /**
  *
@@ -12,7 +11,7 @@ export function login(email, password) {
   return apiFetch('auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
-  });
+  })
 }
 
 /**
@@ -26,13 +25,12 @@ export function register(email, password, displayName) {
   return apiFetch('auth/register', {
     method: 'POST',
     body: JSON.stringify({ email, password, displayName }),
-  });
+  })
 }
-
 
 /**
  * @returns {Promise<import('./types/api.js').Profile>}
  */
 export function getProfile() {
-  return apiFetch('auth/me');
+  return apiFetch('auth/me')
 }

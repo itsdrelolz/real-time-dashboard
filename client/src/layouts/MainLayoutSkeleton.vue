@@ -4,8 +4,13 @@
       <template #start>
         <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
       </template>
+
+      <template #center>
+        <Skeleton height="2.5rem" width="20rem"></Skeleton>
+      </template>
+
       <template #end>
-        <Skeleton height="2.5rem" width="12rem"></Skeleton>
+        <Skeleton height="2.5rem" width="8rem"></Skeleton>
       </template>
     </Toolbar>
 
@@ -47,6 +52,8 @@ import Skeleton from 'primevue/skeleton';
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden;
+  background-color: var(--p-surface-ground, #eff3f8);
 }
 
 .splitter-container {
@@ -55,9 +62,10 @@ import Skeleton from 'primevue/skeleton';
 }
 
 .custom-toolbar {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--p-surface-border, #e5e7eb);
+  background-color: var(--p-surface-card, #ffffff);
 }
 
 .main-left-panel {
@@ -66,5 +74,6 @@ import Skeleton from 'primevue/skeleton';
 
 .servers-panel {
   border-right: 1px solid var(--p-surface-border, #e5e7eb);
+  background-color: var(--p-surface-section, #f8f9fa);
 }
-</style>
+</style>>

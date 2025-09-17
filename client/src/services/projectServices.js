@@ -1,9 +1,7 @@
-import apiFetch from '@/services/api';
-import { useAuthStore } from '@/stores/auth';
+import apiFetch from './api'
 
 /**
  * @typedef {import('../types/api.js').Project} Project
- * @typedef {import('../types/api.js').Profile} Profile
  */
 
 /**
@@ -12,7 +10,7 @@ import { useAuthStore } from '@/stores/auth';
  */
 export function getProjects() {
   // GET /api/projects
-  return apiFetch('projects');
+  return apiFetch('projects')
 }
 
 /**
@@ -22,27 +20,26 @@ export function getProjects() {
  */
 export function getProjectById(projectId) {
   // GET /api/projects/:projectId
-  return apiFetch(`projects/${projectId}`);
+  return apiFetch(`projects/${projectId}`)
 }
 
 /**
  * Creates a new project.
- * @param {{name: string}} projectData - The data for the new project.
- * @returns {Promise<{newProject: Project}>} An object containing the newly created project.
+ * This function should receive all necessary data from its caller (e.g., a Pinia store action).
+ * @param {{name: string, ownerId: string}} projectData - The complete data for the new project.
+ * @returns {Promise<{project: Project}>} An object containing the newly created project.
  */
 export function createProject(projectData) {
-  const authStore = useAuthStore();
-  const ownerId = authStore.user?.id;
-
-  if (!ownerId) {
-    throw new Error("User must be logged in to create a project.");
+  // The ownerId is now passed in as an argument, removing the need for the auth store here.
+  if (!projectData || !projectData.name || !projectData.ownerId) {
+    throw new Error('Project name and ownerId are required to create a project.')
   }
 
   // POST /api/projects
   return apiFetch('projects', {
     method: 'POST',
-    body: JSON.stringify({ ...projectData, ownerId }),
-  });
+    body: JSON.stringify(projectData),
+  })
 }
 
 /**
@@ -56,7 +53,7 @@ export function updateProject(projectId, updateData) {
   return apiFetch(`projects/${projectId}`, {
     method: 'PATCH',
     body: JSON.stringify(updateData),
-  });
+  })
 }
 
 /**
@@ -68,5 +65,5 @@ export function deleteProject(projectId) {
   // DELETE /api/projects/:projectId
   return apiFetch(`projects/${projectId}`, {
     method: 'DELETE',
-  });
+  })
 }
