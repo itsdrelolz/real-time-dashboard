@@ -15,6 +15,22 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = session?.user ?? null
   })
 
+  async function fetchUser() {
+    try {
+      const { data, error } = await supabase.auth.getUser()
+      if (error || !data.user) {
+        user.value = null
+      } else {
+        user.value = data.user
+        await getProfile()
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      authReady.value = true
+    }
+  }
+
   async function signIn(email, password) {
     try {
       const loginResponse = await authService.login(email, password)
@@ -29,7 +45,11 @@ export const useAuthStore = defineStore('auth', () => {
       })
       if (error) throw error
 
+      // Set user and profile immediately
+      user.value = loginResponse.session.user
       userProfile.value = loginResponse.profile
+
+      // Navigate to home
       await router.push('/')
     } catch (error) {
       console.error('Login Failed: ', error)
@@ -56,21 +76,6 @@ export const useAuthStore = defineStore('auth', () => {
     await router.push('/login')
   }
 
-  async function fetchUser() {
-    try {
-      const { data, error } = await supabase.auth.getUser()
-      if (error || !data.user) {
-        user.value = null
-      } else {
-        user.value = data.user
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      authReady.value = true
-    }
-  }
-
   async function getProfile() {
     try {
       userProfile.value = await authService.getProfile()
@@ -88,7 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
     signIn,
     signOut,
     signUp,
-    fetchUser,
     getProfile,
+    fetchUser,
   }
 })

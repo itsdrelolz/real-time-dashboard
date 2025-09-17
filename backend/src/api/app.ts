@@ -21,6 +21,11 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
 app.get("/api", (_req, res) => {

@@ -178,7 +178,7 @@ onMounted(async () => {
 
 <style scoped>
 .message-container {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   padding: 1rem;
   overflow-y: auto;
   display: flex;

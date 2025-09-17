@@ -2,19 +2,8 @@
   <div class="main-layout">
     <Toolbar class="modern-toolbar">
       <template #start>
-        <div class="user-info">
-          <Avatar
-            :image="
-              authStore.userProfile?.avatar ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.userProfile?.displayName || 'User')}&background=3b82f6&color=ffffff&size=40`
-            "
-            class="user-avatar"
-            shape="circle"
-          />
-          <div class="user-details">
-            <span class="user-name">{{ authStore.userProfile?.displayName }}</span>
-            <span class="user-status">Online</span>
-          </div>
+        <div class="app-title">
+          <h1>Team Task</h1>
         </div>
       </template>
 
@@ -37,27 +26,27 @@
           <!-- Projects List Panel  -->
 
           <SplitterPanel class="servers-panel" :size="20">
-            <!-- Loading State -->
+            <!-- Projects List at Top -->
+            <div class="projects-section">
+              <!-- Loading State -->
+              <div v-if="isLoading" class="loading-container">
+                <Skeleton v-for="i in 4" :key="i" shape="circle" size="3rem"></Skeleton>
+              </div>
 
-            <div v-if="isLoading">
-              <Skeleton v-for="i in 4" :key="i" shape="circle" size="3rem"></Skeleton>
-            </div>
+              <!-- Error State -->
+              <div v-else-if="error" class="error-container">
+                <p>Failed to load projects.</p>
+              </div>
 
-            <!-- Error State -->
-
-            <div v-else-if="error">
-              <p>Failed to load projects.</p>
-            </div>
-
-            <!-- Projects List -->
-            <div v-else-if="projects" class="projects-container">
-              <div class="projects-list">
+              <!-- Projects List -->
+              <div v-else-if="projects && projects.length > 0" class="projects-list">
                 <Button
                   @click="selectProject(null)"
                   :class="['project-button', 'home-button', { active: !currentProject }]"
                   rounded
                   text
                   icon="pi pi-home"
+                  v-tooltip="'Home'"
                 />
 
                 <Button
@@ -75,33 +64,41 @@
                 >
                   {{ project.name.charAt(0).toUpperCase() }}
                 </Button>
+              </div>
 
-                <!-- Add New Project Button -->
-                <Button
-                  @click="isModalVisible = true"
-                  rounded
-                  text
-                  icon="pi pi-folder-plus"
-                  class="project-button add-project-button"
-                  aria-label="Create New Project"
-                  v-tooltip="'Create New Project'"
-                />
+              <!-- Empty State -->
+              <div v-else class="empty-projects">
+                <div class="empty-state">
+                  <i class="pi pi-folder-open empty-icon"></i>
+                  <p class="empty-text">No projects yet</p>
+                </div>
               </div>
             </div>
 
-            <div v-else class="empty-projects">
-              <div class="empty-state">
-                <i class="pi pi-folder-open empty-icon"></i>
-                <p class="empty-text">No projects found</p>
+            <!-- Bottom Section with Add Project and User Info -->
+            <div class="bottom-section">
+              <!-- Add New Project Button -->
+              <div class="add-project-container">
                 <Button
                   @click="isModalVisible = true"
                   rounded
                   text
-                  icon="pi pi-folder-plus"
                   class="project-button add-project-button"
-                  aria-label="Create Your First Project"
-                  v-tooltip="'Create Your First Project'"
-                />
+                  aria-label="Create New Project"
+                  v-tooltip="'Create New Project'"
+                >
+                  +
+                </Button>
+              </div>
+
+              <!-- User Info -->
+              <div class="user-info">
+                <div class="user-avatar-container">
+                  <div class="user-avatar">
+                    {{ (authStore.userProfile?.displayName || 'U').charAt(0).toUpperCase() }}
+                  </div>
+                  <div class="status-indicator online"></div>
+                </div>
               </div>
             </div>
           </SplitterPanel>
@@ -230,35 +227,15 @@ onMounted(() => {
   padding: 0.75rem 1.5rem;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border: 2px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.user-name {
-  font-weight: 600;
+.app-title h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #1e293b;
-  font-size: 0.9rem;
-}
-
-.user-status {
-  font-size: 0.75rem;
-  color: #10b981;
-  font-weight: 500;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .logout-button {
@@ -285,16 +262,25 @@ onMounted(() => {
 .servers-panel {
   border-right: 1px solid rgba(59, 130, 246, 0.1);
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  padding: 1rem 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  height: 100%;
 }
 
-/* Projects Container */
-.projects-container {
+/* Projects Section at Top */
+.projects-section {
+  flex: 1;
+  padding: 1rem 0.5rem;
+  overflow-y: auto;
+}
+
+.loading-container,
+.error-container {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
   height: 100%;
 }
 
@@ -303,6 +289,71 @@ onMounted(() => {
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
+}
+
+/* Bottom Section */
+.bottom-section {
+  padding: 1rem 0.5rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.add-project-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* User Info */
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.user-avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.status-indicator.online {
+  background-color: #10b981;
+}
+
+.status-indicator.offline {
+  background-color: #ef4444;
 }
 
 /* Project Buttons */
@@ -373,6 +424,11 @@ onMounted(() => {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   border: 2px solid transparent;
+  font-size: 1.5rem;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .add-project-button:hover {
@@ -388,10 +444,12 @@ onMounted(() => {
 
 .add-project-button.p-button-text.p-button {
   color: #3b82f6;
+  background: transparent;
 }
 
 .add-project-button.p-button-text.p-button:hover {
   color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.1);
 }
 
 /* Empty State */
@@ -400,6 +458,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
+  min-height: 200px;
 }
 
 .empty-state {

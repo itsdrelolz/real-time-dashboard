@@ -36,9 +36,6 @@ const layoutComponent = computed(() => {
 
 onMounted(() => {
   appStateStore.performHealthCheck();
-});
-
-onMounted(() => {
   initializeSocketListeners();
 });
 

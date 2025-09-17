@@ -10,7 +10,7 @@ const channelStore = useChannelStore()
 const { currentProject } = storeToRefs(projectStore)
 const { channels, isLoading, error: channelError } = storeToRefs(channelStore)
 
-const navLabel = computed(() => (currentProject.value ? 'Channels' : 'Connections'))
+const navLabel = computed(() => (currentProject.value ? 'Channels' : 'Dms'))
 const navIcon = computed(() => (currentProject.value ? 'pi-hashtag' : 'pi-users'))
 
 function selectChannel(channel) {
