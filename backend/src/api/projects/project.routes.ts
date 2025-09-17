@@ -6,7 +6,7 @@ import {
   getAllChannelsForProjectController,
   createChannelController
 } from "@/api/channels/channel.controller";
-
+import channelRouter from "@/api/channels/channel.routes";
 
 const router: Router = Router();
 router.use(authMiddleware);
@@ -21,6 +21,8 @@ router.get("/:projectId", projectIdValidator, projectController.getProjectByIdCo
 router.patch("/:projectId", projectIdValidator, projectController.updateProjectController);
 router.delete("/:projectId", projectIdValidator, projectController.deleteProjectController);
 
+
+router.use("/:projectId/channels", projectIdValidator, channelRouter);
 
 router.get("/:projectId/members", projectIdValidator, projectController.getProjectMembersController);
 router.post("/:projectId/members", projectIdValidator, projectController.addProjectMembersController);

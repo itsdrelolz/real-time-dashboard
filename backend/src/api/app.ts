@@ -3,8 +3,6 @@ import cors from "cors";
 import morgan from "morgan";
 import { default as authRouter } from "./auth/auth.routes";
 import { default as projectRouter } from "./projects/project.routes";
-import { default as channelRouter } from "./channels/channel.routes";
-import { default as messageRouter } from "./messages/message.routes";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import { errorHandler } from "@/middleware/errorHandler";
@@ -25,8 +23,6 @@ app.use(morgan("dev"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
-app.use("/api/channels", channelRouter);
-channelRouter.use("/:channelId/messages", messageRouter);
 app.get("/api", (_req, res) => {
   res.send("API is running");
 });

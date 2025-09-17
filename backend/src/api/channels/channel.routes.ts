@@ -2,20 +2,25 @@ import { Router } from "express";
 import * as channelController from "./channel.controller";
 import { authMiddleware } from "@/middleware/authMiddleware";
 import { validateNumericParams } from "@/middleware/validationMiddleware";
+import messageRouter from "../messages/message.routes"; // Import the message router
 
-const router: Router = Router();
+const router: Router = Router({ mergeParams: true });
 
 router.use(authMiddleware);
 
-const channelIdValidator = validateNumericParams("channelId");
+router.post("/", channelController.createChannelController);
+router.get("/", channelController.getAllChannelsForProjectController); // This now handles GET /
 
-// GET /api/channels/:channelId - Gets a single channel
-router.get("/:channelId", channelIdValidator, channelController.getChannelByIdController);
+router.delete(
+  "/:channelId",
+  validateNumericParams("channelId"),
+  channelController.deleteChannelController,
+);
 
-// PATCH /api/channels/:channelId - Updates a single channel
-router.patch("/:channelId", channelIdValidator, channelController.updateChannelController);
-
-// DELETE /api/channels/:channelId - Deletes a single channel
-router.delete("/:channelId", channelIdValidator, channelController.deleteChannelController);
+router.use(
+  "/:channelId/messages",
+  validateNumericParams("channelId"),
+  messageRouter
+);
 
 export default router;
