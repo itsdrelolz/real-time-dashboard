@@ -1,39 +1,31 @@
 <template>
-  <MainLayoutSkeleton v-if="!authStore.authReady" />
+  <MainLayoutSkeleton v-if="isCheckingHealth || (isBackendHealthy && !authStore.authReady)" />
 
-  <component :is="layoutComponent" v-else-if="layoutComponent">
-    <RouterView />
-  </component>
+  <ErrorLayout v-else-if="!isBackendHealthy" />
 
-  <RouterView v-else />
+  <template v-else>
+    <component :is="layoutComponent" v-if="layoutComponent">
+      <RouterView />
+    </component>
+    <RouterView v-else />
+  </template>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { socket, initializeSocketListeners, connectSocket } from '@/services/socketService';
-import { onMounted, watch } from 'vue';
+import { useAppStateStore } from '@/stores/appState';
 import MainLayout from '@/layouts/MainLayout.vue';
 import MainLayoutSkeleton from '@/layouts/MainLayoutSkeleton.vue';
-
+import ErrorLayout from '@/layouts/ErrorLayout.vue';
+import { storeToRefs } from 'pinia'
 const route = useRoute();
 const authStore = useAuthStore();
+const appStateStore = useAppStateStore();
 
-watch(() => authStore.isLoggedIn, (isLoggedIn) => {
-  if (isLoggedIn) {
-    connectSocket();
-  } else {
-    socket.disconnect();
-  }
-}, { immediate: true });
-
-onMounted(() => {
-  initializeSocketListeners();
-});
-
-
-
+const { isBackendHealthy, isCheckingHealth } = storeToRefs(appStateStore);
 const layouts = {
   MainLayout,
 };
@@ -41,6 +33,23 @@ const layouts = {
 const layoutComponent = computed(() => {
   return layouts[route.meta.layout];
 });
+
+onMounted(() => {
+  appStateStore.performHealthCheck();
+});
+
+onMounted(() => {
+  initializeSocketListeners();
+});
+
+
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (isLoggedIn && !socket.connected) {
+    connectSocket();
+  } else if (!isLoggedIn && socket.connected) {
+    socket.disconnect();
+  }
+}, { immediate: true });
 </script>
 
 <style>

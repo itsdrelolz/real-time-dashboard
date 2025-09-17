@@ -25,7 +25,6 @@ export function getMessagesForChannel(projectId, channelId) {
  * @returns {Promise<null>}
  */
 export function deleteMessage(projectId, channelId, messageId) {
-  // This endpoint would need to exist on your backend, following the nested convention
   return apiFetch(`projects/${projectId}/channels/${channelId}/messages/${messageId}`, {
     method: 'DELETE',
   });

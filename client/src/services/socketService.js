@@ -1,7 +1,6 @@
-// client/src/services/socketService.js
-
 import { io } from 'socket.io-client';
 import { useMessageStore } from '@/stores/message';
+import { useChannelStore } from '@/stores/channel';
 import { supabase } from '@/lib/supabaseClient';
 
 const URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -11,10 +10,9 @@ export const socket = io(URL, {
 });
 
 /**
- * Call this function to connect the socket, ensuring the auth token is included.
+ * Connects the socket with the user's authentication token.
  */
 export async function connectSocket() {
-  // Get the current session from Supabase
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
 
@@ -26,11 +24,33 @@ export async function connectSocket() {
   }
 }
 
+/**
+ * Tells the server to add this client to a specific project's room.
+ * @param {number} projectId The ID of the project to join.
+ */
+export function joinProjectRoom(projectId) {
+  if (socket.connected) {
+    socket.emit('joinProjectRoom', projectId);
+  }
+}
+
+/**
+ * Initializes all socket event listeners.
+ */
 export function initializeSocketListeners() {
   const messageStore = useMessageStore();
+  const channelStore = useChannelStore();
 
   socket.on('messageCreated', (newMessage) => {
-    messageStore.addMessage(newMessage);
+    try {
+      const currentChannelId = channelStore.currentChannel?.id;
+      if (!currentChannelId) return;
+      if (newMessage?.channelId === currentChannelId) {
+        messageStore.addMessage(newMessage);
+      }
+    } catch (e) {
+      console.error('Failed to process incoming message', e);
+    }
   });
 
   socket.on('connect_error', (err) => {
