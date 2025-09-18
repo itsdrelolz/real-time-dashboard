@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm install && pnpm run build:client",
+  "buildCommand": "pnpm install && pnpm -w run build:client",
   "outputDirectory": "client/dist",
   "installCommand": "pnpm install",
   "framework": "vite"
