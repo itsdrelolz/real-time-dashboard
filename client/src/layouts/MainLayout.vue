@@ -92,14 +92,14 @@
               </div>
 
               <!-- User Info -->
-              <div class="user-info">
+              <Button class="user-info">
                 <div class="user-avatar-container">
                   <div class="user-avatar">
                     {{ (authStore.userProfile?.displayName || 'U').charAt(0).toUpperCase() }}
                   </div>
                   <div class="status-indicator online"></div>
                 </div>
-              </div>
+              </Button>
             </div>
           </SplitterPanel>
 
@@ -157,7 +157,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 import { useProjectStore } from '@/stores/project'
 
@@ -168,6 +168,8 @@ import { storeToRefs } from 'pinia'
 import Dialog from 'primevue/dialog'
 
 import SideBar from '@/components/SideBar.vue'
+
+import { joinProjectRoom } from '@/services/socketService'
 
 const projectStore = useProjectStore()
 
@@ -208,6 +210,16 @@ async function handleCreateProject() {
 onMounted(() => {
   projectStore.fetchAllProjects()
 })
+
+// Watch for project changes and join socket room
+watch(currentProject, (newProject) => {
+  if (newProject?.id) {
+    // Add a small delay to ensure socket is connected
+    setTimeout(() => {
+      joinProjectRoom(newProject.id)
+    }, 200)
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
@@ -246,7 +258,7 @@ onMounted(() => {
 
 .logout-button:hover {
   background-color: rgba(239, 68, 68, 0.1);
-  transform: translateY(-1px);
+
 }
 
 /* Splitter Styling */
@@ -385,7 +397,6 @@ onMounted(() => {
 }
 
 .project-button:hover {
-  transform: translateY(-2px) scale(1.05);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
   border-color: rgba(59, 130, 246, 0.3);
 }
@@ -399,7 +410,6 @@ onMounted(() => {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
 }
 
 .project-item.active:hover {
@@ -433,7 +443,6 @@ onMounted(() => {
 
 .add-project-button:hover {
   background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-2px) scale(1.05);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
 }
 
@@ -546,7 +555,6 @@ onMounted(() => {
 
 .create-button:hover {
   background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 

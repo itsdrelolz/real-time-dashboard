@@ -29,7 +29,7 @@
             </div>
             <div class="message-content">
               <div class="message-header">
-                <span class="author">{{ message.author.displayName }}</span>
+                <span class="author">{{ message.author?.displayName || message.author?.email || 'Unknown User' }}</span>
                 <span class="timestamp">{{ formatTimestamp(message.createdAt) }}</span>
               </div>
               <div class="content">{{ message.content }}</div>
@@ -59,6 +59,12 @@ const groupedMessages = computed(() => {
   const FIVE_HOURS = 5 * 60 * 60 * 1000 // 5 hours in milliseconds
 
   messages.value.forEach((message, index) => {
+    // Skip messages without required data
+    if (!message || !message.createdAt) {
+      console.warn('Skipping invalid message:', message)
+      return
+    }
+
     const messageTime = new Date(message.createdAt)
 
     // If this is the first message or if more than 5 hours have passed since the last message

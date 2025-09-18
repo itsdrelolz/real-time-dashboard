@@ -23,6 +23,16 @@
             @click="attachFile"
           />
           <Button
+            type="button"
+            icon="pi pi-wifi"
+            class="test-button"
+            severity="secondary"
+            text
+            rounded
+            @click="testSocket"
+            v-tooltip="'Test Socket Connection'"
+          />
+          <Button
             type="submit"
             icon="pi pi-send"
             class="send-button"
@@ -39,7 +49,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useChannelStore } from '@/stores/channel'
-import { socket } from '@/services/socketService'
+import { socket, connectSocket } from '@/services/socketService'
 import { storeToRefs } from 'pinia'
 
 const newMessage = ref('')
@@ -48,6 +58,11 @@ const { currentChannel } = storeToRefs(channelStore)
 
 const sendMessage = () => {
   if (!newMessage.value.trim() || !currentChannel.value) return
+
+  console.log('Sending message:', {
+    channelId: currentChannel.value.id,
+    content: newMessage.value,
+  })
 
   socket.emit('newChannelMessage', {
     channelId: currentChannel.value.id,
@@ -64,6 +79,19 @@ const addNewLine = () => {
 const attachFile = () => {
   // Placeholder for file attachment functionality
   console.log('File attachment clicked')
+}
+
+const testSocket = () => {
+  console.log('Socket connection status:', socket.connected)
+  console.log('Socket ID:', socket.id)
+  console.log('Current channel:', currentChannel.value)
+
+  if (socket.connected) {
+    console.log('Socket is connected!')
+  } else {
+    console.log('Socket is not connected, attempting to connect...')
+    connectSocket()
+  }
 }
 </script>
 
@@ -146,14 +174,16 @@ const attachFile = () => {
   flex-shrink: 0;
 }
 
-.attachment-button {
+.attachment-button,
+.test-button {
   width: 2.5rem;
   height: 2.5rem;
   color: #64748b;
   transition: all 0.2s ease;
 }
 
-.attachment-button:hover {
+.attachment-button:hover,
+.test-button:hover {
   color: #3b82f6;
   background-color: rgba(59, 130, 246, 0.1);
 }

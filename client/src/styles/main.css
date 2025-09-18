@@ -215,7 +215,6 @@ a:hover {
 .card-elevated {
   background: var(--color-surface-card);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-surface-border);
 }
 
@@ -226,13 +225,6 @@ a:hover {
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-lg);
   font-weight: 600;
-  transition: var(--transition-bounce);
-  box-shadow: var(--shadow-md);
-}
-
-.button-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
 }
 
 .button-secondary {
@@ -242,7 +234,6 @@ a:hover {
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-lg);
   font-weight: 500;
-  transition: var(--transition-base);
 }
 
 .button-secondary:hover {

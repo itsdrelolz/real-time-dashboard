@@ -45,7 +45,13 @@ export const useMessageStore = defineStore('message', () => {
    * @param {Message} newMessage
    */
   function addMessage(newMessage) {
-    messages.value.push(newMessage);
+    // Check if message already exists to prevent duplicates
+    const exists = messages.value.some(msg => msg.id === newMessage.id);
+    if (!exists) {
+      messages.value.push(newMessage);
+      // Sort messages by creation time to maintain order
+      messages.value.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
   }
 
   /**

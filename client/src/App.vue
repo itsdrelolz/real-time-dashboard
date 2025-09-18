@@ -34,11 +34,15 @@ const layoutComponent = computed(() => {
   return layouts[route.meta.layout];
 });
 
-onMounted(() => {
+onMounted(async () => {
   appStateStore.performHealthCheck();
   initializeSocketListeners();
-});
 
+  // Connect socket if user is already logged in
+  if (authStore.isLoggedIn && !socket.connected) {
+    await connectSocket();
+  }
+});
 
 watch(() => authStore.isLoggedIn, (isLoggedIn) => {
   if (isLoggedIn && !socket.connected) {

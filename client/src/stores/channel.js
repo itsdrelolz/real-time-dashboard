@@ -96,6 +96,29 @@ export const useChannelStore = defineStore('channel', () => {
   }
 
   /**
+   * Fetches all channels for a specific task.
+   * @param {number} taskId The ID of the task.
+   */
+  async function fetchChannelsForTask(taskId) {
+    if (!taskId) {
+      console.error('Task ID is required to fetch task channels.')
+      return
+    }
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await channelService.getChannelsForTask(taskId)
+      channels.value = response.channels
+    } catch (err) {
+      console.error(`Fetching channels for task ${taskId} failed: `, err)
+      error.value = err
+      channels.value = [] // Clear channels on error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
    * Clears all channel data from the store. Useful when switching projects.
    */
   function clearChannels() {
@@ -110,6 +133,7 @@ export const useChannelStore = defineStore('channel', () => {
     isLoading,
     error,
     fetchChannelsForProject,
+    fetchChannelsForTask,
     createChannelInCurrentProject,
     deleteChannel,
     clearChannels,

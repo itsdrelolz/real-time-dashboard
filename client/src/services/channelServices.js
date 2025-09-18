@@ -37,6 +37,20 @@ export function createChannel(projectId, channelData) {
 }
 
 /**
+ * Fetches all channels for a specific task.
+ * @param {number} taskId The ID of the task whose channels are to be fetched.
+ * @returns {Promise<{channels: Channel[]}>} An object containing an array of channels.
+ */
+export function getChannelsForTask(taskId) {
+  if (!taskId) {
+    throw new Error('Task ID is required to fetch task channels.')
+  }
+  // Calls the task-specific channel route: GET /api/projects/:projectId/tasks/:taskId/channels
+  // Note: This needs the projectId, but we'll need to get it from the task or pass it separately
+  return apiFetch(`tasks/${taskId}/channels`)
+}
+
+/**
  * Deletes a channel by its ID.
  * @param {number} channelId The ID of the channel to delete.
  * @returns {Promise<null>} A promise that resolves when the channel is deleted.
