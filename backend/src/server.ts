@@ -20,6 +20,16 @@ initializeSocketIO(io);
 
 
 const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () => {
+
+// Add error handling for server startup
+httpServer.on('error', (error: any) => {
+  console.error('❌ Server error:', error);
+  process.exit(1);
+});
+
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+  console.log(`🗄️  Database URL: ${process.env.DATABASE_URL ? 'set' : 'not set'}`);
 });

@@ -51,7 +51,12 @@ COPY --from=builder /usr/src/app/dist ./dist
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
+# Expose the port that Cloud Run will use
+EXPOSE 8080
 
+# Set default environment variables for Cloud Run
+ENV PORT=8080
+ENV NODE_ENV=production
 
 # Command to run the application.
 CMD ["pnpm", "run", "start"]
