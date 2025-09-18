@@ -20,9 +20,9 @@ import Splitter from 'primevue/splitter'
 import SplitterPanel from 'primevue/splitterpanel'
 import SplitButton from 'primevue/splitbutton'
 import Toolbar from 'primevue/toolbar'
-import { Avatar } from 'primevue'
-import { Skeleton } from 'primevue'
-import { Form } from '@primevue/forms'
+import Avatar from 'primevue/avatar'
+import Skeleton from 'primevue/skeleton'
+import Form from 'primevue/form'
 import Listbox from 'primevue/listbox'
 
 const app = createApp(App)
