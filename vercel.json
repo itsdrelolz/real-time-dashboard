@@ -2,5 +2,10 @@
   "buildCommand": "pnpm install && pnpm -w run build:client",
   "outputDirectory": "client/dist",
   "installCommand": "pnpm install",
-  "framework": "vite"
+  "framework": "vite",
+  "functions": {
+    "client/dist/**": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }
