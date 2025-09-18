@@ -12,7 +12,7 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 
 # Install all dependencies without running postinstall scripts
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
 
 # Copy the Prisma schema and generate the client
 COPY prisma ./prisma
@@ -38,7 +38,7 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 
 # Install only production dependencies to keep the image size small.
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+RUN pnpm install --no-frozen-lockfile --prod --ignore-scripts
 
 # Copy the Prisma schema and generate the client in production
 COPY prisma ./prisma
