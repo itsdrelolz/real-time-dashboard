@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { createTask, getTaskById, updateTask, getTasksByProjectId, getTasksByProfileId, getTaskWithDetails, deleteTask } from './task.service';
 import { createChannel } from '../channels/channel.service';
-import { authMiddleware } from '@/middleware/authMiddleware';
 import { AuthenticatedRequest } from '@/middleware/authMiddleware';
 
 
