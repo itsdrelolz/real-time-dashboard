@@ -16,12 +16,13 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
 
   const joinProjectRoom = async (projectId: number) => {
     try {
+      console.log(`User ${userId} attempting to join project room ${projectId}`);
       const project = await getProjectById(projectId);
       const isMember = project?.members.some(member => member.profileId === userId);
 
       if (isMember) {
         await socket.join(`project-${projectId}`);
-        console.log(`User ${userId} joined room for project ${projectId}`);
+        console.log(`User ${userId} successfully joined room for project ${projectId}`);
       } else {
         console.warn(`Attempt by user ${userId} to join unauthorized project room ${projectId}`);
       }
@@ -34,8 +35,12 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
     if (!data.content?.trim()) return;
 
     try {
+      console.log(`User ${userId} sending message to channel ${data.channelId}:`, data.content);
       const channel = await getChannelById(data.channelId);
-      if (!channel) return;
+      if (!channel) {
+        console.log(`Channel ${data.channelId} not found`);
+        return;
+      }
 
       const project = await getProjectById(channel.projectId);
       const isMember = project?.members.some(member => member.profileId === userId);
@@ -51,6 +56,7 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
         channelId: data.channelId,
       });
 
+      console.log(`Broadcasting message to project room project-${channel.projectId}:`, newMessage);
       io.to(`project-${channel.projectId}`).emit('messageCreated', newMessage);
 
     } catch (error) {

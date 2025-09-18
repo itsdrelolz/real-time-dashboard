@@ -10,17 +10,21 @@ export interface AuthenticatedSocket extends Socket {
 export const initializeSocketIO = (io: Server) => {
   io.use(async (socket: AuthenticatedSocket, next) => {
     const token = socket.handshake.auth.token;
+    console.log('Socket authentication attempt:', { token: !!token, socketId: socket.id });
 
     if (!token) {
+      console.log('Socket auth failed: No token provided');
       return next(new Error('Authentication error: No token provided.'));
     }
 
     try {
       const userProfile = await getUserFromToken(token);
       if (!userProfile) {
+        console.log('Socket auth failed: Invalid token');
         return next(new Error('Authentication error: Invalid token.'));
       }
       socket.user = userProfile;
+      console.log('Socket authenticated successfully:', userProfile.displayName);
       next();
     } catch (error) {
       console.error("Socket authentication failed:", error);

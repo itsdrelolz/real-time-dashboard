@@ -5,6 +5,7 @@ import {
   createChannel,
   updateChannel,
   deleteChannel,
+  getChannelsForTask,
 } from "./channel.service";
 import { AuthenticatedRequest } from "@/middleware/authMiddleware";
 import { getProjectById, getProjectOwnerId } from "@/api/projects/project.service";
@@ -158,6 +159,26 @@ export async function deleteChannelController(req: AuthenticatedRequest, res: Re
     return res.status(204).send();
   } catch (error) {
     console.error('Error deleting channel: ', error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getChannelsForTaskController(req: AuthenticatedRequest, res: Response) {
+  try {
+    const taskId = parseInt(req.params.taskId as string, 10);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    if (isNaN(taskId)) {
+      return res.status(400).json({ error: "Invalid Task ID." });
+    }
+
+    const channels = await getChannelsForTask(taskId);
+    return res.status(200).json({ channels });
+  } catch (error) {
+    console.error("Error retrieving task channels:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

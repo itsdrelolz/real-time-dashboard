@@ -26,6 +26,9 @@ export async function createMessage(data: { content: string; authorId: string; c
                 authorId: data.authorId,
                 channelId: data.channelId,
             },
+            include: {
+                author: true,
+            },
         });
     } catch (error) {
         console.error("Error creating message:", error);

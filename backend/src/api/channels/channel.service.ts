@@ -8,6 +8,7 @@ export async function createChannel(data: CreateChannelData): Promise<Channel> {
                 name: data.name,
                 description: data.description,
                 projectId: data.projectId,
+                taskId: data.taskId || null,
             },
         });
     } catch (error) {
@@ -26,6 +27,19 @@ export async function getAllChannelsForProject(projectId: number): Promise<Chann
     } catch (error) {
         console.error(`Error fetching channels for project ${projectId}:`, error);
         throw new Error("Failed to retrieve channels.");
+    }
+}
+
+export async function getChannelsForTask(taskId: number): Promise<Channel[]> {
+    try {
+        return await prisma.channel.findMany({
+            where: {
+                taskId: taskId,
+            },
+        });
+    } catch (error) {
+        console.error(`Error fetching channels for task ${taskId}:`, error);
+        throw new Error("Failed to retrieve task channels.");
     }
 }
 
