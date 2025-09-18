@@ -4,8 +4,9 @@
   "private": true,
   "description": "A monorepo for the team-task project",
   "scripts": {
-    "dev:backend": "npm run dev --workspace=backend",
-    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "pnpm --filter backend run dev",
+    "dev:frontend": "pnpm --filter client run dev",
+    "build:client": "pnpm --filter client run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
