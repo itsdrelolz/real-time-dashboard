@@ -22,7 +22,6 @@ import SplitButton from 'primevue/splitbutton'
 import Toolbar from 'primevue/toolbar'
 import Avatar from 'primevue/avatar'
 import Skeleton from 'primevue/skeleton'
-import Form from 'primevue/form'
 import Listbox from 'primevue/listbox'
 
 const app = createApp(App)
@@ -52,7 +51,6 @@ app.component('SplitButton', SplitButton)
 app.component('Toolbar', Toolbar)
 app.component('Avatar', Avatar)
 app.component('Skeleton', Skeleton)
-app.component('Form', Form)
 app.component('Listbox', Listbox)
 
 app.mount('#app')
