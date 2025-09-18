@@ -11,10 +11,10 @@ RUN npm install -g pnpm
 # Copy package manifest and lockfile for dependency installation.
 COPY package.json pnpm-lock.yaml ./
 
-# Install all dependencies (including development dependencies).
-RUN pnpm install --frozen-lockfile
+# Install all dependencies without running postinstall scripts
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Copy the Prisma schema and generate the client.
+# Copy the Prisma schema and generate the client
 COPY prisma ./prisma
 RUN pnpm exec prisma generate
 
@@ -40,11 +40,12 @@ COPY package.json pnpm-lock.yaml ./
 # Install only production dependencies to keep the image size small.
 RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
+# Copy the Prisma schema and generate the client in production
+COPY prisma ./prisma
+RUN pnpm exec prisma generate
+
 # Copy the built application code from the builder stage.
 COPY --from=builder /usr/src/app/dist ./dist
-
-# Copy the generated Prisma client from the builder stage.
-COPY --from=builder /usr/src/app/node_modules/.pnpm/@prisma+client@* ./node_modules/.pnpm/@prisma+client@*
 
 # Run as a non-root user for security best practices.
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
