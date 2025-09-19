@@ -1,10 +1,10 @@
 import { Response } from 'express';
 import { createTask, getTaskById, updateTask, getTasksByProjectId, getTasksByProfileId, getTaskWithDetails, deleteTask } from './task.service';
 import { createChannel } from '../channels/channel.service';
-import { AuthenticatedRequest } from '@/middleware/authMiddleware';
+import { AuthenticatedRequest } from '../../middleware/authMiddleware';
 
 
-// Create a new task
+
 export async function createTaskController(req: AuthenticatedRequest, res: Response) {
   try {
     const { projectId } = req.params as { projectId: string };

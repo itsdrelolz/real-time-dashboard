@@ -4,7 +4,7 @@ dotenv.config();
 import app from "./api/app";
 import { Server } from 'socket.io'
 import { createServer } from 'node:http'
-import {initializeSocketIO} from "@/sockets";
+import {initializeSocketIO} from "./sockets";
 const httpServer = createServer(app)
 
 const io = new Server(httpServer, {
@@ -28,8 +28,8 @@ httpServer.on('error', (error: any) => {
 });
 
 httpServer.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
-  console.log(`🗄️  Database URL: ${process.env.DATABASE_URL ? 'set' : 'not set'}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+  console.log(`Database URL: ${process.env.DATABASE_URL ? 'set' : 'not set'}`);
 });

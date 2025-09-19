@@ -1,8 +1,8 @@
 
 import { Server } from "socket.io";
-import { getProjectById } from "@/api/projects/project.service";
-import { createMessage } from "@/api/messages/message.service";
-import { getChannelById } from "@/api/channels/channel.service";
+import { getProjectById } from "../api/projects/project.service";
+import { createMessage } from "../api/messages/message.service";
+import { getChannelById } from "../api/channels/channel.service";
 import type { AuthenticatedSocket } from "./index"; // Import the custom socket type
 
 export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket) {
