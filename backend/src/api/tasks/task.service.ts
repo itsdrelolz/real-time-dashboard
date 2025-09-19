@@ -1,5 +1,5 @@
 import prisma from "../../utils/prismaClient";
-import type { Task, CreateTaskData, TaskWithDetails } from "@/types";
+import type { Task, CreateTaskData, TaskWithDetails } from "../../types";
 
 
 export async function createTask(data: CreateTaskData): Promise<Task> {

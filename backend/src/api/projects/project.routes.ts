@@ -1,12 +1,12 @@
 import { Router } from "express";
 import * as projectController from "./project.controller";
-import { authMiddleware } from "@/middleware/authMiddleware";
-import { validateNumericParams } from "@/middleware/validationMiddleware";
+import { authMiddleware } from "../../middleware/authMiddleware";
+import { validateNumericParams } from "../../middleware/validationMiddleware";
 import {
   getAllChannelsForProjectController,
   createChannelController
-} from "@/api/channels/channel.controller";
-import channelRouter from "@/api/channels/channel.routes";
+} from "../channels/channel.controller";
+import channelRouter from "../channels/channel.routes";
 
 const router: Router = Router();
 router.use(authMiddleware);

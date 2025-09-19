@@ -1,5 +1,5 @@
-import prisma from "@/utils/prismaClient";
-import type { Channel, CreateChannelData } from "@/types";
+import prisma from "../../utils/prismaClient";
+import type { Channel, CreateChannelData } from "../../types";
 
 export async function createChannel(data: CreateChannelData): Promise<Channel> {
     try {

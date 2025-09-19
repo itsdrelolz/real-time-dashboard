@@ -1,8 +1,8 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "@/middleware/authMiddleware";
-import { getMessagesForChannel } from "@/api/messages/message.service";
-import { getChannelById } from "@/api/channels/channel.service"; // <-- Import channel service
-import { getProjectById } from "@/api/projects/project.service"; // <-- Import project service
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
+import { getMessagesForChannel } from "./message.service";
+import { getChannelById } from "../channels/channel.service"; // <-- Import channel service
+import { getProjectById } from "../projects/project.service"; // <-- Import project service
 
 export async function getMessagesForChannelController(req: AuthenticatedRequest, res: Response) {
     try {

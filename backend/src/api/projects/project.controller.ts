@@ -11,7 +11,7 @@ import {
     getProjectOwnerId,
 } from "./project.service";
 
-import { AuthenticatedRequest } from "@/middleware/authMiddleware";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 
 export async function createProjectController(req: AuthenticatedRequest, res: Response) {
     try {

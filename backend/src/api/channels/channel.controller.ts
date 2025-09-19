@@ -7,8 +7,8 @@ import {
   deleteChannel,
   getChannelsForTask,
 } from "./channel.service";
-import { AuthenticatedRequest } from "@/middleware/authMiddleware";
-import { getProjectById, getProjectOwnerId } from "@/api/projects/project.service";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
+import { getProjectById, getProjectOwnerId } from "../projects/project.service";
 
 export async function getAllChannelsForProjectController(req: AuthenticatedRequest, res: Response) {
   try {

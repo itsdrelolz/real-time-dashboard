@@ -8,7 +8,7 @@ import type {
     ProjectMemberProfile,
     ProjectSummaryPayload,
     UpdateProjectDetailsData,
-} from "@/types";
+} from "../../types";
 
 
 export async function createProject(data: CreateProjectData): Promise<Project> {

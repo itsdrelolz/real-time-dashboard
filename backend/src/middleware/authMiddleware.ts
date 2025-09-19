@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getUserFromToken } from "@/api/auth/auth.service";
+import { getUserFromToken } from "../api/auth/auth.service";
 
 export interface AuthenticatedRequest extends Request {
   user?: Awaited<ReturnType<typeof getUserFromToken>>;

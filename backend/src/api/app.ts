@@ -4,11 +4,11 @@ dotenv.config();
 import express, { Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
-import { default as authRouter } from "./auth/auth.routes.js";
-import { default as projectRouter } from "./projects/project.routes.js";
-import { default as taskRouter } from "./tasks/task.routes.js";
+import { default as authRouter } from "./auth/auth.routes";
+import { default as projectRouter } from "./projects/project.routes";
+import { default as taskRouter } from "./tasks/task.routes";
 import helmet from "helmet";
-import { errorHandler } from "../middleware/errorHandler.js";
+import { errorHandler } from "../middleware/errorHandler";
 
 const app: Application = express();
 app.use(helmet());

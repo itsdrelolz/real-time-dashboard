@@ -1,7 +1,7 @@
 import prisma from "../../utils/prismaClient";
 import {supabase} from "../supabaseServer";
-import type {AuthResponse, LoginParams, SignupParams,} from "@/types/auth.types";
-import type {Profile} from "@/types/profile.types";
+import type {AuthResponse, LoginParams, SignupParams,} from "../../types/auth.types";
+import type {Profile} from "../../types/profile.types";
 
 export async function signupUser(params: SignupParams): Promise<AuthResponse> {
   const { email, password, displayName, firstName, lastName } = params;

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as messageController from "./message.controller";
-import { authMiddleware } from "@/middleware/authMiddleware";
+import { authMiddleware } from "../../middleware/authMiddleware";
 
 
 const router: Router = Router({ mergeParams: true });

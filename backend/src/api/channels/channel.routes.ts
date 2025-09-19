@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as channelController from "./channel.controller";
-import { authMiddleware } from "@/middleware/authMiddleware";
-import { validateNumericParams } from "@/middleware/validationMiddleware";
+import { authMiddleware } from "../../middleware/authMiddleware";
+import { validateNumericParams } from "../../middleware/validationMiddleware";
 import messageRouter from "../messages/message.routes"; 
 
 const router: Router = Router({ mergeParams: true });
