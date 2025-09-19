@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import app from "./api/app.js";
+import app from "./api/app";
 import { Server } from 'socket.io'
 import { createServer } from 'node:http'
-import {initializeSocketIO} from "./sockets/index.js";
+import {initializeSocketIO} from "@/sockets";
 const httpServer = createServer(app)
 
 const io = new Server(httpServer, {
@@ -27,7 +27,7 @@ httpServer.on('error', (error: any) => {
   process.exit(1);
 });
 
-httpServer.listen(PORT, () => {
+httpServer.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
