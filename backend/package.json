@@ -10,7 +10,7 @@
     "dev": "tsx watch src/server.ts",
     "postinstall": "prisma generate",
     "pretest": "prisma generate",
-    "lint": "pnpm dlx oxlint --type-aware",
+    "lint": "npx oxlint --type-aware",
     "lint:fix": "eslint . --fix",
     "test": "jest"
   },
