@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "Backend service for the project",
   "main": "dist/server.js",
-  "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node -r tsconfig-paths/register dist/server.js",
     "dev": "tsx watch src/server.ts",
     "postinstall": "prisma generate",
     "pretest": "prisma generate",

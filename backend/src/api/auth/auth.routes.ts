@@ -4,9 +4,9 @@ import {
   signinController,
   getProfileController,
   signOutController,
-} from "./auth.controller";
-import { limiter } from "@/middleware/rateLimit";
-import { authMiddleware } from "@/middleware/authMiddleware";
+} from "./auth.controller.js";
+import { limiter } from "../../middleware/rateLimit.js";
+import { authMiddleware } from "../../middleware/authMiddleware.js";
 const router: Router = Router();
 
 router.post("/register", signupController);

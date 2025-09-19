@@ -1,9 +1,9 @@
 
 import { Server } from "socket.io";
-import { getProjectById } from "@/api/projects/project.service";
-import { createMessage } from "@/api/messages/message.service";
-import { getChannelById } from "@/api/channels/channel.service";
-import type { AuthenticatedSocket } from "./index"; // Import the custom socket type
+import { getProjectById } from "../api/projects/project.service.js";
+import { createMessage } from "../api/messages/message.service.js";
+import { getChannelById } from "../api/channels/channel.service.js";
+import type { AuthenticatedSocket } from "./index.js"; // Import the custom socket type
 
 export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket) {
   const userId = socket.user?.id;

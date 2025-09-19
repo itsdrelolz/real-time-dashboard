@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
-import { registerMessageHandlers } from './messageHandlers';
-import { getUserFromToken } from '@/api/auth/auth.service';
-import type { Profile } from '@/types';
+import { registerMessageHandlers } from './messageHandlers.js';
+import { getUserFromToken } from '../api/auth/auth.service.js';
+import type { Profile } from '../types/index.js';
 
 export interface AuthenticatedSocket extends Socket {
   user?: Profile | null;

@@ -1,7 +1,7 @@
 import { signupUser, signinUser, signOutUser } from "./auth.service";
 import { Request, Response } from "express";
-import { isSupabaseAuthError } from "@/types/error.types";
-import { AuthenticatedRequest } from "@/middleware/authMiddleware";
+import { isSupabaseAuthError } from "../../types/error.types";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 
 export async function signupController(req: Request, res: Response) {
   try {

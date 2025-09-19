@@ -22,8 +22,8 @@
     "noUncheckedIndexedAccess": true,
 
     /* Module Settings */
-    "moduleResolution": "Bundler",
-    "module": "ESNext",
+    "moduleResolution": "Node",
+    "module": "CommonJS",
 
     /* Library and Declaration Files */
     "lib": ["esnext"],
