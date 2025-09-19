@@ -3,9 +3,16 @@ import { registerMessageHandlers } from './messageHandlers';
 import { getUserFromToken } from '../api/auth/auth.service';
 import type { Profile } from '../types';
 
+
+
 export interface AuthenticatedSocket extends Socket {
   user?: Profile | null;
 }
+
+/*
+* This function is used to initialize the socket.io server.
+* It is used to initialize the socket.io server.
+*/
 
 export const initializeSocketIO = (io: Server) => {
   io.use(async (socket: AuthenticatedSocket, next) => {

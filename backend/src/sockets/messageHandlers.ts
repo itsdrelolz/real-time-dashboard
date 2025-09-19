@@ -5,6 +5,17 @@ import { createMessage } from "../api/messages/message.service";
 import { getChannelById } from "../api/channels/channel.service";
 import type { AuthenticatedSocket } from "./index"; // Import the custom socket type
 
+
+/*
+* This function registers the message handlers for the socket.
+* It is used to handle the messages for the socket.
+* 
+
+
+
+
+*/
+
 export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket) {
   const userId = socket.user?.id;
 
@@ -13,6 +24,11 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
     socket.disconnect();
     return;
   }
+
+  /*
+  * This function is used to join the project room for the socket.
+  * It is used to join the project room for the socket.
+  */
 
   const joinProjectRoom = async (projectId: number) => {
     try {
@@ -30,6 +46,11 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
       console.error(`Error joining project room for user ${userId}:`, error);
     }
   };
+
+  /*
+  * This function is used to handle the new channel message for the socket.
+  * It is used to create new messages for the socket.
+  */
 
   const handleNewChannelMessage = async (data: { channelId: number; content: string }) => {
     if (!data.content?.trim()) return;
