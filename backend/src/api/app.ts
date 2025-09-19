@@ -17,6 +17,7 @@ const corsOptions = {
     origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PATCH", "DELETE"],
     optionsSuccessStatus: 200,
+    credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -25,6 +26,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 app.get("/api/health", (_req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
+app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok" });
 });
 
