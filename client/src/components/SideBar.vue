@@ -329,7 +329,7 @@ watch(
   text-align: center;
 }
 
-/* Loading and Error States */
+
 .loading-state,
 .error-state {
   display: flex;
@@ -362,7 +362,7 @@ watch(
   font-size: 0.875rem;
 }
 
-/* Tab Switcher */
+
 .tab-switcher {
   display: flex;
   background: rgba(255, 255, 255, 0.05);
@@ -616,7 +616,7 @@ watch(
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Empty States */
+
 .empty-channels,
 .empty-tasks,
 .empty-connections {
@@ -666,7 +666,7 @@ watch(
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
 
-/* Connections View */
+
 .connections-view {
   display: flex;
   flex-direction: column;
@@ -728,17 +728,10 @@ watch(
   background: rgba(59, 130, 246, 0.5);
 }
 
-/* Animations */
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
-/* Responsive Design */
+
+
+
 @media (max-width: 768px) {
   .nav-container {
     margin: 0.25rem;
