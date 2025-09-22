@@ -1,54 +1,85 @@
-# Team Task Management Dashboard
+Team Task Management Dashboard
 
-A real-time collaborative task management application built with Vue.js frontend and Node.js backend, featuring WebSocket communication and cloud deployment capabilities.
+A real-time, reliable collaborative platform inspired by Slack and Discord. This application is built with a modern tech stack designed to ensure a seamless user experience through a live, interactive interface and guaranteed message delivery, even for offline users.
 
-## App Features Checklist
+Architectural Goals
 
-### Core Features to Implement
+This project is built on three core systems working together to create a sophisticated real-time application:
 
-- [ ] **User Social Features**: Implement the ability for users to connect with friends and add them to projects.
+    Core REST API: The foundational layer for all data operations (CRUD), providing a reliable "source of truth."
 
-- [ ] **Real-time Communication**: Create channels and messaging for project teams.
+    Real-Time Layer: A WebSocket server that manages online presence and broadcasts live updates to all connected clients.
 
-- [ ] **Task Naming Fix**: Correct the task implementation to ensure unique names are assigned to new tasks.
+    Asynchronous Notification System: A safety net using a database-backed inbox and push notifications (FCM) to ensure no messages or updates are ever missed.
 
-- [ ] **Image Uploading**: Add functionality for uploading images to messages and for user profile pictures.
+App Features & Roadmap
 
-- [ ] **Dark Mode**: Introduce a dark mode option for the user interface.
+Foundation: Core API & Data Model
 
-- [ ] **Test & CI/CD**: Focus on building a robust test suite and a continuous integration/continuous deployment pipeline.
+    [ ] Project & Task CRUD: Full create, read, update, and delete functionality for projects and their associated tasks.
 
-- [ ] **Frontend Optimization**: Utilize Edge Functions to improve frontend performance.
+    [ ] User Authentication & Profiles: Secure user registration and login, with customizable user profiles.
 
-### Suggested Additional Features
+    [ ] Social System: Ability for users to find and connect with others to collaborate on projects.
 
-- [ ] **Search & Filtering**: Add search and filtering options for tasks, projects, and users.
+    [ ] Image Uploading: Support for uploading user avatars and attaching images to messages.
 
-- [ ] **Notifications**: Implement real-time notifications for new messages, task assignments, and project updates.
+The Live Experience: Real-Time Layer
 
-- [ ] **Customizable Profiles**: Allow users to personalize their profiles with a bio or other information.
+    [ ] Online Presence Indicators: Show which users are currently online, offline, or idle.
 
-- [ ] **Task Dependencies**: Add the ability to create dependencies between tasks.
+    [ ] Live Channel Messaging: Instantaneous message delivery in project channels for all online users.
 
-## Technology Stack
+    [ ] Real-Time UI Updates: Instantly reflect changes like new tasks or status updates without a page refresh.
 
-### Backend
-- Node.js with Express
-- Prisma ORM with PostgreSQL
-- WebSocket for real-time communication
-- Supabase for authentication
-- Docker for containerization
+Guaranteed Delivery: Asynchronous Notifications
 
-### Frontend
-- Vue.js 3 with Composition API
-- Pinia for state management
-- WebSocket client for real-time updates
+    [ ] Offline Inbox System: Store all notifications (new messages, task assignments) in the database for users who are offline.
 
-### DevOps & Cloud
-- GitHub Actions for CI/CD
-- Docker for containerization
-- Google Cloud Run (current)
-- AWS in the Future?? 
+    [ ] Fetch on Reconnect: Deliver all missed notifications to a user the moment they come back online.
 
-## Getting Started
+    [ ] FCM Push Notifications: Send push notifications to alert users of important, direct updates when the app is closed.
 
+User Experience & Polish
+
+    [ ] Dark Mode: A sleek dark mode option for the user interface.
+
+    [ ] Search & Filtering: Implement search functionality for tasks, projects, and messages.
+
+    [ ] Robust Testing & CI/CD: Build out a comprehensive test suite and a fully automated CI/CD pipeline for deployments.
+
+Technology Stack
+
+The stack is chosen to be scalable, modern, and efficient.
+
+Backend
+
+    Framework: Node.js with Express
+
+    Real-Time: ws library for WebSocket communication
+
+    Database: PostgreSQL
+
+    ORM: Prisma
+
+    Push Notifications: Firebase Admin SDK (FCM)
+
+Frontend
+
+    Framework: Vue.js 3 (Composition API)
+
+    State Management: Pinia
+
+    Real-Time Client: WebSocket API
+
+    Push Notifications: Firebase Client SDK
+
+DevOps & Cloud
+
+    Containerization: Docker
+
+    CI/CD: GitHub Actions
+
+    Frontend Deployment: Vercel
+
+    Backend Deployment: AWS Fargate
