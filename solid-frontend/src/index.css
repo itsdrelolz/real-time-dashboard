@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: InterVariable, sans-serif;
+  --font-sans--font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  --color-primary: oklch(0.4662 0.3083 265.24);
+  --color-primary-hover: oklch(0.4662 0.3083 265.24 / 0.8);
+  --color-primary-active: oklch(0.4662 0.3083 265.24 / 0.6);
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
