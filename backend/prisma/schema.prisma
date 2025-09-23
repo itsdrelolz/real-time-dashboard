@@ -26,8 +26,6 @@ model Profile {
   conversations   ConversationParticipant[]
   messages        Message[]
 
-  sentConnections     Connection[] @relation("SentConnections")
-  receivedConnections Connection[] @relation("ReceivedConnections")
 
   @@map("profiles")
 }
@@ -145,18 +143,6 @@ model Message {
 }
 
 
-model Connection {
-  requesterId String  @db.Uuid @map("requester_id")
-  requester   Profile @relation("SentConnections", fields: [requesterId], references: [id], onDelete: Cascade)
-
-  addresseeId String  @db.Uuid @map("addressee_id")
-  addressee   Profile @relation("ReceivedConnections", fields: [addresseeId], references: [id], onDelete: Cascade)
-
-  status      String @default("PENDING")
-
-  @@id([requesterId, addresseeId])
-  @@map("connections")
-}
 
 
 

@@ -23,6 +23,33 @@ export async function getChannelById(id: string): Promise<Channel | null> {
     try {
     return prisma.channel.findUnique({
         where: { id },
+        include: {
+            messages: {
+                include: {
+                    author: {
+                        select: {
+                            id: true,
+                            username: true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
+                },
+                orderBy: { createdAt: 'asc' }
+            },
+            tasks: {
+                include: {
+                    assignee: {
+                        select: {
+                            id: true,
+                            username: true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
+                }
+            }
+        }
     });
     } catch (error) {
         console.error("Error getting channel by id:", error);
@@ -53,5 +80,47 @@ export async function deleteChannel(id: string): Promise<void> {
     } catch (error) {
         console.error("Error deleting channel:", error);
         throw new Error("Failed to delete channel.");
+    }
+}
+
+export async function getChannelsByProjectId(projectId: string): Promise<Channel[]> {
+    try {
+        return prisma.channel.findMany({
+            where: { projectId },
+            include: {
+                messages: {
+                    take: 1,
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        author: {
+                            select: {
+                                id: true,
+                                username: true,
+                                firstName: true,
+                                lastName: true
+                            }
+                        }
+                    }
+                },
+                tasks: {
+                    take: 5,
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        assignee: {
+                            select: {
+                                id: true,
+                                username: true,
+                                firstName: true,
+                                lastName: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'asc' }
+        });
+    } catch (error) {
+        console.error("Error getting channels by project id:", error);
+        throw new Error("Failed to get channels by project id.");
     }
 }

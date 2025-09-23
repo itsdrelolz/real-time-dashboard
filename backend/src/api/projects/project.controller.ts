@@ -115,7 +115,7 @@ export async function deleteProjectController(req: AuthenticatedRequest, res: Re
             return res.status(401).json({ error: "Unauthorized" });
         }
         if (!projectId) {
-            return res.status(400).json({ error: "Project ID must be a valid number." });
+            return res.status(400).json({ error: "Project ID is required." });
         }
 
         const ownerId = await getProjectOwnerId(projectId);

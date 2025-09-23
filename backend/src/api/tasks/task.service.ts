@@ -9,6 +9,9 @@ export async function createTask(data: CreateTaskData): Promise<Task> {
                 title: data.title,
                 description: data.description,
                 channelId: data.channelId,
+                priority: data.priority,
+                status: data.status,
+                assigneeId: data.assigneeId,
             }
         });
     } catch (error) {

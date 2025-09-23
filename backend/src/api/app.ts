@@ -5,7 +5,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { default as projectRouter } from "./projects/project.routes";
-import { default as taskRouter } from "./tasks/task.routes";
+import { default as conversationRouter } from "./conversations/conversation.routes";
 import helmet from "helmet";
 import { errorHandler } from "../middleware/errorHandler";
 
@@ -30,7 +30,7 @@ app.get("/api/health", (_req, res) => {
 
 
 app.use("/api/projects", projectRouter);
-app.use("/api", taskRouter);
+app.use("/api/conversations", conversationRouter);
 app.get("/api", (_req, res) => {
     res.send("API is running");
 });

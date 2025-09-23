@@ -4,6 +4,7 @@ import {
   createChannel,
   updateChannel,
   deleteChannel,
+  getChannelsByProjectId,
 } from "./channel.service";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { getProjectById, getProjectOwnerId } from "../projects/project.service";
@@ -142,6 +143,38 @@ export async function deleteChannelController(req: AuthenticatedRequest, res: Re
     return res.status(204).send();
   } catch (error) {
     console.error('Error deleting channel: ', error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getAllChannelsForProjectController(req: AuthenticatedRequest, res: Response) {
+  try {
+    const projectId = req.params.projectId;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!projectId) {
+      return res.status(400).json({ error: "Project ID is required" });
+    }
+
+    // Verify user is a member of the project
+    const project = await getProjectById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const isMember = project.members.some(member => member.profileId === userId);
+    if (!isMember) {
+      return res.status(403).json({ error: "You are not a member of this project" });
+    }
+
+    const channels = await getChannelsByProjectId(projectId);
+    return res.status(200).json({ channels });
+  } catch (error) {
+    console.error('Error getting channels for project:', error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -12,12 +12,12 @@ const router: Router = Router();
 // All routes require authentication
 router.use(authMiddleware);
 
-// Channel-scoped task creation and listing should live under channels
-router.post('/channels/:channelId/tasks', createTaskController);
+// Task creation (channelId comes from parent route)
+router.post('/', createTaskController);
 
 // Task by id operations
-router.get('/tasks/:taskId', getTaskByIdController);
-router.put('/tasks/:taskId', updateTaskController);
-router.delete('/tasks/:taskId', deleteTaskController);
+router.get('/:taskId', getTaskByIdController);
+router.put('/:taskId', updateTaskController);
+router.delete('/:taskId', deleteTaskController);
 
 export default router;

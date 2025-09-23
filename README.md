@@ -66,9 +66,7 @@ Backend
 
 Frontend
 
-
     Framework: solid.js 3
-
 
     Real-Time Client: WebSocket API
 
