@@ -171,3 +171,8 @@ enum Priority {
    MEDIUM
    HIGH
 }
+
+enum ConnectionStatus {
+   PENDING
+   ACCEPTED
+}

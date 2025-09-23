@@ -4,7 +4,6 @@ dotenv.config();
 import express, { Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
-import { default as authRouter } from "./auth/auth.routes";
 import { default as projectRouter } from "./projects/project.routes";
 import { default as taskRouter } from "./tasks/task.routes";
 import helmet from "helmet";
@@ -29,11 +28,7 @@ app.get("/api/health", (_req, res) => {
     res.status(200).json({ status: "ok" });
 });
 
-app.get("/health", (_req, res) => {
-    res.status(200).json({ status: "ok" });
-});
 
-app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api", taskRouter);
 app.get("/api", (_req, res) => {
