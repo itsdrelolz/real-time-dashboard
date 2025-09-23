@@ -66,9 +66,14 @@ Backend
 
 Frontend
 
+<<<<<<< HEAD
     Framework: Vue.js 3 (Composition API)
 
     State Management: Pinia
+=======
+    Framework: solid.js 3
+
+>>>>>>> c433089 (changed schema)
 
     Real-Time Client: WebSocket API
 
@@ -82,4 +87,8 @@ DevOps & Cloud
 
     Frontend Deployment: Vercel
 
+<<<<<<< HEAD
     Backend Deployment: AWS Fargate
+=======
+    Backend Deployment: AWS Fargate
+>>>>>>> c433089 (changed schema)
