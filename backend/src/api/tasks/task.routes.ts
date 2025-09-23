@@ -4,9 +4,6 @@ import {
   createTaskController,
   getTaskByIdController,
   updateTaskController,
-  getTasksByProjectIdController,
-  getTasksByProfileIdController,
-  getTaskWithDetailsController,
   deleteTaskController,
 } from './task.controller';
 
@@ -15,17 +12,12 @@ const router: Router = Router();
 // All routes require authentication
 router.use(authMiddleware);
 
-// Task routes
-router.post('/projects/:projectId/tasks', createTaskController);
-router.get('/tasks/:id', getTaskByIdController);
-router.put('/tasks/:id', updateTaskController);
-router.delete('/tasks/:id', deleteTaskController);
-router.get('/tasks/:id/details', getTaskWithDetailsController);
+// Channel-scoped task creation and listing should live under channels
+router.post('/channels/:channelId/tasks', createTaskController);
 
-// Project-specific task routes
-router.get('/projects/:projectId/tasks', getTasksByProjectIdController);
-
-// Profile-specific task routes
-router.get('/profiles/:profileId/tasks', getTasksByProfileIdController);
+// Task by id operations
+router.get('/tasks/:taskId', getTaskByIdController);
+router.put('/tasks/:taskId', updateTaskController);
+router.delete('/tasks/:taskId', deleteTaskController);
 
 export default router;

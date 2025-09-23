@@ -1,87 +1,57 @@
 import prisma from "../../utils/prismaClient";
-import type { Channel, CreateChannelData } from "../../types";
+import type { Channel, CreateChannelData, UpdateChannelData } from "../../types/channel.types";
+
+
 
 export async function createChannel(data: CreateChannelData): Promise<Channel> {
     try {
-        return await prisma.channel.create({
-            data: {
-                name: data.name,
-                description: data.description,
-                projectId: data.projectId,
-                taskId: data.taskId || null,
-            },
-        });
+    return prisma.channel.create({
+        data: {
+            name: data.name,
+            topic: data.topic,
+            projectId: data.projectId,
+        }
+    });
     } catch (error) {
         console.error("Error creating channel:", error);
         throw new Error("Failed to create channel.");
     }
 }
 
-export async function getAllChannelsForProject(projectId: number): Promise<Channel[]> {
+
+export async function getChannelById(id: string): Promise<Channel | null> {
     try {
-        return await prisma.channel.findMany({
-            where: {
-                projectId: projectId,
-            },
-        });
+    return prisma.channel.findUnique({
+        where: { id },
+    });
     } catch (error) {
-        console.error(`Error fetching channels for project ${projectId}:`, error);
-        throw new Error("Failed to retrieve channels.");
+        console.error("Error getting channel by id:", error);
+        throw new Error("Failed to get channel by id.");
     }
 }
 
-export async function getChannelsForTask(taskId: number): Promise<Channel[]> {
+export async function updateChannel(id: string, data: UpdateChannelData): Promise<Channel> {
     try {
-        return await prisma.channel.findMany({
-            where: {
-                taskId: taskId,
-            },
-        });
+    return prisma.channel.update({
+        where: { id },
+        data: { 
+            name: data.name,
+            topic: data.topic,
+        },
+    });
     } catch (error) {
-        console.error(`Error fetching channels for task ${taskId}:`, error);
-        throw new Error("Failed to retrieve task channels.");
-    }
-}
-
-export async function getChannelById(channelId: number): Promise<Channel | null> {
-    try {
-        return await prisma.channel.findUnique({
-            where: {
-                id: channelId,
-            },
-        });
-    } catch (error) {
-        console.error(`Error fetching channel with ID ${channelId}:`, error);
-        throw new Error("Failed to retrieve channel details.");
-    }
-}
-
-export async function updateChannel(channelId: number, data: Partial<CreateChannelData>): Promise<Channel> {
-    try {
-        return await prisma.channel.update({
-            where: {
-                id: channelId,
-            },
-            data: {
-                name: data.name,
-                description: data.description,
-            },
-        });
-    } catch (error) {
-        console.error(`Error updating channel ${channelId}:`, error);
+        console.error("Error updating channel:", error);
         throw new Error("Failed to update channel.");
     }
 }
 
-export async function deleteChannel(channelId: number): Promise<void> {
+export async function deleteChannel(id: string): Promise<void> {
     try {
-        await prisma.channel.delete({
-            where: {
-                id: channelId,
-            },
-        });
+    await prisma.channel.delete({
+        where: { id },
+    });
     } catch (error) {
-        console.error(`Error deleting channel ${channelId}:`, error);
+        console.error("Error deleting channel:", error);
         throw new Error("Failed to delete channel.");
     }
 }

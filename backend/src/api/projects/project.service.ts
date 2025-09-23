@@ -5,9 +5,6 @@ import type {
     DetailedProjectPayload,
     Project,
     ProjectMember,
-    ProjectMemberProfile,
-    ProjectSummaryPayload,
-    UpdateProjectDetailsData,
 } from "../../types";
 
 
@@ -18,7 +15,7 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
                 name: data.name,
                 ownerId: data.ownerId,
                 channels: {
-                    create: [{ name: "general", description: "General project discussions" }],
+                    create: [{ name: "general", topic: "General project discussions" }],
                 },
                 members: {
                     create: [{ profileId: data.ownerId }],
@@ -33,21 +30,22 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
 
 
 export async function getProjectById(
-    projectId: number,
+    projectId: string,
 ): Promise<DetailedProjectPayload | null> {
     try {
         return await prisma.project.findUnique({
             where: { id: projectId },
             include: {
-                owner: { select: { id: true, displayName: true } },
+                owner: { select: { id: true, username: true, firstName: true, lastName: true } },
                 members: {
                     include: {
-                        profile: { select: { id: true, displayName: true } },
+                        profile: { select: { id: true, username: true, firstName: true, lastName: true } },
                     },
                 },
-                tasks: true,
                 channels: {
-                    select: { id: true, name: true, taskId: true },
+                    include: {
+                        tasks: true,
+                    },
                 },
             },
         });
@@ -60,17 +58,19 @@ export async function getProjectById(
 
 export async function getProjectSummariesForUser(
     userId: string,
-): Promise<ProjectSummaryPayload[]> {
+): Promise<Project[]> {
     try {
         return await prisma.project.findMany({
             where: {
                 members: {
                     some: { profileId: userId },
                 },
+
             },
             select: {
                 id: true,
                 name: true,
+                ownerId: true,
             },
         });
     } catch (error) {
@@ -81,8 +81,8 @@ export async function getProjectSummariesForUser(
 
 
 export async function updateProjectDetails(
-    projectId: number,
-    data: UpdateProjectDetailsData,
+    projectId: string,
+    data: Partial<Pick<Project, "name">>,
 ): Promise<Project> {
     try {
         return await prisma.project.update({
@@ -98,7 +98,7 @@ export async function updateProjectDetails(
 }
 
 
-export async function deleteProject(projectId: number): Promise<void> {
+export async function deleteProject(projectId: string): Promise<void> {
     try {
         await prisma.project.delete({
             where: { id: projectId },
@@ -128,7 +128,7 @@ export async function addMemberToProject(
 
 
 export async function removeMemberFromProject(
-    projectId: number,
+    projectId: string,
     profileId: string,
 ): Promise<void> {
     try {
@@ -148,8 +148,8 @@ export async function removeMemberFromProject(
 
 
 export async function getProjectMembers(
-    projectId: number,
-): Promise<ProjectMemberProfile[]> {
+    projectId: string,
+): Promise<ProjectMember[]> {
     try {
         return await prisma.projectMember.findMany({
             where: {
@@ -159,7 +159,9 @@ export async function getProjectMembers(
                 profile: {
                     select: {
                         id: true,
-                        displayName: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
                     },
                 },
             },
@@ -171,7 +173,7 @@ export async function getProjectMembers(
 }
 
 
-export async function getProjectOwnerId(projectId: number): Promise<string | null> {
+export async function getProjectOwnerId(projectId: string): Promise<string | null> {
     try {
         const project = await prisma.project.findUnique({
             where: { id: projectId },

@@ -35,13 +35,13 @@ export async function createProjectController(req: AuthenticatedRequest, res: Re
 
 export async function getProjectByIdController(req: AuthenticatedRequest, res: Response) {
     try {
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = req.params.projectId;
         const userId = req.user?.id;
 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        if (isNaN(projectId)) {
+        if (!projectId) {
             return res.status(400).json({ error: "Invalid Project ID." });
         }
 
@@ -79,14 +79,14 @@ export async function getAllUserProjectsController(req: AuthenticatedRequest, re
 
 export async function updateProjectController(req: AuthenticatedRequest, res: Response) {
     try {
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = req.params.projectId;
         const userId = req.user?.id;
         const { name } = req.body;
 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        if (isNaN(projectId)) {
+        if (!projectId) {
             return res.status(400).json({ error: "Invalid project ID." });
         }
         if (!name || typeof name !== "string" || name.trim() === "") {
@@ -108,13 +108,13 @@ export async function updateProjectController(req: AuthenticatedRequest, res: Re
 
 export async function deleteProjectController(req: AuthenticatedRequest, res: Response) {
     try {
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = req.params.projectId;
         const userId = req.user?.id;
 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        if (isNaN(projectId)) {
+        if (!projectId) {
             return res.status(400).json({ error: "Project ID must be a valid number." });
         }
 
@@ -133,7 +133,10 @@ export async function deleteProjectController(req: AuthenticatedRequest, res: Re
 
 export async function getProjectMembersController(req: AuthenticatedRequest, res: Response) {
     try {
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = req.params.projectId;
+        if (!projectId) {
+            return res.status(400).json({ error: "Invalid project ID." });
+        }
         const members = await getProjectMembers(projectId);
         return res.status(200).json({ members });
     } catch (error) {
@@ -144,14 +147,14 @@ export async function getProjectMembersController(req: AuthenticatedRequest, res
 
 export async function addProjectMembersController(req: AuthenticatedRequest, res: Response) {
     try {
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = req.params.projectId;
         const userId = req.user?.id;
         const { profileId } = req.body;
 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        if (isNaN(projectId) || !profileId) {
+        if (!projectId || !profileId) {
             return res.status(400).json({ error: "Invalid project ID or missing profile ID." });
         }
 
@@ -170,24 +173,22 @@ export async function addProjectMembersController(req: AuthenticatedRequest, res
 
 export async function removeMemberFromProjectController(req: AuthenticatedRequest, res: Response) {
     try {
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = req.params.projectId;
         const profileIdToRemove = req.params.profileId;
         const userId = req.user?.id;
 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        if (isNaN(projectId) || !profileIdToRemove) {
+        if (!projectId || !profileIdToRemove) {
             return res.status(400).json({ error: "Invalid project or profile ID." });
         }
 
-        // Authorization: Only the project owner can remove members
         const ownerId = await getProjectOwnerId(projectId);
         if (ownerId !== userId) {
             return res.status(403).json({ error: "Forbidden: Only the project owner can remove members." });
         }
 
-        // Prevent owner from removing themselves
         if (ownerId === profileIdToRemove) {
             return res.status(400).json({ error: "Project owner cannot be removed." });
         }

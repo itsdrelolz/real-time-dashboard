@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 3000;
 
 // Add error handling for server startup
 httpServer.on('error', (error: any) => {
-  console.error('❌ Server error:', error);
+  console.error('Server error:', error);
   process.exit(1);
 });
 

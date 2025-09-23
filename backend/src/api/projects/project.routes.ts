@@ -1,11 +1,7 @@
-import { Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import * as projectController from "./project.controller";
 import { authMiddleware } from "../../middleware/authMiddleware";
-import { validateNumericParams } from "../../middleware/validationMiddleware";
-import {
-  getAllChannelsForProjectController,
-  createChannelController
-} from "../channels/channel.controller";
+// numeric param validation removed; ids are UUID strings
 import channelRouter from "../channels/channel.routes";
 
 const router: Router = Router();
@@ -15,7 +11,7 @@ router.get("/", projectController.getAllUserProjectsController);
 router.post("/", projectController.createProjectController);
 
 
-const projectIdValidator = validateNumericParams("projectId");
+const projectIdValidator = ((req: Request, res: Response, next: NextFunction) => next());
 
 router.get("/:projectId", projectIdValidator, projectController.getProjectByIdController);
 router.patch("/:projectId", projectIdValidator, projectController.updateProjectController);
@@ -29,17 +25,7 @@ router.post("/:projectId/members", projectIdValidator, projectController.addProj
 router.delete("/:projectId/members/:profileId", projectIdValidator, projectController.removeMemberFromProjectController);
 
 
-router.get(
-  "/:projectId/channels",
-  projectIdValidator,
-  getAllChannelsForProjectController,
-);
-
-router.post(
-  "/:projectId/channels",
-  projectIdValidator,
-  createChannelController
-);
+// channel-specific routes are delegated to channelRouter above
 
 
 export default router;

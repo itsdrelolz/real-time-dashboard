@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import type {
   Project as PrismaProject,
   ProjectMember as PrismaProjectMember,
@@ -22,21 +22,24 @@ export type UpdateProjectDetailsData = Partial<Pick<Project, "name">>;
 export type ProjectSummaryPayload = Pick<Project, "id" | "name">;
 
 const detailedProjectInclude = {
-  owner: { select: { id: true, displayName: true } },
+  owner: {
+    select: { id: true, username: true, firstName: true, lastName: true },
+  },
   members: {
     include: {
-      profile: { select: { id: true, displayName: true } },
+      profile: {
+        select: { id: true, username: true, firstName: true, lastName: true },
+      },
     },
   },
-  tasks: true,
+
   channels: {
-    select: {
-      id: true,
-      name: true,
-      taskId: true,
+    include: {
+      tasks: true,
     },
   },
 };
+
 
 export type DetailedProjectPayload = Prisma.ProjectGetPayload<{
   include: typeof detailedProjectInclude;

@@ -4,13 +4,13 @@ import type {AuthResponse, LoginParams, SignupParams,} from "../../types/auth.ty
 import type {Profile} from "../../types/profile.types";
 
 export async function signupUser(params: SignupParams): Promise<AuthResponse> {
-  const { email, password, displayName, firstName, lastName } = params;
+  const { email, password, username, firstName, lastName } = params;
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { displayName, firstName, lastName },
+      data: { username, firstName, lastName },
     },
   });
 
@@ -27,9 +27,9 @@ export async function signupUser(params: SignupParams): Promise<AuthResponse> {
     data: {
       id: authData.user.id,
       email: authData.user.email,
-      displayName: displayName,
-      ...(firstName && { firstName }),
-      ...(lastName && { lastName }),
+      username: username,
+      firstName: firstName,
+      lastName: lastName,
     },
   });
 

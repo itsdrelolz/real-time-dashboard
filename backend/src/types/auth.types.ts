@@ -11,9 +11,9 @@ export type AuthResponse = {
 export type SignupParams = {
   email: string;
   password: string;
-  displayName: string;
-  firstName?: string;
-  lastName?: string;
+  username: string;
+  firstName: string;
+  lastName: string;
 };
 
 export type LoginParams = {
