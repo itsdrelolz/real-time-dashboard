@@ -25,7 +25,10 @@ supabase/
 
 # Firebase emulators and config
 firebase-debug.log
+firebase-debug.*.log
+firebase-debug.log*
 firebase.json 
 .firebaserc
+.firebase/
 storage.rules
 functions
