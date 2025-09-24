@@ -36,3 +36,12 @@ firebase-debug.log*
 !storage.rules
 !firestore.rules
 !firestore.indexes.json
+
+// google firebase emulators
+firebase-debug.log
+firebase.json
+.firebaserc
+storage.rules
+functions
+
+
