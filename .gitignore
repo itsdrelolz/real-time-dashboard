@@ -20,4 +20,12 @@ yarn-debug.log
 
 
 
-supabase/
+
+// google firebase emulators 
+firebase-debug.log
+firebase.json 
+.firebaserc
+storage.rules
+functions
+
+
