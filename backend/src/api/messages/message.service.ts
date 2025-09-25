@@ -5,17 +5,19 @@ import { canCreateDM } from "../conversations/conversation.service";
 /**
  * Create a message in a conversation (validates shared project membership)
  */
-export async function createConversationMessage(data: CreateConversationMessageData) {
+export async function createConversationMessage(
+  data: CreateConversationMessageData,
+) {
   // Get the conversation and its participants
   const conversation = await prisma.conversation.findUnique({
     where: { id: data.conversationId! },
     include: {
       participants: {
         include: {
-          profile: true
-        }
-      }
-    }
+          profile: true,
+        },
+      },
+    },
   });
 
   if (!conversation) {
@@ -24,7 +26,7 @@ export async function createConversationMessage(data: CreateConversationMessageD
 
   // Validate that the author is a participant
   const authorIsParticipant = conversation.participants.some(
-    (p: any) => p.profileId === data.authorId
+    (p: any) => p.profileId === data.authorId,
   );
 
   if (!authorIsParticipant) {
@@ -52,10 +54,10 @@ export async function createConversationMessage(data: CreateConversationMessageD
           id: true,
           username: true,
           firstName: true,
-          lastName: true
-        }
-      }
-    }
+          lastName: true,
+        },
+      },
+    },
   });
 }
 
@@ -71,11 +73,11 @@ export async function getMessagesForConversation(conversationId: string) {
           id: true,
           username: true,
           firstName: true,
-          lastName: true
-        }
-      }
+          lastName: true,
+        },
+      },
     },
-    orderBy: { createdAt: 'asc' }
+    orderBy: { createdAt: "asc" },
   });
 }
 
@@ -85,10 +87,10 @@ export async function getMessagesForConversation(conversationId: string) {
 export async function deleteMessage(messageId: string, authorId: string) {
   // Verify the message exists and belongs to the author
   const message = await prisma.message.findFirst({
-    where: { 
+    where: {
       id: messageId,
-      authorId: authorId
-    }
+      authorId: authorId,
+    },
   });
 
   if (!message) {
@@ -96,7 +98,6 @@ export async function deleteMessage(messageId: string, authorId: string) {
   }
 
   return await prisma.message.delete({
-    where: { id: messageId }
+    where: { id: messageId },
   });
 }
-

@@ -1,10 +1,8 @@
-
 import { Server } from "socket.io";
 import { getProjectById } from "../api/projects/project.service";
 import { createMessage } from "../api/messages/message.service";
 import { getChannelById } from "../api/channels/channel.service";
 import type { AuthenticatedSocket } from "./index"; // Import the custom socket type
-
 
 /*
 * This function registers the message handlers for the socket.
@@ -16,7 +14,10 @@ import type { AuthenticatedSocket } from "./index"; // Import the custom socket 
 
 */
 
-export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket) {
+export function registerMessageHandlers(
+  io: Server,
+  socket: AuthenticatedSocket,
+) {
   const userId = socket.user?.id;
 
   if (!userId) {
@@ -26,21 +27,29 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
   }
 
   /*
-  * This function is used to join the project room for the socket.
-  * It is used to join the project room for the socket.
-  */
+   * This function is used to join the project room for the socket.
+   * It is used to join the project room for the socket.
+   */
 
   const joinProjectRoom = async (projectId: number) => {
     try {
-      console.log(`User ${userId} attempting to join project room ${projectId}`);
+      console.log(
+        `User ${userId} attempting to join project room ${projectId}`,
+      );
       const project = await getProjectById(projectId);
-      const isMember = project?.members.some(member => member.profileId === userId);
+      const isMember = project?.members.some(
+        (member) => member.profileId === userId,
+      );
 
       if (isMember) {
         await socket.join(`project-${projectId}`);
-        console.log(`User ${userId} successfully joined room for project ${projectId}`);
+        console.log(
+          `User ${userId} successfully joined room for project ${projectId}`,
+        );
       } else {
-        console.warn(`Attempt by user ${userId} to join unauthorized project room ${projectId}`);
+        console.warn(
+          `Attempt by user ${userId} to join unauthorized project room ${projectId}`,
+        );
       }
     } catch (error) {
       console.error(`Error joining project room for user ${userId}:`, error);
@@ -48,15 +57,21 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
   };
 
   /*
-  * This function is used to handle the new channel message for the socket.
-  * It is used to create new messages for the socket.
-  */
+   * This function is used to handle the new channel message for the socket.
+   * It is used to create new messages for the socket.
+   */
 
-  const handleNewChannelMessage = async (data: { channelId: number; content: string }) => {
+  const handleNewChannelMessage = async (data: {
+    channelId: number;
+    content: string;
+  }) => {
     if (!data.content?.trim()) return;
 
     try {
-      console.log(`User ${userId} sending message to channel ${data.channelId}:`, data.content);
+      console.log(
+        `User ${userId} sending message to channel ${data.channelId}:`,
+        data.content,
+      );
       const channel = await getChannelById(data.channelId);
       if (!channel) {
         console.log(`Channel ${data.channelId} not found`);
@@ -64,10 +79,14 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
       }
 
       const project = await getProjectById(channel.projectId);
-      const isMember = project?.members.some(member => member.profileId === userId);
+      const isMember = project?.members.some(
+        (member) => member.profileId === userId,
+      );
 
       if (!isMember) {
-        console.warn(`Unauthorized message attempt by user ${userId} in channel ${data.channelId}`);
+        console.warn(
+          `Unauthorized message attempt by user ${userId} in channel ${data.channelId}`,
+        );
         return;
       }
 
@@ -77,12 +96,14 @@ export function registerMessageHandlers(io: Server, socket: AuthenticatedSocket)
         channelId: data.channelId,
       });
 
-      console.log(`Broadcasting message to project room project-${channel.projectId}:`, newMessage);
-      io.to(`project-${channel.projectId}`).emit('messageCreated', newMessage);
-
+      console.log(
+        `Broadcasting message to project room project-${channel.projectId}:`,
+        newMessage,
+      );
+      io.to(`project-${channel.projectId}`).emit("messageCreated", newMessage);
     } catch (error) {
       console.error("Error handling new message:", error);
-      socket.emit('messageError', { message: "Could not send message." });
+      socket.emit("messageError", { message: "Could not send message." });
     }
   };
 

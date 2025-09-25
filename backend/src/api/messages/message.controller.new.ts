@@ -1,12 +1,19 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
-import { createConversationMessage, getMessagesForConversation, deleteMessage } from "./message.service";
+import {
+  createConversationMessage,
+  getMessagesForConversation,
+  deleteMessage,
+} from "./message.service";
 import prisma from "../../utils/prismaClient";
 
 /**
  * Create a message in a conversation (DM)
  */
-export async function createConversationMessageController(req: AuthenticatedRequest, res: Response) {
+export async function createConversationMessageController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const { conversationId, content } = req.body;
     const authorId = req.user?.id;
@@ -16,7 +23,9 @@ export async function createConversationMessageController(req: AuthenticatedRequ
     }
 
     if (!conversationId || !content) {
-      return res.status(400).json({ error: "Conversation ID and content are required" });
+      return res
+        .status(400)
+        .json({ error: "Conversation ID and content are required" });
     }
 
     const message = await createConversationMessage({
@@ -28,16 +37,19 @@ export async function createConversationMessageController(req: AuthenticatedRequ
     return res.status(201).json({ message });
   } catch (error) {
     console.error("Error creating conversation message:", error);
-    
+
     if (error instanceof Error) {
-      if (error.message.includes("not found") || error.message.includes("not authorized")) {
+      if (
+        error.message.includes("not found") ||
+        error.message.includes("not authorized")
+      ) {
         return res.status(404).json({ error: error.message });
       }
       if (error.message.includes("must share at least one project")) {
         return res.status(403).json({ error: error.message });
       }
     }
-    
+
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -45,7 +57,10 @@ export async function createConversationMessageController(req: AuthenticatedRequ
 /**
  * Get messages for a conversation
  */
-export async function getConversationMessagesController(req: AuthenticatedRequest, res: Response) {
+export async function getConversationMessagesController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const { conversationId } = req.params;
     const userId = req.user?.id;
@@ -71,7 +86,10 @@ export async function getConversationMessagesController(req: AuthenticatedReques
 /**
  * Delete a message
  */
-export async function deleteMessageController(req: AuthenticatedRequest, res: Response) {
+export async function deleteMessageController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const { messageId } = req.params;
     const userId = req.user?.id;
@@ -89,11 +107,15 @@ export async function deleteMessageController(req: AuthenticatedRequest, res: Re
     return res.status(204).send();
   } catch (error) {
     console.error("Error deleting message:", error);
-    
-    if (error instanceof Error && (error.message.includes("not found") || error.message.includes("not authorized"))) {
+
+    if (
+      error instanceof Error &&
+      (error.message.includes("not found") ||
+        error.message.includes("not authorized"))
+    ) {
       return res.status(404).json({ error: error.message });
     }
-    
+
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -101,7 +123,10 @@ export async function deleteMessageController(req: AuthenticatedRequest, res: Re
 /**
  * Get messages for a channel
  */
-export async function getMessagesForChannelController(req: AuthenticatedRequest, res: Response) {
+export async function getMessagesForChannelController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const { channelId } = req.params;
     const userId = req.user?.id;
@@ -120,19 +145,23 @@ export async function getMessagesForChannelController(req: AuthenticatedRequest,
       include: {
         project: {
           include: {
-            members: true
-          }
-        }
-      }
+            members: true,
+          },
+        },
+      },
     });
 
     if (!channel) {
       return res.status(404).json({ error: "Channel not found" });
     }
 
-    const isMember = channel.project.members.some(member => member.profileId === userId);
+    const isMember = channel.project.members.some(
+      (member) => member.profileId === userId,
+    );
     if (!isMember) {
-      return res.status(403).json({ error: "You don't have access to this channel" });
+      return res
+        .status(403)
+        .json({ error: "You don't have access to this channel" });
     }
 
     const messages = await prisma.message.findMany({
@@ -143,11 +172,11 @@ export async function getMessagesForChannelController(req: AuthenticatedRequest,
             id: true,
             username: true,
             firstName: true,
-            lastName: true
-          }
-        }
+            lastName: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: "asc" },
     });
 
     return res.status(200).json({ messages });

@@ -3,7 +3,7 @@ import { authMiddleware } from "../../middleware/authMiddleware";
 import {
   createConversationMessageController,
   getConversationMessagesController,
-  deleteMessageController
+  deleteMessageController,
 } from "./message.controller";
 
 const router: Router = Router();

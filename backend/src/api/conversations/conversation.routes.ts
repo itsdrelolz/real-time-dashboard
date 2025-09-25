@@ -4,7 +4,7 @@ import {
   getDMEligibleUsersController,
   createConversationController,
   getUserConversationsController,
-  canCreateDMController
+  canCreateDMController,
 } from "./conversation.controller";
 import conversationMessageRouter from "../messages/conversation-message.routes";
 

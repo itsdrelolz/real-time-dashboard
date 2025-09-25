@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { authMiddleware } from '../../middleware/authMiddleware';
+import { Router } from "express";
+import { authMiddleware } from "../../middleware/authMiddleware";
 import {
   createTaskController,
   getTaskByIdController,
   updateTaskController,
   deleteTaskController,
-} from './task.controller';
+} from "./task.controller";
 
 const router: Router = Router();
 
@@ -13,11 +13,11 @@ const router: Router = Router();
 router.use(authMiddleware);
 
 // Task creation (channelId comes from parent route)
-router.post('/', createTaskController);
+router.post("/", createTaskController);
 
 // Task by id operations
-router.get('/:taskId', getTaskByIdController);
-router.put('/:taskId', updateTaskController);
-router.delete('/:taskId', deleteTaskController);
+router.get("/:taskId", getTaskByIdController);
+router.put("/:taskId", updateTaskController);
+router.delete("/:taskId", deleteTaskController);
 
 export default router;

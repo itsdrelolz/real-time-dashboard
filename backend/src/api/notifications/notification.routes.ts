@@ -1,8 +1,13 @@
+import { authMiddleware } from "@/middleware/authMiddleware";
 import { Router } from "express";
+import { saveTokenController } from "./notification.controller";
 
+const router: Router = Router();
 
+router.post(
+  "/api/notifications/save-token",
+  authMiddleware,
+  saveTokenController,
+);
 
-
-
-app.get('/', getNotificationsController);
-app.get('/notification/mark-as-read', markNotificationAsReadController);
+export default router;

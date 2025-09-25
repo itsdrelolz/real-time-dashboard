@@ -1,187 +1,185 @@
-import prisma from "../../utils/prismaClient";
-import type {
-    AddProjectMemberData,
-    CreateProjectData,
-    DetailedProjectPayload,
-    Project,
-    ProjectMember,
-} from "../../types";
+import { Project, User } from "@prisma/client";
+import {
+  CreateProjectBody,
+  UpdateProjectBody,
+  UpdateProjectMemberBody,
+  ProjectDetailsResponse,
+  AddProjectMemberBody,
+  BasicProjectResponse,
+} from "../../types/project.types";
+import prisma from "@/utils/prismaClient";
 
-
-export async function createProject(data: CreateProjectData): Promise<Project> {
-    try {
-        return await prisma.project.create({
-            data: {
-                name: data.name,
-                ownerId: data.ownerId,
-                channels: {
-                    create: [{ name: "general", topic: "General project discussions" }],
-                },
-                members: {
-                    create: [{ profileId: data.ownerId }],
-                },
-            },
-        });
-    } catch (error) {
-        console.error("Error creating project:", error);
-        throw new Error("Failed to create project.");
-    }
-}
-
-
-export async function getProjectById(
-    projectId: string,
-): Promise<DetailedProjectPayload | null> {
-    try {
-        return await prisma.project.findUnique({
-            where: { id: projectId },
-            include: {
-                owner: { select: { id: true, username: true, firstName: true, lastName: true } },
-                members: {
-                    include: {
-                        profile: { select: { id: true, username: true, firstName: true, lastName: true } },
-                    },
-                },
-                channels: {
-                    include: {
-                        tasks: true,
-                    },
-                },
-            },
-        });
-    } catch (error) {
-        console.error(`Error fetching project with ID ${projectId}:`, error);
-        throw new Error("Failed to retrieve project details.");
-    }
-}
-
-
-export async function getProjectSummariesForUser(
+class ProjectService {
+  public async getProjectSummariesForUser(
     userId: string,
-): Promise<Project[]> {
+  ): Promise<BasicProjectResponse[]> {
     try {
-        return await prisma.project.findMany({
-            where: {
-                members: {
-                    some: { profileId: userId },
-                },
-
-            },
-            select: {
-                id: true,
-                name: true,
-                ownerId: true,
-            },
-        });
+      // first verify that the user is a member of the project
+      const projects = await prisma.project.findMany({
+        where: {
+          members: { some: { id: userId } },
+        },
+      });
+      return projects as BasicProjectResponse[];
     } catch (error) {
-        console.error(`Error fetching project summaries for user ${userId}:`, error);
-        throw new Error("Failed to retrieve project summaries.");
+      console.error("Failed to get project summaries for user", error);
+      throw error;
     }
-}
+  }
 
+  public async getProjectById(
+    id: string,
+  ): Promise<ProjectDetailsResponse | null> {
+    try {
+      // first verify that the user is a member of the project
 
-export async function updateProjectDetails(
+      const project = await prisma.project.findUnique({
+        where: { id },
+        include: {
+          members: true,
+          tasks: true,
+          creator: true,
+          channels: true,
+        },
+      });
+      return project as ProjectDetailsResponse;
+    } catch (error) {
+      console.error("Failed to get project by id", error);
+      throw error;
+    }
+  }
+
+  public async createProject(
+    projectData: CreateProjectBody,
+    creatorId: string,
+  ): Promise<Project> {
+    try {
+      const newProject = await prisma.project.create({
+        data: {
+          name: projectData.name,
+          description: projectData.description,
+          creator: {
+            connect: { id: creatorId },
+          },
+          members: {
+            connect: { id: creatorId },
+          },
+        },
+      });
+      return newProject;
+    } catch (error) {
+      console.error("Failed to create project", error);
+      throw error;
+    }
+  }
+
+  public async updateProject(
+    id: string,
+    projectData: UpdateProjectBody,
+  ): Promise<Project> {
+    try {
+      const updatedProject = await prisma.project.update({
+        where: { id },
+        data: projectData,
+      });
+      return updatedProject;
+    } catch (error) {
+      console.error("Failed to update project", error);
+      throw error;
+    }
+  }
+  public async deleteProject(id: string): Promise<Project> {
+    try {
+      const deletedProject = await prisma.project.delete({
+        where: { id },
+      });
+      return deletedProject;
+    } catch (error) {
+      console.error("Failed to delete project", error);
+      throw error;
+    }
+  }
+
+  public async addMemberToProject(
     projectId: string,
-    data: Partial<Pick<Project, "name">>,
-): Promise<Project> {
+    body: AddProjectMemberBody,
+  ): Promise<Project> {
     try {
-        return await prisma.project.update({
-            where: { id: projectId },
-            data: {
-                name: data.name,
-            },
-        });
+      const member = await prisma.user.findUnique({
+        where: { username: body.username },
+      });
+
+      if (!member) {
+        throw new Error("Member not found");
+      }
+      const updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data: { members: { connect: { id: member.id } } },
+      });
+      return updatedProject;
     } catch (error) {
-        console.error(`Error updating project ${projectId}:`, error);
-        throw new Error("Failed to update project.");
+      console.error("Failed to add member to project", error);
+      throw error;
     }
-}
+  }
 
-
-export async function deleteProject(projectId: string): Promise<void> {
-    try {
-        await prisma.project.delete({
-            where: { id: projectId },
-        });
-    } catch (error) {
-        console.error(`Error deleting project ${projectId}:`, error);
-        throw new Error("Failed to delete project.");
-    }
-}
-
-
-export async function addMemberToProject(
-    data: AddProjectMemberData,
-): Promise<ProjectMember> {
-    try {
-        return await prisma.projectMember.create({
-            data: {
-                profileId: data.profileId,
-                projectId: data.projectId,
-            },
-        });
-    } catch (error) {
-        console.error(`Error adding member to project ${data.projectId}:`, error);
-        throw new Error("Failed to add project member.");
-    }
-}
-
-
-export async function removeMemberFromProject(
+  public async updateProjectMember(
     projectId: string,
-    profileId: string,
-): Promise<void> {
+    body: UpdateProjectMemberBody,
+  ): Promise<Project> {
     try {
-        await prisma.projectMember.delete({
-            where: {
-                projectId_profileId: {
-                    projectId: projectId,
-                    profileId: profileId,
-                },
-            },
-        });
+      const updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data: { members: { connect: { username: body.username } } },
+      });
+      return updatedProject;
     } catch (error) {
-        console.error(`Error removing member ${profileId} from project ${projectId}:`, error);
-        throw new Error("Failed to remove project member.");
+      console.error("Failed to update project member", error);
+      throw error;
     }
-}
+  }
 
-
-export async function getProjectMembers(
+  public async removeMemberFromProject(
     projectId: string,
-): Promise<ProjectMember[]> {
+    body: UpdateProjectMemberBody,
+  ): Promise<Project> {
     try {
-        return await prisma.projectMember.findMany({
-            where: {
-                projectId: projectId,
-            },
-            include: {
-                profile: {
-                    select: {
-                        id: true,
-                        username: true,
-                        firstName: true,
-                        lastName: true,
-                    },
-                },
-            },
-        });
-    } catch (error) {
-        console.error(`Error fetching members for project ${projectId}:`, error);
-        throw new Error("Failed to retrieve project members.");
+      const updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data: { members: { disconnect: { username: body.username } } },
+      });
+      return updatedProject;
+    } catch (error: any) {
+      console.error("Failed to remove member from project", error);
+      throw new Error("Failed to remove member from project");
     }
+  }
+
+  public async getProjectOwnerId(projectId: string): Promise<string | null> {
+    try {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { creatorId: true },
+      });
+      return project?.creatorId || null;
+    } catch (error) {
+      console.error("Failed to get project owner id", error);
+      throw error;
+    }
+  }
+
+  public async getProjectMembers(projectId: string): Promise<User[]> {
+    try {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { members: true },
+      });
+      return project?.members || [];
+    } catch (error) {
+      console.error("Failed to get project members", error);
+      throw error;
+    }
+  }
 }
 
-
-export async function getProjectOwnerId(projectId: string): Promise<string | null> {
-    try {
-        const project = await prisma.project.findUnique({
-            where: { id: projectId },
-            select: { ownerId: true }
-        });
-        return project?.ownerId ?? null;
-    } catch (error) {
-        console.error(`Error fetching owner for project ${projectId}:`, error);
-        throw new Error("Failed to retrieve project owner.");
-    }
-}
+export const projectService = new ProjectService();

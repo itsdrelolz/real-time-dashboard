@@ -3,16 +3,19 @@ import prisma from "../../utils/prismaClient";
 /**
  * Check if two users share at least one project
  */
-export async function canCreateDM(userAId: string, userBId: string): Promise<boolean> {
+export async function canCreateDM(
+  userAId: string,
+  userBId: string,
+): Promise<boolean> {
   const sharedProjects = await prisma.project.findMany({
     where: {
       AND: [
         { members: { some: { profileId: userAId } } },
-        { members: { some: { profileId: userBId } } }
-      ]
-    }
+        { members: { some: { profileId: userBId } } },
+      ],
+    },
   });
-  
+
   return sharedProjects.length > 0;
 }
 
@@ -22,36 +25,36 @@ export async function canCreateDM(userAId: string, userBId: string): Promise<boo
 export async function getDMEligibleUsers(userId: string) {
   const sharedProjects = await prisma.project.findMany({
     where: {
-      members: { some: { profileId: userId } }
+      members: { some: { profileId: userId } },
     },
     include: {
       members: {
-        include: { 
+        include: {
           profile: {
             select: {
               id: true,
               username: true,
               firstName: true,
               lastName: true,
-              email: true
-            }
-          }
-        }
-      }
-    }
+              email: true,
+            },
+          },
+        },
+      },
+    },
   });
-  
+
   // Extract unique users from shared projects (excluding current user)
   const eligibleUsers = new Map();
-  
-  sharedProjects.forEach(project => {
-    project.members.forEach(member => {
+
+  sharedProjects.forEach((project) => {
+    project.members.forEach((member) => {
       if (member.profileId !== userId && !eligibleUsers.has(member.profileId)) {
         eligibleUsers.set(member.profileId, member.profile);
       }
     });
   });
-  
+
   return Array.from(eligibleUsers.values());
 }
 
@@ -64,34 +67,31 @@ export async function createConversation(userAId: string, userBId: string) {
   if (!canCreate) {
     throw new Error("Users must share at least one project to create a DM");
   }
-  
+
   // Check if conversation already exists
   const existingConversation = await prisma.conversation.findFirst({
     where: {
       participants: {
         every: {
-          profileId: { in: [userAId, userBId] }
-        }
-      }
+          profileId: { in: [userAId, userBId] },
+        },
+      },
     },
     include: {
-      participants: true
-    }
+      participants: true,
+    },
   });
-  
+
   if (existingConversation && existingConversation.participants.length === 2) {
     return existingConversation;
   }
-  
+
   // Create new conversation
   return await prisma.conversation.create({
     data: {
       participants: {
-        create: [
-          { profileId: userAId },
-          { profileId: userBId }
-        ]
-      }
+        create: [{ profileId: userAId }, { profileId: userBId }],
+      },
     },
     include: {
       participants: {
@@ -101,12 +101,12 @@ export async function createConversation(userAId: string, userBId: string) {
               id: true,
               username: true,
               firstName: true,
-              lastName: true
-            }
-          }
-        }
-      }
-    }
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
   });
 }
 
@@ -117,8 +117,8 @@ export async function getUserConversations(userId: string) {
   return await prisma.conversation.findMany({
     where: {
       participants: {
-        some: { profileId: userId }
-      }
+        some: { profileId: userId },
+      },
     },
     include: {
       participants: {
@@ -128,16 +128,16 @@ export async function getUserConversations(userId: string) {
               id: true,
               username: true,
               firstName: true,
-              lastName: true
-            }
-          }
-        }
+              lastName: true,
+            },
+          },
+        },
       },
       messages: {
-        orderBy: { createdAt: 'desc' },
-        take: 1
-      }
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
   });
 }

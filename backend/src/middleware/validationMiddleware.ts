@@ -1,34 +1,42 @@
 import { Request, Response, NextFunction } from "express";
-import { ParamsDictionary } from "express-serve-static-core";
+import type { ParamsDictionary } from "express-serve-static-core";
+import { ZodSchema, ZodError } from "zod";
 
-export interface ParsedParams {
-  projectId: number;
-}
+type Schemas = {
+  body?: ZodSchema<any>;
+  params?: ZodSchema<any>;
+  query?: ZodSchema<any>;
+};
 
-export interface RequestWithNumericParams extends Request {
-  params: ParsedParams & ParamsDictionary;
-}
-
-export function validateNumericParams(...paramNames: string[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    for (const name of paramNames) {
-      const value = req.params[name];
-
-      if (value === undefined) {
-        return res.status(400).json({ error: `Missing parameter: ${name}` });
+export function validateRequest(schemas: Schemas) {
+  return (
+    req: Request<ParamsDictionary, any, any, any>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      if (schemas.body) {
+        req.body = schemas.body.parse(req.body);
       }
-
-      const parsedValue = parseInt(value, 10);
-
-      if (isNaN(parsedValue)) {
-        return res
-          .status(400)
-          .json({ error: `Parameter '${name}' must be a valid number.` });
+      if (schemas.params) {
+        req.params = schemas.params.parse(req.params);
       }
-
-      (req.params as Record<string, unknown>)[name] = parsedValue;
+      if (schemas.query) {
+        req.query = schemas.query.parse(req.query);
+      }
+      return next();
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({
+          error: "ValidationError",
+          issues: err.issues.map((i) => ({
+            path: i.path.join("."),
+            message: i.message,
+            code: i.code,
+          })),
+        });
+      }
+      return res.status(400).json({ error: "Invalid request" });
     }
-
-    next();
   };
 }

@@ -12,5 +12,5 @@ export function errorHandler(
     error: "An unexpected internal server error occurred.",
   });
 
-    next(err);
+  next(err);
 }
