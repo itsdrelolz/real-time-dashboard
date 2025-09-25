@@ -23,7 +23,7 @@ export async function getConversationMessagesController(
       conversationId,
       userId,
       Number(limit),
-      Number(offset)
+      Number(offset),
     );
 
     return res.status(200).json({ messages });
@@ -49,17 +49,21 @@ export async function sendConversationMessageController(
     if (!userId) return; // Response already sent by requireAuth
 
     if (!conversationId || !content) {
-      return res.status(400).json({ error: "Conversation ID and content are required" });
+      return res
+        .status(400)
+        .json({ error: "Conversation ID and content are required" });
     }
 
     const message = await messageService.createMessage(
       { content },
       userId,
       undefined,
-      conversationId
+      conversationId,
     );
 
-    return res.status(201).json({ message: "Message sent successfully", data: message });
+    return res
+      .status(201)
+      .json({ message: "Message sent successfully", data: message });
   } catch (error) {
     console.error("Error sending conversation message:", error);
     if (error instanceof Error && error.message.includes("not found")) {
@@ -89,7 +93,7 @@ export async function getChannelMessagesController(
       channelId,
       userId,
       Number(limit),
-      Number(offset)
+      Number(offset),
     );
 
     return res.status(200).json({ messages });
@@ -115,17 +119,21 @@ export async function sendChannelMessageController(
     if (!userId) return; // Response already sent by requireAuth
 
     if (!channelId || !content) {
-      return res.status(400).json({ error: "Channel ID and content are required" });
+      return res
+        .status(400)
+        .json({ error: "Channel ID and content are required" });
     }
 
     const message = await messageService.createMessage(
       { content },
       userId,
       channelId,
-      undefined
+      undefined,
     );
 
-    return res.status(201).json({ message: "Message sent successfully", data: message });
+    return res
+      .status(201)
+      .json({ message: "Message sent successfully", data: message });
   } catch (error) {
     console.error("Error sending channel message:", error);
     if (error instanceof Error && error.message.includes("not found")) {
@@ -148,12 +156,16 @@ export async function editMessageController(
     if (!userId) return; // Response already sent by requireAuth
 
     if (!id || !content) {
-      return res.status(400).json({ error: "Message ID and content are required" });
+      return res
+        .status(400)
+        .json({ error: "Message ID and content are required" });
     }
 
     const message = await messageService.updateMessage(id, content, userId);
 
-    return res.status(200).json({ message: "Message updated successfully", data: message });
+    return res
+      .status(200)
+      .json({ message: "Message updated successfully", data: message });
   } catch (error) {
     console.error("Error updating message:", error);
     if (error instanceof Error && error.message.includes("not found")) {

@@ -8,16 +8,16 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
  * @returns userId if authenticated, null if not (response sent)
  */
 export function requireAuth(
-  req: AuthenticatedRequest, 
-  res: Response
+  req: AuthenticatedRequest,
+  res: Response,
 ): string | null {
   const userId = req.user?.uid;
-  
+
   if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return null;
   }
-  
+
   return userId;
 }
 
@@ -29,17 +29,17 @@ export function requireAuth(
  * @returns userId if authenticated, null if not (response sent)
  */
 export function requireAuthWithMessage(
-  req: AuthenticatedRequest, 
+  req: AuthenticatedRequest,
   res: Response,
-  errorMessage: string = "Unauthorized"
+  errorMessage: string = "Unauthorized",
 ): string | null {
   const userId = req.user?.uid;
-  
+
   if (!userId) {
     res.status(401).json({ error: errorMessage });
     return null;
   }
-  
+
   return userId;
 }
 
@@ -48,7 +48,9 @@ export function requireAuthWithMessage(
  * @param req - Authenticated request
  * @returns userId if authenticated, null if not
  */
-export function getAuthenticatedUserId(req: AuthenticatedRequest): string | null {
+export function getAuthenticatedUserId(
+  req: AuthenticatedRequest,
+): string | null {
   return req.user?.uid || null;
 }
 
@@ -59,15 +61,15 @@ export function getAuthenticatedUserId(req: AuthenticatedRequest): string | null
  * @returns true if authenticated, false if not (response sent)
  */
 export function isAuthenticated(
-  req: AuthenticatedRequest, 
-  res: Response
+  req: AuthenticatedRequest,
+  res: Response,
 ): boolean {
   const userId = req.user?.uid;
-  
+
   if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return false;
   }
-  
+
   return true;
 }

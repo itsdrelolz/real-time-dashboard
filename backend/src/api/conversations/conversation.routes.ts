@@ -1,13 +1,13 @@
 import { authMiddleware } from "@/middleware/authMiddleware";
 import { Router } from "express";
-import { 
+import {
   createConversationController,
   getConversationsController,
   getConversationController,
   updateConversationController,
   deleteConversationController,
   addParticipantController,
-  removeParticipantController
+  removeParticipantController,
 } from "./conversation.controller";
 
 const router: Router = Router();

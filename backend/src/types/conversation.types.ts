@@ -13,7 +13,10 @@ export type CreateConversationBody = {
 };
 
 // Basic conversation response (without participants)
-export type BasicConversationResponse = Pick<Conversation, "id" | "createdAt" | "updatedAt">;
+export type BasicConversationResponse = Pick<
+  Conversation,
+  "id" | "createdAt" | "updatedAt"
+>;
 
 // Full conversation response with participants
 export type ConversationResponse = BasicConversationResponse & {

@@ -7,7 +7,7 @@ import {
   sendChannelMessageController,
   editMessageController,
   deleteMessageController,
-  markMessageAsReadController
+  markMessageAsReadController,
 } from "./message.controller";
 
 const router: Router = Router();
@@ -17,7 +17,10 @@ router.use(authMiddleware);
 // Specific routes first (to avoid conflicts with generic :id routes)
 // Conversation messages
 router.get("/conversations/:conversationId", getConversationMessagesController);
-router.post("/conversations/:conversationId", sendConversationMessageController);
+router.post(
+  "/conversations/:conversationId",
+  sendConversationMessageController,
+);
 
 // Channel messages
 router.get("/channels/:channelId", getChannelMessagesController);

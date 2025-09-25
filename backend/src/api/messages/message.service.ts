@@ -1,27 +1,31 @@
 import prisma from "../../utils/prismaClient";
-import { 
-  MessageWithAuthor, 
-  CreateMessageBody, 
-  ChannelMessageResponse, 
+import {
+  MessageWithAuthor,
+  CreateMessageBody,
+  ChannelMessageResponse,
   DirectMessageResponse,
-  MessageResponse 
+  MessageResponse,
 } from "../../types/message.types";
 
 class MessageService {
   // Create a message (generic - can be for channel or conversation)
   public async createMessage(
-    messageData: CreateMessageBody, 
+    messageData: CreateMessageBody,
     authorId: string,
     channelId?: string,
-    conversationId?: string
+    conversationId?: string,
   ): Promise<MessageWithAuthor> {
     try {
       // Validate that message belongs to either channel or conversation, not both
       if (channelId && conversationId) {
-        throw new Error("Message cannot belong to both channel and conversation");
+        throw new Error(
+          "Message cannot belong to both channel and conversation",
+        );
       }
       if (!channelId && !conversationId) {
-        throw new Error("Message must belong to either channel or conversation");
+        throw new Error(
+          "Message must belong to either channel or conversation",
+        );
       }
 
       const newMessage = await prisma.message.create({
@@ -53,7 +57,7 @@ class MessageService {
     conversationId: string,
     userId: string,
     limit: number = 50,
-    offset: number = 0
+    offset: number = 0,
   ): Promise<DirectMessageResponse[]> {
     try {
       // Verify user is participant in conversation
@@ -61,9 +65,9 @@ class MessageService {
         where: {
           id: conversationId,
           participants: {
-            some: { id: userId }
-          }
-        }
+            some: { id: userId },
+          },
+        },
       });
 
       if (!conversation) {
@@ -90,7 +94,7 @@ class MessageService {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         take: limit,
         skip: offset,
       });
@@ -107,7 +111,7 @@ class MessageService {
     channelId: string,
     userId: string,
     limit: number = 50,
-    offset: number = 0
+    offset: number = 0,
   ): Promise<ChannelMessageResponse[]> {
     try {
       // Verify user has access to channel through project membership
@@ -116,13 +120,13 @@ class MessageService {
           id: channelId,
           project: {
             members: {
-              some: { id: userId }
-            }
-          }
+              some: { id: userId },
+            },
+          },
         },
         include: {
-          project: true
-        }
+          project: true,
+        },
       });
 
       if (!channel) {
@@ -151,7 +155,7 @@ class MessageService {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         take: limit,
         skip: offset,
       });
@@ -164,7 +168,10 @@ class MessageService {
   }
 
   // Get a single message by ID
-  public async getMessageById(messageId: string, userId: string): Promise<MessageResponse | null> {
+  public async getMessageById(
+    messageId: string,
+    userId: string,
+  ): Promise<MessageResponse | null> {
     try {
       const message = await prisma.message.findFirst({
         where: {
@@ -174,19 +181,19 @@ class MessageService {
               channel: {
                 project: {
                   members: {
-                    some: { id: userId }
-                  }
-                }
-              }
+                    some: { id: userId },
+                  },
+                },
+              },
             },
             {
               conversation: {
                 participants: {
-                  some: { id: userId }
-                }
-              }
-            }
-          ]
+                  some: { id: userId },
+                },
+              },
+            },
+          ],
         },
         include: {
           author: {
@@ -224,9 +231,9 @@ class MessageService {
 
   // Update a message
   public async updateMessage(
-    messageId: string, 
-    content: string, 
-    userId: string
+    messageId: string,
+    content: string,
+    userId: string,
   ): Promise<MessageWithAuthor> {
     try {
       // Verify user is the author of the message
@@ -287,7 +294,10 @@ class MessageService {
   }
 
   // Mark message as read
-  public async markMessageAsRead(messageId: string, userId: string): Promise<void> {
+  public async markMessageAsRead(
+    messageId: string,
+    userId: string,
+  ): Promise<void> {
     try {
       await prisma.messageReadStatus.upsert({
         where: {

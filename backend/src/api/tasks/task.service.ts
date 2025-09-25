@@ -1,10 +1,16 @@
-import { CreateTaskBody, UpdateTaskBody, BasicTaskResponse, TaskDetailsResponse } from "../../types/task.types";
+import {
+  CreateTaskBody,
+  UpdateTaskBody,
+  BasicTaskResponse,
+  TaskDetailsResponse,
+} from "../../types/task.types";
 import prisma from "../../utils/prismaClient";
 import { Task } from "@prisma/client";
 
-class TaskService { 
-
-  public async getTaskSummariesForProject(projectId: string): Promise<BasicTaskResponse[]> {
+class TaskService {
+  public async getTaskSummariesForProject(
+    projectId: string,
+  ): Promise<BasicTaskResponse[]> {
     try {
       const tasks = await prisma.task.findMany({
         where: { projectId },
@@ -16,7 +22,9 @@ class TaskService {
     }
   }
 
-  public async getTaskById(taskId: string): Promise<TaskDetailsResponse | null> {
+  public async getTaskById(
+    taskId: string,
+  ): Promise<TaskDetailsResponse | null> {
     try {
       const task = await prisma.task.findUnique({
         where: { id: taskId },
@@ -32,40 +40,45 @@ class TaskService {
     }
   }
 
-  public async createTask(projectId: string, userId: string, taskData: CreateTaskBody): Promise<Task> {
+  public async createTask(
+    projectId: string,
+    userId: string,
+    taskData: CreateTaskBody,
+  ): Promise<Task> {
     try {
-     // first verify that the user is the creator of the project
-     const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        creatorId: userId,
-        members: {
-          some: {
-            id: userId,
+      // first verify that the user is the creator of the project
+      const project = await prisma.project.findFirst({
+        where: {
+          id: projectId,
+          creatorId: userId,
+          members: {
+            some: {
+              id: userId,
+            },
           },
         },
-      },
-    });
-    if (!project) {
-      throw new Error("Project not found");
-    }
-    const task = await prisma.task.create({
-      data: {
-        ...taskData,
-        projectId: projectId,
-        creatorId: userId,
-      },
-    });
-    return task;
+      });
+      if (!project) {
+        throw new Error("Project not found");
+      }
+      const task = await prisma.task.create({
+        data: {
+          ...taskData,
+          projectId: projectId,
+          creatorId: userId,
+        },
+      });
+      return task;
     } catch (error) {
       console.error("Failed to create task", error);
       throw error;
     }
   }
-      
 
-
-  public async updateTask(taskId: string, taskData: UpdateTaskBody): Promise<Task> {
+  public async updateTask(
+    taskId: string,
+    taskData: UpdateTaskBody,
+  ): Promise<Task> {
     try {
       const task = await prisma.task.update({
         where: { id: taskId },

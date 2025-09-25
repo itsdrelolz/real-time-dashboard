@@ -1,10 +1,8 @@
 import prisma from "../../utils/prismaClient";
-import { 
-  CreateNotificationBody, 
-  NotificationWithRelations, 
+import {
+  CreateNotificationBody,
+  NotificationWithRelations,
   NotificationListResponse,
-  NotificationType,
-  FCMNotificationPayload
 } from "../../types/notification.types";
 
 class NotificationService {
@@ -23,7 +21,9 @@ class NotificationService {
   }
 
   // Create a new notification
-  public async createNotification(notificationData: CreateNotificationBody): Promise<NotificationWithRelations> {
+  public async createNotification(
+    notificationData: CreateNotificationBody,
+  ): Promise<NotificationWithRelations> {
     try {
       const notification = await prisma.notification.create({
         data: {
@@ -92,7 +92,7 @@ class NotificationService {
     userId: string,
     limit: number = 20,
     offset: number = 0,
-    unreadOnly: boolean = false
+    unreadOnly: boolean = false,
   ): Promise<NotificationListResponse> {
     try {
       const whereClause = {
@@ -145,12 +145,14 @@ class NotificationService {
               },
             },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
           take: limit,
           skip: offset,
         }),
         prisma.notification.count({ where: { recipientId: userId } }),
-        prisma.notification.count({ where: { recipientId: userId, read: false } }),
+        prisma.notification.count({
+          where: { recipientId: userId, read: false },
+        }),
       ]);
 
       return {
@@ -165,7 +167,10 @@ class NotificationService {
   }
 
   // Mark notification as read
-  public async markNotificationAsRead(notificationId: string, userId: string): Promise<void> {
+  public async markNotificationAsRead(
+    notificationId: string,
+    userId: string,
+  ): Promise<void> {
     try {
       await prisma.notification.updateMany({
         where: {
@@ -197,7 +202,10 @@ class NotificationService {
   }
 
   // Delete notification
-  public async deleteNotification(notificationId: string, userId: string): Promise<void> {
+  public async deleteNotification(
+    notificationId: string,
+    userId: string,
+  ): Promise<void> {
     try {
       await prisma.notification.deleteMany({
         where: {
@@ -232,7 +240,7 @@ class NotificationService {
     recipientId: string,
     title: string,
     body: string,
-    data?: Record<string, any>
+    data?: Record<string, any>,
   ): Promise<NotificationWithRelations> {
     return this.createNotification({
       type: "message",
@@ -249,7 +257,7 @@ class NotificationService {
     taskId: string,
     assigneeId: string,
     taskTitle: string,
-    projectName: string
+    projectName: string,
   ): Promise<NotificationWithRelations> {
     return this.createNotification({
       type: "task_assigned",
@@ -266,7 +274,7 @@ class NotificationService {
     projectId: string,
     inviteeId: string,
     projectName: string,
-    inviterName: string
+    inviterName: string,
   ): Promise<NotificationWithRelations> {
     return this.createNotification({
       type: "project_invite",
@@ -283,7 +291,7 @@ class NotificationService {
     messageId: string,
     mentionedUserId: string,
     mentionerName: string,
-    channelName: string
+    channelName: string,
   ): Promise<NotificationWithRelations> {
     return this.createNotification({
       type: "user_mentioned",
@@ -300,7 +308,7 @@ class NotificationService {
     taskId: string,
     assigneeId: string,
     taskTitle: string,
-    dueDate: Date
+    dueDate: Date,
   ): Promise<NotificationWithRelations> {
     return this.createNotification({
       type: "due_date_reminder",

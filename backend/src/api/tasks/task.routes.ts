@@ -13,4 +13,3 @@ router.patch("/:taskId", taskController.updateTaskController);
 router.delete("/:taskId", taskController.deleteTaskController);
 
 export default router;
-

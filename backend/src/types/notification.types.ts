@@ -1,12 +1,12 @@
 import { Message, Notification, Project, Task, User } from "@prisma/client";
 
 // Base notification types
-export type NotificationType = 
-  | "message" 
-  | "task_assigned" 
-  | "task_updated" 
+export type NotificationType =
+  | "message"
+  | "task_assigned"
+  | "task_updated"
   | "task_completed"
-  | "project_invite" 
+  | "project_invite"
   | "project_created"
   | "channel_created"
   | "conversation_created"

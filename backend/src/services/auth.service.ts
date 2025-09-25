@@ -1,6 +1,7 @@
 import admin from "firebase-admin";
 import prisma from "../utils/prismaClient";
 import { User } from "@prisma/client";
+import { FirebaseError } from "firebase-admin/lib/utils/error";
 
 export type AuthenticatedUser = {
   uid: string;
@@ -25,7 +26,18 @@ export async function getUserFromToken(
       profile: profile ?? null,
     };
   } catch (error) {
-    // Token invalid/expired or Admin not initialized
+    if (error instanceof FirebaseError) {
+      if (error.code === "auth/id-token-expired") {
+        // Handle expired token specifically
+        console.error("Firebase ID token has expired.");
+      } else {
+        // Handle other Firebase authentication errors
+        console.error(`Firebase auth error: ${error.code}`);
+      }
+    } else {
+      // Handle non-Firebase errors (e.g., Prisma errors)
+      console.error("An unexpected error occurred:", error);
+    }
     return null;
   }
 }

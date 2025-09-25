@@ -1,28 +1,27 @@
 import prisma from "../../utils/prismaClient";
-import { 
-  ConversationWithParticipants,
+import {
   CreateConversationBody,
   ConversationResponse,
-  ConversationListItem
+  ConversationListItem,
 } from "../../types/conversation.types";
 
 class ConversationService {
   // Create a new conversation
   public async createConversation(
     conversationData: CreateConversationBody,
-    creatorId: string
+    creatorId: string,
   ): Promise<ConversationResponse> {
     try {
       // Verify all participants exist
       const participants = await prisma.user.findMany({
         where: {
-          id: { in: conversationData.participantIds }
+          id: { in: conversationData.participantIds },
         },
         select: {
           id: true,
           username: true,
           photoURL: true,
-        }
+        },
       });
 
       if (participants.length !== conversationData.participantIds.length) {
@@ -30,13 +29,15 @@ class ConversationService {
       }
 
       // Add creator to participants if not already included
-      const allParticipantIds = [...new Set([creatorId, ...conversationData.participantIds])];
+      const allParticipantIds = [
+        ...new Set([creatorId, ...conversationData.participantIds]),
+      ];
 
       const conversation = await prisma.conversation.create({
         data: {
           participants: {
-            connect: allParticipantIds.map(id => ({ id }))
-          }
+            connect: allParticipantIds.map((id) => ({ id })),
+          },
         },
         include: {
           participants: {
@@ -44,9 +45,9 @@ class ConversationService {
               id: true,
               username: true,
               photoURL: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return conversation as ConversationResponse;
@@ -57,13 +58,15 @@ class ConversationService {
   }
 
   // Get all conversations for a user
-  public async getUserConversations(userId: string): Promise<ConversationListItem[]> {
+  public async getUserConversations(
+    userId: string,
+  ): Promise<ConversationListItem[]> {
     try {
       const conversations = await prisma.conversation.findMany({
         where: {
           participants: {
-            some: { id: userId }
-          }
+            some: { id: userId },
+          },
         },
         include: {
           participants: {
@@ -71,10 +74,10 @@ class ConversationService {
               id: true,
               username: true,
               photoURL: true,
-            }
+            },
           },
           messages: {
-            orderBy: { createdAt: 'desc' },
+            orderBy: { createdAt: "desc" },
             take: 1,
             include: {
               author: {
@@ -82,24 +85,26 @@ class ConversationService {
                   id: true,
                   username: true,
                   photoURL: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
-        orderBy: { updatedAt: 'desc' }
+        orderBy: { updatedAt: "desc" },
       });
 
-      return conversations.map(conv => ({
+      return conversations.map((conv) => ({
         id: conv.id,
         createdAt: conv.createdAt,
         updatedAt: conv.updatedAt,
         participants: conv.participants,
-        lastMessage: conv.messages[0] ? {
-          content: conv.messages[0].content,
-          createdAt: conv.messages[0].createdAt,
-          author: conv.messages[0].author
-        } : undefined
+        lastMessage: conv.messages[0]
+          ? {
+              content: conv.messages[0].content,
+              createdAt: conv.messages[0].createdAt,
+              author: conv.messages[0].author,
+            }
+          : undefined,
       }));
     } catch (error) {
       console.error("Failed to get user conversations", error);
@@ -109,16 +114,16 @@ class ConversationService {
 
   // Get conversation by ID
   public async getConversationById(
-    conversationId: string, 
-    userId: string
+    conversationId: string,
+    userId: string,
   ): Promise<ConversationResponse | null> {
     try {
       const conversation = await prisma.conversation.findFirst({
         where: {
           id: conversationId,
           participants: {
-            some: { id: userId }
-          }
+            some: { id: userId },
+          },
         },
         include: {
           participants: {
@@ -126,10 +131,10 @@ class ConversationService {
               id: true,
               username: true,
               photoURL: true,
-            }
+            },
           },
           messages: {
-            orderBy: { createdAt: 'desc' },
+            orderBy: { createdAt: "desc" },
             take: 1,
             include: {
               author: {
@@ -137,11 +142,11 @@ class ConversationService {
                   id: true,
                   username: true,
                   photoURL: true,
-                }
-              }
-            }
-          }
-        }
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!conversation) {
@@ -154,14 +159,16 @@ class ConversationService {
         updatedAt: conversation.updatedAt,
         participants: conversation.participants,
         messageCount: await prisma.message.count({
-          where: { conversationId: conversationId }
+          where: { conversationId: conversationId },
         }),
-        lastMessage: conversation.messages[0] ? {
-          id: conversation.messages[0].id,
-          content: conversation.messages[0].content,
-          createdAt: conversation.messages[0].createdAt,
-          author: conversation.messages[0].author
-        } : undefined
+        lastMessage: conversation.messages[0]
+          ? {
+              id: conversation.messages[0].id,
+              content: conversation.messages[0].content,
+              createdAt: conversation.messages[0].createdAt,
+              author: conversation.messages[0].author,
+            }
+          : undefined,
       };
     } catch (error) {
       console.error("Failed to get conversation by id", error);
@@ -173,7 +180,7 @@ class ConversationService {
   public async updateConversation(
     conversationId: string,
     userId: string,
-    updateData: Partial<CreateConversationBody>
+    updateData: Partial<CreateConversationBody>,
   ): Promise<ConversationResponse> {
     try {
       // Verify user is participant
@@ -181,9 +188,9 @@ class ConversationService {
         where: {
           id: conversationId,
           participants: {
-            some: { id: userId }
-          }
-        }
+            some: { id: userId },
+          },
+        },
       });
 
       if (!conversation) {
@@ -193,9 +200,11 @@ class ConversationService {
       const updatedConversation = await prisma.conversation.update({
         where: { id: conversationId },
         data: {
-          participants: updateData.participantIds ? {
-            set: updateData.participantIds.map(id => ({ id }))
-          } : undefined
+          participants: updateData.participantIds
+            ? {
+                set: updateData.participantIds.map((id) => ({ id })),
+              }
+            : undefined,
         },
         include: {
           participants: {
@@ -203,9 +212,9 @@ class ConversationService {
               id: true,
               username: true,
               photoURL: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return updatedConversation as ConversationResponse;
@@ -218,7 +227,7 @@ class ConversationService {
   // Delete conversation
   public async deleteConversation(
     conversationId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     try {
       // Verify user is participant
@@ -226,9 +235,9 @@ class ConversationService {
         where: {
           id: conversationId,
           participants: {
-            some: { id: userId }
-          }
-        }
+            some: { id: userId },
+          },
+        },
       });
 
       if (!conversation) {
@@ -236,7 +245,7 @@ class ConversationService {
       }
 
       await prisma.conversation.delete({
-        where: { id: conversationId }
+        where: { id: conversationId },
       });
     } catch (error) {
       console.error("Failed to delete conversation", error);
@@ -248,7 +257,7 @@ class ConversationService {
   public async addParticipant(
     conversationId: string,
     userId: string,
-    participantId: string
+    participantId: string,
   ): Promise<ConversationResponse> {
     try {
       // Verify user is participant
@@ -256,9 +265,9 @@ class ConversationService {
         where: {
           id: conversationId,
           participants: {
-            some: { id: userId }
-          }
-        }
+            some: { id: userId },
+          },
+        },
       });
 
       if (!conversation) {
@@ -267,7 +276,7 @@ class ConversationService {
 
       // Verify new participant exists
       const newParticipant = await prisma.user.findUnique({
-        where: { id: participantId }
+        where: { id: participantId },
       });
 
       if (!newParticipant) {
@@ -278,8 +287,8 @@ class ConversationService {
         where: { id: conversationId },
         data: {
           participants: {
-            connect: { id: participantId }
-          }
+            connect: { id: participantId },
+          },
         },
         include: {
           participants: {
@@ -287,9 +296,9 @@ class ConversationService {
               id: true,
               username: true,
               photoURL: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return updatedConversation as ConversationResponse;
@@ -303,7 +312,7 @@ class ConversationService {
   public async removeParticipant(
     conversationId: string,
     userId: string,
-    participantId: string
+    participantId: string,
   ): Promise<ConversationResponse> {
     try {
       // Verify user is participant
@@ -311,9 +320,9 @@ class ConversationService {
         where: {
           id: conversationId,
           participants: {
-            some: { id: userId }
-          }
-        }
+            some: { id: userId },
+          },
+        },
       });
 
       if (!conversation) {
@@ -324,8 +333,8 @@ class ConversationService {
         where: { id: conversationId },
         data: {
           participants: {
-            disconnect: { id: participantId }
-          }
+            disconnect: { id: participantId },
+          },
         },
         include: {
           participants: {
@@ -333,9 +342,9 @@ class ConversationService {
               id: true,
               username: true,
               photoURL: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return updatedConversation as ConversationResponse;

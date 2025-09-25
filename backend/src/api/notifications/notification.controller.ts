@@ -4,7 +4,10 @@ import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { requireAuth } from "../../utils/authUtils";
 
 // Save FCM token
-export const saveTokenController = async (req: AuthenticatedRequest, res: Response) => {
+export const saveTokenController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   const userId = requireAuth(req, res);
   const { token } = req.body;
 
@@ -27,7 +30,10 @@ export const saveTokenController = async (req: AuthenticatedRequest, res: Respon
 };
 
 // Get user's notifications
-export const getNotificationsController = async (req: AuthenticatedRequest, res: Response) => {
+export const getNotificationsController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   const userId = requireAuth(req, res);
   const { limit = 20, offset = 0, unreadOnly = false } = req.query;
 
@@ -38,7 +44,7 @@ export const getNotificationsController = async (req: AuthenticatedRequest, res:
       userId,
       Number(limit),
       Number(offset),
-      unreadOnly === 'true'
+      unreadOnly === "true",
     );
 
     return res.status(200).json(result);
@@ -49,7 +55,10 @@ export const getNotificationsController = async (req: AuthenticatedRequest, res:
 };
 
 // Get unread count
-export const getUnreadCountController = async (req: AuthenticatedRequest, res: Response) => {
+export const getUnreadCountController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   const userId = requireAuth(req, res);
 
   if (!userId) return; // Response already sent by requireAuth
@@ -64,7 +73,10 @@ export const getUnreadCountController = async (req: AuthenticatedRequest, res: R
 };
 
 // Mark notification as read
-export const markAsReadController = async (req: AuthenticatedRequest, res: Response) => {
+export const markAsReadController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   const userId = requireAuth(req, res);
   const { notificationId } = req.params;
 
@@ -84,14 +96,19 @@ export const markAsReadController = async (req: AuthenticatedRequest, res: Respo
 };
 
 // Mark all notifications as read
-export const markAllAsReadController = async (req: AuthenticatedRequest, res: Response) => {
+export const markAllAsReadController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   const userId = requireAuth(req, res);
 
   if (!userId) return; // Response already sent by requireAuth
 
   try {
     await notificationService.markAllNotificationsAsRead(userId);
-    return res.status(200).json({ message: "All notifications marked as read" });
+    return res
+      .status(200)
+      .json({ message: "All notifications marked as read" });
   } catch (error) {
     console.error("Error marking all notifications as read:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -99,7 +116,10 @@ export const markAllAsReadController = async (req: AuthenticatedRequest, res: Re
 };
 
 // Delete notification
-export const deleteNotificationController = async (req: AuthenticatedRequest, res: Response) => {
+export const deleteNotificationController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   const userId = requireAuth(req, res);
   const { notificationId } = req.params;
 

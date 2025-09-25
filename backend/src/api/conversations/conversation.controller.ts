@@ -14,18 +14,22 @@ export async function createConversationController(
 
     if (!userId) return; // Response already sent by requireAuth
 
-    if (!participantIds || !Array.isArray(participantIds) || participantIds.length === 0) {
+    if (
+      !participantIds ||
+      !Array.isArray(participantIds) ||
+      participantIds.length === 0
+    ) {
       return res.status(400).json({ error: "Participant IDs are required" });
     }
 
     const conversation = await conversationService.createConversation(
       { participantIds },
-      userId
+      userId,
     );
 
-    return res.status(201).json({ 
-      message: "Conversation created successfully", 
-      conversation 
+    return res.status(201).json({
+      message: "Conversation created successfully",
+      conversation,
     });
   } catch (error) {
     console.error("Error creating conversation:", error);
@@ -46,7 +50,8 @@ export async function getConversationsController(
 
     if (!userId) return; // Response already sent by requireAuth
 
-    const conversations = await conversationService.getUserConversations(userId);
+    const conversations =
+      await conversationService.getUserConversations(userId);
 
     return res.status(200).json({ conversations });
   } catch (error) {
@@ -70,7 +75,10 @@ export async function getConversationController(
       return res.status(400).json({ error: "Conversation ID is required" });
     }
 
-    const conversation = await conversationService.getConversationById(id, userId);
+    const conversation = await conversationService.getConversationById(
+      id,
+      userId,
+    );
 
     if (!conversation) {
       return res.status(404).json({ error: "Conversation not found" });
@@ -102,12 +110,12 @@ export async function updateConversationController(
     const conversation = await conversationService.updateConversation(
       id,
       userId,
-      { participantIds }
+      { participantIds },
     );
 
-    return res.status(200).json({ 
-      message: "Conversation updated successfully", 
-      conversation 
+    return res.status(200).json({
+      message: "Conversation updated successfully",
+      conversation,
     });
   } catch (error) {
     console.error("Error updating conversation:", error);
@@ -158,18 +166,20 @@ export async function addParticipantController(
     if (!userId) return; // Response already sent by requireAuth
 
     if (!id || !participantId) {
-      return res.status(400).json({ error: "Conversation ID and participant ID are required" });
+      return res
+        .status(400)
+        .json({ error: "Conversation ID and participant ID are required" });
     }
 
     const conversation = await conversationService.addParticipant(
       id,
       userId,
-      participantId
+      participantId,
     );
 
-    return res.status(200).json({ 
-      message: "Participant added successfully", 
-      conversation 
+    return res.status(200).json({
+      message: "Participant added successfully",
+      conversation,
     });
   } catch (error) {
     console.error("Error adding participant:", error);
@@ -192,18 +202,20 @@ export async function removeParticipantController(
     if (!userId) return; // Response already sent by requireAuth
 
     if (!id || !participantId) {
-      return res.status(400).json({ error: "Conversation ID and participant ID are required" });
+      return res
+        .status(400)
+        .json({ error: "Conversation ID and participant ID are required" });
     }
 
     const conversation = await conversationService.removeParticipant(
       id,
       userId,
-      participantId
+      participantId,
     );
 
-    return res.status(200).json({ 
-      message: "Participant removed successfully", 
-      conversation 
+    return res.status(200).json({
+      message: "Participant removed successfully",
+      conversation,
     });
   } catch (error) {
     console.error("Error removing participant:", error);

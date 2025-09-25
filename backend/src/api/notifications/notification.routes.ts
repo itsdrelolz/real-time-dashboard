@@ -1,12 +1,12 @@
 import { authMiddleware } from "@/middleware/authMiddleware";
 import { Router } from "express";
-import { 
+import {
   saveTokenController,
   getNotificationsController,
   getUnreadCountController,
   markAsReadController,
   markAllAsReadController,
-  deleteNotificationController
+  deleteNotificationController,
 } from "./notification.controller";
 
 const router: Router = Router();

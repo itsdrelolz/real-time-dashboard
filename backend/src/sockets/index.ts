@@ -1,10 +1,9 @@
 import { Server, Socket } from "socket.io";
 import { registerMessageHandlers } from "./messageHandlers";
-import { getUserFromToken } from "../api/auth/auth.service";
-import type { Profile } from "../types";
+import { getUserFromToken, AuthenticatedUser } from "../services/auth.service";
 
 export interface AuthenticatedSocket extends Socket {
-  user?: Profile | null;
+  user?: AuthenticatedUser | null;
 }
 
 /*
@@ -34,7 +33,7 @@ export const initializeSocketIO = (io: Server) => {
       socket.user = userProfile;
       console.log(
         "Socket authenticated successfully:",
-        userProfile.displayName,
+        userProfile.profile?.username || userProfile.uid,
       );
       next();
     } catch (error) {
@@ -44,12 +43,16 @@ export const initializeSocketIO = (io: Server) => {
   });
 
   io.on("connection", (socket: AuthenticatedSocket) => {
-    console.log(`User connected: ${socket.user?.displayName} (${socket.id})`);
+    console.log(
+      `User connected: ${socket.user?.profile?.username || socket.user?.uid} (${socket.id})`,
+    );
 
     registerMessageHandlers(io, socket);
 
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.user?.displayName}`);
+      console.log(
+        `User disconnected: ${socket.user?.profile?.username || socket.user?.uid}`,
+      );
     });
   });
 };
