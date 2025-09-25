@@ -1,31 +1,28 @@
+import { authMiddleware } from "@/middleware/authMiddleware";
 import { Router } from "express";
-import { authMiddleware } from "../../middleware/authMiddleware";
-import {
-  getDMEligibleUsersController,
+import { 
   createConversationController,
-  getUserConversationsController,
-  canCreateDMController,
+  getConversationsController,
+  getConversationController,
+  updateConversationController,
+  deleteConversationController,
+  addParticipantController,
+  removeParticipantController
 } from "./conversation.controller";
-import conversationMessageRouter from "../messages/conversation-message.routes";
 
 const router: Router = Router();
 
-// All routes require authentication
 router.use(authMiddleware);
 
-// Get users eligible for DM (share at least one project)
-router.get("/dm-eligible", getDMEligibleUsersController);
-
-// Check if two users can create a DM
-router.get("/can-create-dm", canCreateDMController);
-
-// Create a new conversation/DM
+// Conversation management routes
+router.get("/", getConversationsController);
 router.post("/", createConversationController);
+router.get("/:id", getConversationController);
+router.put("/:id", updateConversationController);
+router.delete("/:id", deleteConversationController);
 
-// Get all conversations for the current user
-router.get("/", getUserConversationsController);
-
-// Conversation messages routes
-router.use("/:conversationId/messages", conversationMessageRouter);
+// Participant management
+router.post("/:id/participants", addParticipantController);
+router.delete("/:id/participants/:userId", removeParticipantController);
 
 export default router;

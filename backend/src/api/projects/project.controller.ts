@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { projectService } from "./project.service";
-
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
+import { requireAuth } from "../../utils/authUtils";
 
 export async function createProjectController(
   req: AuthenticatedRequest,
@@ -9,11 +9,9 @@ export async function createProjectController(
 ) {
   try {
     const { name, description } = req.body;
-    const ownerId = req.user?.id;
+    const ownerId = requireAuth(req, res);
 
-    if (!ownerId) {
-      return res.status(401).json({ error: "Authentication required." });
-    }
+    if (!ownerId) return; // Response already sent by requireAuth
     if (!name) {
       return res.status(400).json({ error: "Project name is required." });
     }
@@ -37,11 +35,9 @@ export async function getProjectByIdController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
     if (!projectId) {
       return res.status(400).json({ error: "Invalid Project ID." });
     }
@@ -72,10 +68,8 @@ export async function getAllUserProjectsController(
   res: Response,
 ) {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    const userId = requireAuth(req, res);
+    if (!userId) return; // Response already sent by requireAuth
 
     const projects = await projectService.getProjectSummariesForUser(userId);
     return res.status(200).json({ projects });
@@ -91,12 +85,10 @@ export async function updateProjectController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
     const { name, description } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
     if (!projectId) {
       return res.status(400).json({ error: "Invalid project ID." });
     }
@@ -130,11 +122,9 @@ export async function deleteProjectController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
     if (!projectId) {
       return res.status(400).json({ error: "Project ID is required." });
     }
@@ -177,12 +167,10 @@ export async function addProjectMembersController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
     const { profileId } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
     if (!projectId || !profileId) {
       return res
         .status(400)
@@ -215,11 +203,9 @@ export async function removeMemberFromProjectController(
   try {
     const projectId = req.params.projectId;
     const profileIdToRemove = req.params.profileId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
     if (!projectId || !profileIdToRemove) {
       return res.status(400).json({ error: "Invalid project or profile ID." });
     }

@@ -11,24 +11,32 @@ provider = "prisma-client-js"
 
 
 model User {
+  id            String    @id
+  email         String?   @unique
+  username      String?   @unique
+  photoURL      String?
+  fcmToken      String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-id            String    @id
-email         String?   @unique
-username      String?   @unique
-
-
-photoURL      String?
-fcmToken      String?   @unique
-createdAt     DateTime  @default(now())
-updatedAt     DateTime  @updatedAt
-
-createdProjects Project[] @relation("ProjectCreator")
-memberOf        Project[] @relation("ProjectMembers")
-createdTasks    Task[]    @relation("TaskCreator")
-assignedTo      Task[]    @relation("TaskAssignee")
-authored        Message[] @relation("MessageAuthor")
-conversations   Conversation[] @relation("ConversationParticipants")
-
+  // Project relationships
+  createdProjects Project[] @relation("ProjectCreator")
+  memberOf        Project[] @relation("ProjectMembers")
+  
+  // Task relationships
+  createdTasks    Task[]    @relation("TaskCreator")
+  assignedTo      Task[]    @relation("TaskAssignee")
+  
+  // Communication relationships
+  authored        Message[] @relation("MessageAuthor")
+  conversations   Conversation[] @relation("ConversationParticipants")
+  
+  // Notification relationships
+  notifications   Notification[] @relation("NotificationRecipient")
+  
+  // Presence and activity
+  presence        UserPresence? @relation("UserPresence")
+  messageReads    MessageReadStatus[] @relation("MessageReadStatus")
 }
 
 // =============================================
@@ -41,12 +49,16 @@ description String?
 createdAt   DateTime  @default(now())
 updatedAt   DateTime  @updatedAt
 
-creator     User      @relation("ProjectCreator", fields: [creatorId], references: [id])
-creatorId   String
-members     User[]    @relation("ProjectMembers")
-tasks       Task[]
-channels    Channel[]
-@@index([creatorId])
+  creator     User      @relation("ProjectCreator", fields: [creatorId], references: [id])
+  creatorId   String
+  members     User[]    @relation("ProjectMembers")
+  tasks       Task[]
+  channels    Channel[]
+  
+  // Notification relationships
+  notifications Notification[] @relation("NotificationProject")
+  
+  @@index([creatorId])
 }
 
 model Task {
@@ -64,52 +76,135 @@ creatorId   String
 assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
 assigneeId  String?
 
-project     Project  @relation(fields: [projectId], references: [id])
-projectId   String
-@@index([creatorId])
-@@index([assigneeId])
-@@index([projectId])
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  
+  // Notification relationships
+  notifications Notification[] @relation("NotificationTask")
+  
+  @@index([creatorId])
+  @@index([assigneeId])
+  @@index([projectId])
 }
 
 // =============================================
 //              COMMUNICATION MODELS
 // =============================================
 model Channel {
-id          String    @id @default(uuid())
-name        String
-description String?
-createdAt   DateTime  @default(now())
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-project     Project   @relation(fields: [projectId], references: [id])
-projectId   String
-messages    Message[]
-@@index([projectId])
+  project     Project   @relation(fields: [projectId], references: [id])
+  projectId   String
+  messages    Message[]
+  
+  @@index([projectId])
+  @@index([createdAt])
 }
 
 model Conversation {
-id        String    @id @default(uuid())
-createdAt DateTime  @default(now())
-updatedAt DateTime  @updatedAt
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-participants User[]   @relation("ConversationParticipants")
-messages     Message[]
+  participants User[]   @relation("ConversationParticipants")
+  messages     Message[]
+  
+  @@index([createdAt])
 }
 
 model Message {
-id        String    @id @default(uuid())
-content   String
-createdAt DateTime  @default(now())
+  id        String    @id @default(uuid())
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-author    User      @relation("MessageAuthor", fields: [authorId], references: [id])
-authorId  String
+  author    User      @relation("MessageAuthor", fields: [authorId], references: [id])
+  authorId  String
 
-channel         Channel?      @relation(fields: [channelId], references: [id])
-channelId       String?
-conversation    Conversation? @relation(fields: [conversationId], references: [id])
-conversationId  String?
-@@index([authorId])
-@@index([channelId])
-@@index([conversationId])
+  // A message belongs to either a channel OR a conversation, never both
+  channel         Channel?      @relation(fields: [channelId], references: [id])
+  channelId       String?
+  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId  String?
+  
+  // Notification and read status relationships
+  notifications   Notification[] @relation("NotificationMessage")
+  readStatuses    MessageReadStatus[] @relation("MessageReadStatus")
+  
+  @@index([authorId])
+  @@index([channelId])
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+// =============================================
+//              NOTIFICATION MODELS
+// =============================================
+model Notification {
+  id        String    @id @default(uuid())
+  type      String    // e.g., "message", "task_assigned", "task_updated", "project_invite"
+  title     String
+  body      String
+  data      Json?     // Additional data for the notification
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  recipient   User     @relation("NotificationRecipient", fields: [recipientId], references: [id])
+  recipientId String
+  
+  
+  messageId     String?
+  message       Message? @relation("NotificationMessage", fields: [messageId], references: [id])
+  taskId        String?
+  task          Task?    @relation("NotificationTask", fields: [taskId], references: [id])
+  projectId     String?
+  project       Project? @relation("NotificationProject", fields: [projectId], references: [id])
+  
+  @@index([recipientId])
+  @@index([read])
+  @@index([createdAt])
+  @@index([type])
+  @@index([messageId])
+  @@index([taskId])
+  @@index([projectId])
+}
+
+// =============================================
+//              PRESENCE & ACTIVITY MODELS
+// =============================================
+model UserPresence {
+  id        String    @id @default(uuid())
+  status    String    @default("offline") // offline, online, idle, away
+  lastSeen  DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user   User   @relation("UserPresence", fields: [userId], references: [id])
+  userId String @unique
+  
+  @@index([userId])
+  @@index([status])
+  @@index([lastSeen])
+}
+
+model MessageReadStatus {
+  id        String    @id @default(uuid())
+  readAt    DateTime  @default(now())
+  createdAt DateTime  @default(now())
+
+  user      User      @relation("MessageReadStatus", fields: [userId], references: [id])
+  userId    String
+  message   Message   @relation("MessageReadStatus", fields: [messageId], references: [id])
+  messageId String
+
+  @@unique([userId, messageId])
+  @@index([userId])
+  @@index([messageId])
 }
 
 

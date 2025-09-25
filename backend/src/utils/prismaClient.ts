@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 if (!process.env.DATABASE_URL) {
-  console.error("❌ Missing required environment variable: DATABASE_URL");
+  console.error("Missing required environment variable: DATABASE_URL");
   process.exit(1);
 }
 

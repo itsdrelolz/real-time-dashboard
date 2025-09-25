@@ -2,6 +2,7 @@ import { Response } from "express";
 import { channelService } from "./channel.service";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { projectService } from "../projects/project.service";
+import { requireAuth } from "../../utils/authUtils";
 
 export async function getChannelByIdController(
   req: AuthenticatedRequest,
@@ -9,11 +10,9 @@ export async function getChannelByIdController(
 ) {
   try {
     const channelId = req.params.channelId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
 
     if (!channelId) {
       return res.status(400).json({ error: "Invalid Channel ID." });
@@ -50,11 +49,9 @@ export async function createChannelController(
   try {
     const projectId = req.params.projectId;
     const { name, description } = req.body;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
 
     if (!projectId || !name) {
       return res.status(400).json({
@@ -86,12 +83,10 @@ export async function updateChannelController(
   try {
     const channelId = req.params.channelId;
     const projectId = req.params.projectId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
     const { name, description } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
 
     if (!channelId || !projectId) {
       return res
@@ -134,11 +129,9 @@ export async function deleteChannelController(
 ) {
   try {
     const channelId = req.params.channelId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required." });
-    }
+    if (!userId) return; // Response already sent by requireAuth
     if (!channelId) {
       return res
         .status(400)
@@ -171,11 +164,9 @@ export async function getAllChannelsForProjectController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
 
     if (!projectId) {
       return res.status(400).json({ error: "Project ID is required" });

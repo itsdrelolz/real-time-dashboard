@@ -6,6 +6,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { default as projectRouter } from "./projects/project.routes";
 import { default as conversationRouter } from "./conversations/conversation.routes";
+import { default as messageRouter } from "./messages/message.routes";
 import helmet from "helmet";
 import { errorHandler } from "../middleware/errorHandler";
 import { default as notificationsRouter } from "./notifications/notification.routes";
@@ -30,6 +31,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/projects", projectRouter);
 app.use("/api/conversations", conversationRouter);
+app.use("/api/messages", messageRouter);
 app.use("/api/notifications", notificationsRouter);
 
 app.get("/api", (_req, res) => {

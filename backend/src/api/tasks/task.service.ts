@@ -1,67 +1,94 @@
+import { CreateTaskBody, UpdateTaskBody, BasicTaskResponse, TaskDetailsResponse } from "../../types/task.types";
 import prisma from "../../utils/prismaClient";
-import type {
-  CreateTaskData,
-  Task,
-  UpdateTaskData,
-} from "../../types/task.types";
+import { Task } from "@prisma/client";
 
-export async function createTask(data: CreateTaskData): Promise<Task> {
-  try {
-    return prisma.task.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        channelId: data.channelId,
-        priority: data.priority,
-        status: data.status,
-        assigneeId: data.assigneeId,
+class TaskService { 
+
+  public async getTaskSummariesForProject(projectId: string): Promise<BasicTaskResponse[]> {
+    try {
+      const tasks = await prisma.task.findMany({
+        where: { projectId },
+      });
+      return tasks as BasicTaskResponse[];
+    } catch (error) {
+      console.error("Failed to get task summaries for project", error);
+      throw error;
+    }
+  }
+
+  public async getTaskById(taskId: string): Promise<TaskDetailsResponse | null> {
+    try {
+      const task = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+          assignee: true,
+          creator: true,
+        },
+      });
+      return task as TaskDetailsResponse;
+    } catch (error) {
+      console.error("Failed to get task by id", error);
+      throw error;
+    }
+  }
+
+  public async createTask(projectId: string, userId: string, taskData: CreateTaskBody): Promise<Task> {
+    try {
+     // first verify that the user is the creator of the project
+     const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        creatorId: userId,
+        members: {
+          some: {
+            id: userId,
+          },
+        },
       },
     });
-  } catch (error) {
-    console.error("Error creating task:", error);
-    throw new Error("Failed to create task.");
-  }
-}
-
-export async function getTaskById(id: string): Promise<Task | null> {
-  try {
-    return prisma.task.findUnique({
-      where: { id },
-    });
-  } catch (error) {
-    console.error("Error getting task by id:", error);
-    throw new Error("Failed to get task by id.");
-  }
-}
-
-export async function updateTask(
-  id: string,
-  data: UpdateTaskData,
-): Promise<Task> {
-  try {
-    return prisma.task.update({
-      where: { id },
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    const task = await prisma.task.create({
       data: {
-        title: data.title,
-        description: data.description,
-        status: data.status,
-        priority: data.priority,
-        assigneeId: data.assigneeId,
+        ...taskData,
+        projectId: projectId,
+        creatorId: userId,
       },
     });
-  } catch (error) {
-    console.error("Error updating task:", error);
-    throw new Error("Failed to update task.");
+    return task;
+    } catch (error) {
+      console.error("Failed to create task", error);
+      throw error;
+    }
+  }
+      
+
+
+  public async updateTask(taskId: string, taskData: UpdateTaskBody): Promise<Task> {
+    try {
+      const task = await prisma.task.update({
+        where: { id: taskId },
+        data: taskData,
+      });
+      return task;
+    } catch (error) {
+      console.error("Failed to update task", error);
+      throw error;
+    }
+  }
+
+  public async deleteTask(taskId: string): Promise<Task> {
+    try {
+      const task = await prisma.task.delete({
+        where: { id: taskId },
+      });
+      return task;
+    } catch (error) {
+      console.error("Failed to delete task", error);
+      throw error;
+    }
   }
 }
 
-export async function deleteTask(id: string): Promise<void> {
-  try {
-    await prisma.task.delete({
-      where: { id },
-    });
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    throw new Error("Failed to delete task.");
-  }
-}
+export const taskService = new TaskService();

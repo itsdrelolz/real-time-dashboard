@@ -1,5 +1,6 @@
 import admin from "firebase-admin";
 import prisma from "../utils/prismaClient";
+import { User } from "@prisma/client";
 
 export type AuthenticatedUser = {
   uid: string;

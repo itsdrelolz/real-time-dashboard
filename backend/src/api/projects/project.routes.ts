@@ -6,9 +6,8 @@ import {
 } from "express";
 import * as projectController from "./project.controller";
 import { authMiddleware } from "../../middleware/authMiddleware";
-// numeric param validation removed; ids are UUID strings
 import channelRouter from "../channels/channel.routes";
-
+import taskRouter from "../tasks/task.routes";
 const router: Router = Router();
 router.use(authMiddleware);
 
@@ -18,6 +17,24 @@ router.post("/", projectController.createProjectController);
 const projectIdValidator = (req: Request, res: Response, next: NextFunction) =>
   next();
 
+// Specific routes first (to avoid conflicts with nested routers)
+router.get(
+  "/:projectId/members",
+  projectIdValidator,
+  projectController.getProjectMembersController,
+);
+router.post(
+  "/:projectId/members",
+  projectIdValidator,
+  projectController.addProjectMembersController,
+);
+router.delete(
+  "/:projectId/members/:profileId",
+  projectIdValidator,
+  projectController.removeMemberFromProjectController,
+);
+
+// Generic project routes
 router.get(
   "/:projectId",
   projectIdValidator,
@@ -34,23 +51,9 @@ router.delete(
   projectController.deleteProjectController,
 );
 
+// Nested routers last (to avoid conflicts with specific routes)
 router.use("/:projectId/channels", projectIdValidator, channelRouter);
-
-router.get(
-  "/:projectId/members",
-  projectIdValidator,
-  projectController.getProjectMembersController,
-);
-router.post(
-  "/:projectId/members",
-  projectIdValidator,
-  projectController.addProjectMembersController,
-);
-router.delete(
-  "/:projectId/members/:profileId",
-  projectIdValidator,
-  projectController.removeMemberFromProjectController,
-);
+router.use("/:projectId/tasks", projectIdValidator, taskRouter);
 
 // channel-specific routes are delegated to channelRouter above
 

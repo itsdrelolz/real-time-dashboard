@@ -1,129 +1,215 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
-import {
-  createConversation,
-  getDMEligibleUsers,
-  getUserConversations,
-  canCreateDM,
-} from "./conversation.service";
+import { conversationService } from "./conversation.service";
+import { requireAuth } from "../../utils/authUtils";
 
-/**
- * Get users eligible for DM (share at least one project)
- */
-export async function getDMEligibleUsersController(
-  req: AuthenticatedRequest,
-  res: Response,
-) {
-  try {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
-
-    const eligibleUsers = await getDMEligibleUsers(userId);
-
-    return res.status(200).json({ users: eligibleUsers });
-  } catch (error) {
-    console.error("Error getting DM eligible users:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-/**
- * Create a new conversation/DM between two users
- */
+// Create a new conversation
 export async function createConversationController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
-    const userId = req.user?.id;
-    const { otherUserId } = req.body;
+    const { participantIds } = req.body;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
+    if (!userId) return; // Response already sent by requireAuth
+
+    if (!participantIds || !Array.isArray(participantIds) || participantIds.length === 0) {
+      return res.status(400).json({ error: "Participant IDs are required" });
     }
 
-    if (!otherUserId) {
-      return res.status(400).json({ error: "Other user ID is required" });
-    }
+    const conversation = await conversationService.createConversation(
+      { participantIds },
+      userId
+    );
 
-    if (userId === otherUserId) {
-      return res
-        .status(400)
-        .json({ error: "Cannot create conversation with yourself" });
-    }
-
-    const conversation = await createConversation(userId, otherUserId);
-
-    return res.status(201).json({
-      message: "Conversation created successfully",
-      conversation,
+    return res.status(201).json({ 
+      message: "Conversation created successfully", 
+      conversation 
     });
   } catch (error) {
     console.error("Error creating conversation:", error);
-
-    if (
-      error instanceof Error &&
-      error.message.includes("must share at least one project")
-    ) {
-      return res.status(403).json({
-        error: "Users must share at least one project to create a DM",
-      });
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
     }
-
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
-/**
- * Get all conversations for the current user
- */
-export async function getUserConversationsController(
+// Get all conversations for user
+export async function getConversationsController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
-    const userId = req.user?.id;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
+    if (!userId) return; // Response already sent by requireAuth
 
-    const conversations = await getUserConversations(userId);
+    const conversations = await conversationService.getUserConversations(userId);
 
     return res.status(200).json({ conversations });
   } catch (error) {
-    console.error("Error getting user conversations:", error);
+    console.error("Error getting conversations:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
-/**
- * Check if two users can create a DM (share at least one project)
- */
-export async function canCreateDMController(
+// Get conversation by ID
+export async function getConversationController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
-    const userId = req.user?.id;
-    const { otherUserId } = req.query;
+    const { id } = req.params;
+    const userId = requireAuth(req, res);
 
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
+    if (!userId) return; // Response already sent by requireAuth
+
+    if (!id) {
+      return res.status(400).json({ error: "Conversation ID is required" });
     }
 
-    if (!otherUserId || typeof otherUserId !== "string") {
-      return res.status(400).json({ error: "Other user ID is required" });
+    const conversation = await conversationService.getConversationById(id, userId);
+
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found" });
     }
 
-    const canCreate = await canCreateDM(userId, otherUserId);
-
-    return res.status(200).json({ canCreate });
+    return res.status(200).json({ conversation });
   } catch (error) {
-    console.error("Error checking DM eligibility:", error);
+    console.error("Error getting conversation:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Update conversation
+export async function updateConversationController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+    const { participantIds } = req.body;
+    const userId = requireAuth(req, res);
+
+    if (!userId) return; // Response already sent by requireAuth
+
+    if (!id) {
+      return res.status(400).json({ error: "Conversation ID is required" });
+    }
+
+    const conversation = await conversationService.updateConversation(
+      id,
+      userId,
+      { participantIds }
+    );
+
+    return res.status(200).json({ 
+      message: "Conversation updated successfully", 
+      conversation 
+    });
+  } catch (error) {
+    console.error("Error updating conversation:", error);
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Delete conversation
+export async function deleteConversationController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+    const userId = requireAuth(req, res);
+
+    if (!userId) return; // Response already sent by requireAuth
+
+    if (!id) {
+      return res.status(400).json({ error: "Conversation ID is required" });
+    }
+
+    await conversationService.deleteConversation(id, userId);
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Add participant to conversation
+export async function addParticipantController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+    const { participantId } = req.body;
+    const userId = requireAuth(req, res);
+
+    if (!userId) return; // Response already sent by requireAuth
+
+    if (!id || !participantId) {
+      return res.status(400).json({ error: "Conversation ID and participant ID are required" });
+    }
+
+    const conversation = await conversationService.addParticipant(
+      id,
+      userId,
+      participantId
+    );
+
+    return res.status(200).json({ 
+      message: "Participant added successfully", 
+      conversation 
+    });
+  } catch (error) {
+    console.error("Error adding participant:", error);
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Remove participant from conversation
+export async function removeParticipantController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { id, userId: participantId } = req.params;
+    const userId = requireAuth(req, res);
+
+    if (!userId) return; // Response already sent by requireAuth
+
+    if (!id || !participantId) {
+      return res.status(400).json({ error: "Conversation ID and participant ID are required" });
+    }
+
+    const conversation = await conversationService.removeParticipant(
+      id,
+      userId,
+      participantId
+    );
+
+    return res.status(200).json({ 
+      message: "Participant removed successfully", 
+      conversation 
+    });
+  } catch (error) {
+    console.error("Error removing participant:", error);
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   getUserFromToken,
   type AuthenticatedUser,
-} from "../api/auth/auth.service";
+} from "../services/auth.service";
 
 export interface AuthenticatedRequest extends Request {
   user?: AuthenticatedUser;
