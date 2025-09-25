@@ -6,6 +6,10 @@ node_modules/
 dist/
 **/dist/
 
+# editor directories and files
+.vscode/
+.idea/
+
 # Log files
 npm-debug.log*
 yarn-error.log
@@ -44,3 +48,4 @@ storage.rules
 functions
 
 
+!firestore.indexes.json
