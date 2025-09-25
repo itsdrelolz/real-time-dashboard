@@ -31,4 +31,5 @@ firebase.json
 .firebaserc
 .firebase/
 storage.rules
-functions
+
+functions/
