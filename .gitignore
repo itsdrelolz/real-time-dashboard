@@ -49,3 +49,9 @@ functions
 
 
 !firestore.indexes.json
+*.key
+*.pem
+*.p12
+service-account*.json
+firebase-adminsdk*.json
+.secrets/
