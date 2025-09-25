@@ -1,8 +1,7 @@
 import { Response } from "express";
 import { channelService } from "./channel.service";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
-import { projectService } from "../projects/project.service";
-import { requireAuth } from "../../utils/authUtils";
+import { validateChannel } from "@/validators/channelValidator";
 
 export async function getChannelByIdController(
   req: AuthenticatedRequest,
@@ -10,9 +9,6 @@ export async function getChannelByIdController(
 ) {
   try {
     const channelId = req.params.channelId;
-    const userId = requireAuth(req, res);
-
-    if (!userId) return; // Response already sent by requireAuth
 
     if (!channelId) {
       return res.status(400).json({ error: "Invalid Channel ID." });
@@ -22,17 +18,6 @@ export async function getChannelByIdController(
 
     if (!channel) {
       return res.status(404).json({ error: "Channel not found." });
-    }
-
-    const project = await projectService.getProjectById(channel.projectId);
-    const isMember = project?.members.some(
-      (member: any) => member.id === userId,
-    );
-
-    if (!isMember) {
-      return res
-        .status(403)
-        .json({ error: "Forbidden: You do not have access to this channel." });
     }
 
     return res.status(200).json({ channel });
@@ -48,12 +33,21 @@ export async function createChannelController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const { name, description } = req.body;
-    const userId = requireAuth(req, res);
+    const validationResult = validateChannel(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Invalid channel payload",
+        details: validationResult.error.message,
+      });
+    }
+    const validatedData = validationResult.data;
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-    if (!projectId || !name) {
+    if (!projectId || !validatedData.name) {
       return res.status(400).json({
         error:
           "Missing required fields: valid projectId and name are required.",
@@ -61,17 +55,15 @@ export async function createChannelController(
     }
 
     const newChannel = await channelService.createChannel(projectId, userId, {
-      name,
-      description,
+      name: validatedData.name,
+      description: validatedData.description,
     });
+
     return res
       .status(201)
       .json({ message: "Channel created successfully", channel: newChannel });
   } catch (error) {
     console.error("Error creating channel: ", error);
-    if (error instanceof Error && error.message.includes("Unauthorized")) {
-      return res.status(403).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -83,10 +75,19 @@ export async function updateChannelController(
   try {
     const channelId = req.params.channelId;
     const projectId = req.params.projectId;
-    const userId = requireAuth(req, res);
-    const { name, description } = req.body;
+    const userId = req.user?.uid;
+    const validationResult = validateChannel(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Invalid channel payload",
+        details: validationResult.error.message,
+      });
+    }
+    const validatedData = validationResult.data;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!channelId || !projectId) {
       return res
@@ -95,7 +96,7 @@ export async function updateChannelController(
     }
 
     // option of either name or description is required
-    if (!name && !description) {
+    if (!validatedData.name && !validatedData.description) {
       return res
         .status(400)
         .json({ error: "Channel name or description is required." });
@@ -105,20 +106,13 @@ export async function updateChannelController(
       projectId,
       channelId,
       userId,
-      { name, description },
+      { name: validatedData.name, description: validatedData.description },
     );
     return res
       .status(200)
       .json({ message: "Channel updated successfully", channel: updated });
   } catch (error) {
     console.error("Error updating channel:", error);
-    if (
-      error instanceof Error &&
-      (error.message.includes("Unauthorized") ||
-        error.message.includes("not found"))
-    ) {
-      return res.status(403).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -129,25 +123,14 @@ export async function deleteChannelController(
 ) {
   try {
     const channelId = req.params.channelId;
-    const userId = requireAuth(req, res);
 
-    if (!userId) return; // Response already sent by requireAuth
     if (!channelId) {
-      return res
-        .status(400)
-        .json({ error: "Channel ID must be a valid number." });
+      return res.status(400).json({ error: "Invalid Channel ID." });
     }
 
     const channel = await channelService.getChannelById(channelId);
     if (!channel) {
       return res.status(404).json({ error: "Channel not found." });
-    }
-
-    const ownerId = await projectService.getProjectOwnerId(channel.projectId);
-    if (ownerId !== userId) {
-      return res.status(403).json({
-        error: "Forbidden: You are not authorized to delete this channel.",
-      });
     }
 
     await channelService.deleteChannel(channelId);
@@ -164,27 +147,9 @@ export async function getAllChannelsForProjectController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = requireAuth(req, res);
-
-    if (!userId) return; // Response already sent by requireAuth
 
     if (!projectId) {
       return res.status(400).json({ error: "Project ID is required" });
-    }
-
-    // Verify user is a member of the project
-    const project = await projectService.getProjectById(projectId);
-    if (!project) {
-      return res.status(404).json({ error: "Project not found" });
-    }
-
-    const isMember = project.members.some(
-      (member: any) => member.id === userId,
-    );
-    if (!isMember) {
-      return res
-        .status(403)
-        .json({ error: "You are not a member of this project" });
     }
 
     const channels = await channelService.getChannelsByProjectId(projectId);

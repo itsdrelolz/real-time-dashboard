@@ -8,7 +8,7 @@ export type CreateTaskBody = {
   status: string;
   priority: string;
   assigneeId?: string;
-  dueDate?: string;
+  dueDate?: Date;
 };
 
 export type UpdateTaskBody = {
@@ -17,7 +17,7 @@ export type UpdateTaskBody = {
   status?: string;
   priority?: string;
   assigneeId?: string;
-  dueDate?: string;
+  dueDate?: Date;
 };
 
 export type BasicTaskResponse = Pick<

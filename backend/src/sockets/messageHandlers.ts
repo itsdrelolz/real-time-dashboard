@@ -12,9 +12,6 @@ import type { AuthenticatedSocket } from "./index";
 * It is used to handle the messages for the socket.
 * 
 
-
-
-
 */
 
 export function registerMessageHandlers(
@@ -104,7 +101,7 @@ export function registerMessageHandlers(
       }
 
       // Get all project members
-      const members = project.members;
+      const members = await projectService.getProjectMembers(channel.projectId);
 
       // Send to online users via WebSocket
       console.log(

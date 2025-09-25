@@ -8,7 +8,7 @@ export interface AuthenticatedRequest extends Request {
   user?: AuthenticatedUser;
 }
 
-export async function authMiddleware(
+export async function authenticateMiddleware(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,

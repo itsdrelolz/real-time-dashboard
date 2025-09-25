@@ -1,10 +1,4 @@
-import { Channel, Message, User } from "@prisma/client";
-
-type PublicUser = Pick<User, "id" | "username" | "photoURL">;
-
-export type MessageWithAuthor = Message & {
-  author: PublicUser;
-};
+import { Channel, Message } from "@prisma/client";
 
 export type CreateChannelBody = {
   name: string;
@@ -21,13 +15,9 @@ export type BasicChannelResponse = Pick<
   "id" | "name" | "description" | "createdAt" | "projectId"
 >;
 
-export type CreateMessageBody = {
-  content: string;
-};
-
 /**
  * Include the messages for the channel along with author details for the messages
  */
 export type ChannelDetailsResponse = BasicChannelResponse & {
-  messages: MessageWithAuthor[];
+  messages: Message[];
 };

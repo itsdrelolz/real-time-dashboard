@@ -1,23 +1,24 @@
 import { Response } from "express";
 import { notificationService } from "./notification.service";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
-import { requireAuth } from "../../utils/authUtils";
 
 // Save FCM token
 export const saveTokenController = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const userId = requireAuth(req, res);
-  const { token } = req.body;
-
-  if (!userId) return; // Response already sent by requireAuth
-
-  if (!token || typeof token !== "string") {
-    return res.status(400).json({ error: "Invalid token" });
-  }
-
   try {
+    const userId = req.user?.uid;
+    const { token } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({ error: "Invalid token" });
+    }
+
     const updatedUser = await notificationService.saveUserNotificationToken(
       userId,
       token,
@@ -34,12 +35,14 @@ export const getNotificationsController = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const userId = requireAuth(req, res);
-  const { limit = 20, offset = 0, unreadOnly = false } = req.query;
-
-  if (!userId) return; // Response already sent by requireAuth
-
   try {
+    const userId = req.user?.uid;
+    const { limit = 20, offset = 0, unreadOnly = false } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const result = await notificationService.getUserNotifications(
       userId,
       Number(limit),
@@ -59,11 +62,13 @@ export const getUnreadCountController = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const userId = requireAuth(req, res);
-
-  if (!userId) return; // Response already sent by requireAuth
-
   try {
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const count = await notificationService.getUnreadCount(userId);
     return res.status(200).json({ unreadCount: count });
   } catch (error) {
@@ -77,16 +82,18 @@ export const markAsReadController = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const userId = requireAuth(req, res);
-  const { notificationId } = req.params;
-
-  if (!userId) return; // Response already sent by requireAuth
-
-  if (!notificationId) {
-    return res.status(400).json({ error: "Notification ID is required" });
-  }
-
   try {
+    const userId = req.user?.uid;
+    const { notificationId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!notificationId) {
+      return res.status(400).json({ error: "Notification ID is required" });
+    }
+
     await notificationService.markNotificationAsRead(notificationId, userId);
     return res.status(200).json({ message: "Notification marked as read" });
   } catch (error) {
@@ -100,11 +107,13 @@ export const markAllAsReadController = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const userId = requireAuth(req, res);
-
-  if (!userId) return; // Response already sent by requireAuth
-
   try {
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     await notificationService.markAllNotificationsAsRead(userId);
     return res
       .status(200)
@@ -120,16 +129,18 @@ export const deleteNotificationController = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const userId = requireAuth(req, res);
-  const { notificationId } = req.params;
-
-  if (!userId) return; // Response already sent by requireAuth
-
-  if (!notificationId) {
-    return res.status(400).json({ error: "Notification ID is required" });
-  }
-
   try {
+    const userId = req.user?.uid;
+    const { notificationId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!notificationId) {
+      return res.status(400).json({ error: "Notification ID is required" });
+    }
+
     await notificationService.deleteNotification(notificationId, userId);
     return res.status(204).send();
   } catch (error) {

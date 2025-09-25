@@ -1,19 +1,27 @@
 import { Response } from "express";
 import { projectService } from "./project.service";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
-import { requireAuth } from "../../utils/authUtils";
+
+import { validateProject } from "@/validators/projectValidator";
 
 export async function createProjectController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
-    const { name, description } = req.body;
-    const ownerId = requireAuth(req, res);
+    const validationResult = validateProject(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Invalid project payload",
+        details: validationResult.error.message,
+      });
+    }
+    const validatedData = validationResult.data;
+    const { name, description } = validatedData;
+    const ownerId = req.user?.uid;
 
-    if (!ownerId) return; // Response already sent by requireAuth
-    if (!name) {
-      return res.status(400).json({ error: "Project name is required." });
+    if (!ownerId) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const newProject = await projectService.createProject(
@@ -35,9 +43,7 @@ export async function getProjectByIdController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = requireAuth(req, res);
 
-    if (!userId) return; // Response already sent by requireAuth
     if (!projectId) {
       return res.status(400).json({ error: "Invalid Project ID." });
     }
@@ -45,15 +51,6 @@ export async function getProjectByIdController(
     const project = await projectService.getProjectById(projectId);
     if (!project) {
       return res.status(404).json({ error: "Project not found." });
-    }
-
-    const isMember = project.members.some(
-      (member: any) => member.profileId === userId,
-    );
-    if (!isMember) {
-      return res
-        .status(403)
-        .json({ error: "Forbidden: You are not a member of this project." });
     }
 
     return res.status(200).json({ project });
@@ -68,8 +65,11 @@ export async function getAllUserProjectsController(
   res: Response,
 ) {
   try {
-    const userId = requireAuth(req, res);
-    if (!userId) return; // Response already sent by requireAuth
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const projects = await projectService.getProjectSummariesForUser(userId);
     return res.status(200).json({ projects });
@@ -85,34 +85,29 @@ export async function updateProjectController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = requireAuth(req, res);
-    const { name, description } = req.body;
+    const validationResult = validateProject(req.body);
 
-    if (!userId) return; // Response already sent by requireAuth
-    if (!projectId) {
-      return res.status(400).json({ error: "Invalid project ID." });
-    }
-    if (!name || typeof name !== "string" || name.trim() === "") {
-      return res
-        .status(400)
-        .json({ error: "Project name must be a non-empty string." });
-    }
-
-    const ownerId = await projectService.getProjectOwnerId(projectId);
-    if (ownerId !== userId) {
-      return res.status(403).json({
-        error: "Forbidden: You are not authorized to update this project.",
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Invalid project payload",
+        details: validationResult.error.message,
       });
     }
 
+    const validatedData = validationResult.data;
+
+    if (!projectId) {
+      return res.status(400).json({ error: "Invalid project ID." });
+    }
+
     const updatedProject = await projectService.updateProject(projectId, {
-      name,
-      description,
+      name: validatedData.name,
+      description: validatedData.description,
     });
     return res.status(200).json(updatedProject);
   } catch (error) {
     console.error("Failed to update project:", error);
-    return res.status(500).json({ error: "An unexpected error occurred." });
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
@@ -122,25 +117,16 @@ export async function deleteProjectController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = requireAuth(req, res);
 
-    if (!userId) return; // Response already sent by requireAuth
     if (!projectId) {
       return res.status(400).json({ error: "Project ID is required." });
-    }
-
-    const ownerId = await projectService.getProjectOwnerId(projectId);
-    if (ownerId !== userId) {
-      return res.status(403).json({
-        error: "Forbidden: You are not authorized to delete this project.",
-      });
     }
 
     await projectService.deleteProject(projectId);
     return res.status(204).send();
   } catch (error) {
     console.error("Failed to delete project", error);
-    return res.status(500).json({ error: "An unexpected error occurred." });
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
@@ -167,21 +153,12 @@ export async function addProjectMembersController(
 ) {
   try {
     const projectId = req.params.projectId;
-    const userId = requireAuth(req, res);
     const { profileId } = req.body;
 
-    if (!userId) return; // Response already sent by requireAuth
     if (!projectId || !profileId) {
       return res
         .status(400)
         .json({ error: "Invalid project ID or missing profile ID." });
-    }
-
-    const ownerId = await projectService.getProjectOwnerId(projectId);
-    if (ownerId !== userId) {
-      return res
-        .status(403)
-        .json({ error: "Forbidden: Only the project owner can add members." });
     }
 
     const newMember = await projectService.addMemberToProject(projectId, {
@@ -203,20 +180,12 @@ export async function removeMemberFromProjectController(
   try {
     const projectId = req.params.projectId;
     const profileIdToRemove = req.params.profileId;
-    const userId = requireAuth(req, res);
 
-    if (!userId) return; // Response already sent by requireAuth
     if (!projectId || !profileIdToRemove) {
       return res.status(400).json({ error: "Invalid project or profile ID." });
     }
 
     const ownerId = await projectService.getProjectOwnerId(projectId);
-    if (ownerId !== userId) {
-      return res.status(403).json({
-        error: "Forbidden: Only the project owner can remove members.",
-      });
-    }
-
     if (ownerId === profileIdToRemove) {
       return res
         .status(400)

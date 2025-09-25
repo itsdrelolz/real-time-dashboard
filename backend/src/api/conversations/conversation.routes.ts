@@ -1,4 +1,4 @@
-import { authMiddleware } from "@/middleware/authMiddleware";
+import { authenticateMiddleware } from "@/middleware/authMiddleware";
 import { Router } from "express";
 import {
   createConversationController,
@@ -9,20 +9,54 @@ import {
   addParticipantController,
   removeParticipantController,
 } from "./conversation.controller";
+import { sanitizeFields } from "@/middleware/sanitizer";
+import { canConversate } from "@/middleware/authorization/canConversate";
+import { validateConversationId } from "@/validators/indexValidator";
 
 const router: Router = Router();
 
-router.use(authMiddleware);
+router.use(authenticateMiddleware);
 
 // Conversation management routes
 router.get("/", getConversationsController);
-router.post("/", createConversationController);
-router.get("/:id", getConversationController);
-router.put("/:id", updateConversationController);
-router.delete("/:id", deleteConversationController);
+router.post(
+  "/",
+  sanitizeFields(["name", "description"]),
+  createConversationController,
+);
+router.get(
+  "/:id",
+  validateConversationId,
+  canConversate,
+  getConversationController,
+);
+router.put(
+  "/:id",
+  validateConversationId,
+  canConversate,
+  sanitizeFields(["name", "description"]),
+  updateConversationController,
+);
+router.delete(
+  "/:id",
+  validateConversationId,
+  canConversate,
+  deleteConversationController,
+);
 
 // Participant management
-router.post("/:id/participants", addParticipantController);
-router.delete("/:id/participants/:userId", removeParticipantController);
+router.post(
+  "/:id/participants",
+  validateConversationId,
+  canConversate,
+  sanitizeFields(["userId"]),
+  addParticipantController,
+);
+router.delete(
+  "/:id/participants/:userId",
+  validateConversationId,
+  canConversate,
+  removeParticipantController,
+);
 
 export default router;

@@ -1,15 +1,54 @@
 import { Router } from "express";
-import { authMiddleware } from "../../middleware/authMiddleware";
+import { authenticateMiddleware } from "../../middleware/authMiddleware";
 import * as taskController from "./task.controller";
+import { sanitizeFields } from "@/middleware/sanitizer";
+import { canEditTask } from "@/middleware/authorization/canEditTask";
+import { canViewProject } from "@/middleware/authorization/canViewProject";
+import { validateTaskId } from "@/validators/indexValidator";
 
 const router: Router = Router();
 
-router.use(authMiddleware);
+router.use(authenticateMiddleware);
 
-router.post("/", taskController.createTaskController);
-router.get("/", taskController.getAllTasksForProjectController);
-router.get("/:taskId", taskController.getTaskByIdController);
-router.patch("/:taskId", taskController.updateTaskController);
-router.delete("/:taskId", taskController.deleteTaskController);
+router.post(
+  "/",
+  canViewProject,
+  sanitizeFields([
+    "title",
+    "description",
+    "assigneeId",
+    "status",
+    "priority",
+    "dueDate",
+  ]),
+  taskController.createTaskController,
+);
+router.get("/", canViewProject, taskController.getAllTasksForProjectController);
+router.get(
+  "/:taskId",
+  validateTaskId,
+  canViewProject,
+  taskController.getTaskByIdController,
+);
+router.patch(
+  "/:taskId",
+  validateTaskId,
+  canEditTask,
+  sanitizeFields([
+    "title",
+    "description",
+    "assigneeId",
+    "status",
+    "priority",
+    "dueDate",
+  ]),
+  taskController.updateTaskController,
+);
+router.delete(
+  "/:taskId",
+  validateTaskId,
+  canEditTask,
+  taskController.deleteTaskController,
+);
 
 export default router;

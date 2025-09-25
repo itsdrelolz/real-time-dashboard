@@ -1,7 +1,6 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { conversationService } from "./conversation.service";
-import { requireAuth } from "../../utils/authUtils";
 
 // Create a new conversation
 export async function createConversationController(
@@ -10,9 +9,11 @@ export async function createConversationController(
 ) {
   try {
     const { participantIds } = req.body;
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (
       !participantIds ||
@@ -33,9 +34,6 @@ export async function createConversationController(
     });
   } catch (error) {
     console.error("Error creating conversation:", error);
-    if (error instanceof Error && error.message.includes("not found")) {
-      return res.status(404).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -46,9 +44,11 @@ export async function getConversationsController(
   res: Response,
 ) {
   try {
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const conversations =
       await conversationService.getUserConversations(userId);
@@ -67,9 +67,11 @@ export async function getConversationController(
 ) {
   try {
     const { id } = req.params;
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!id) {
       return res.status(400).json({ error: "Conversation ID is required" });
@@ -99,9 +101,11 @@ export async function updateConversationController(
   try {
     const { id } = req.params;
     const { participantIds } = req.body;
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!id) {
       return res.status(400).json({ error: "Conversation ID is required" });
@@ -119,9 +123,6 @@ export async function updateConversationController(
     });
   } catch (error) {
     console.error("Error updating conversation:", error);
-    if (error instanceof Error && error.message.includes("not found")) {
-      return res.status(404).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -133,9 +134,11 @@ export async function deleteConversationController(
 ) {
   try {
     const { id } = req.params;
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!id) {
       return res.status(400).json({ error: "Conversation ID is required" });
@@ -146,9 +149,6 @@ export async function deleteConversationController(
     return res.status(204).send();
   } catch (error) {
     console.error("Error deleting conversation:", error);
-    if (error instanceof Error && error.message.includes("not found")) {
-      return res.status(404).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -161,9 +161,11 @@ export async function addParticipantController(
   try {
     const { id } = req.params;
     const { participantId } = req.body;
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!id || !participantId) {
       return res
@@ -183,9 +185,6 @@ export async function addParticipantController(
     });
   } catch (error) {
     console.error("Error adding participant:", error);
-    if (error instanceof Error && error.message.includes("not found")) {
-      return res.status(404).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -197,9 +196,11 @@ export async function removeParticipantController(
 ) {
   try {
     const { id, userId: participantId } = req.params;
-    const userId = requireAuth(req, res);
+    const userId = req.user?.uid;
 
-    if (!userId) return; // Response already sent by requireAuth
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!id || !participantId) {
       return res
@@ -219,9 +220,6 @@ export async function removeParticipantController(
     });
   } catch (error) {
     console.error("Error removing participant:", error);
-    if (error instanceof Error && error.message.includes("not found")) {
-      return res.status(404).json({ error: error.message });
-    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }

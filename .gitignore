@@ -20,16 +20,19 @@ yarn-debug.log
 
 
 
-# Supabase
-supabase/
 
 # Firebase emulators and config
 firebase-debug.log
 firebase-debug.*.log
 firebase-debug.log*
-firebase.json 
-.firebaserc
 .firebase/
-storage.rules
+/.firebase-*
+/emulator-data/
+/firebase-export/
 
-functions/
+# Allow committing Firebase config and rules
+!firebase.json
+!.firebaserc
+!storage.rules
+!firestore.rules
+!firestore.indexes.json

@@ -1,59 +1,79 @@
-import {
-  Router,
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
+import { Router } from "express";
+
 import * as projectController from "./project.controller";
-import { authMiddleware } from "../../middleware/authMiddleware";
+import { authenticateMiddleware } from "../../middleware/authMiddleware";
+import { canViewProject } from "../../middleware/authorization/canViewProject";
+import { canEditProject } from "../../middleware/authorization/canEditProject";
 import channelRouter from "../channels/channel.routes";
 import taskRouter from "../tasks/task.routes";
+import { validateProjectId } from "@/validators/indexValidator";
+import { sanitizeFields } from "@/middleware/sanitizer";
+
 const router: Router = Router();
-router.use(authMiddleware);
+
+router.use(authenticateMiddleware);
 
 router.get("/", projectController.getAllUserProjectsController);
-router.post("/", projectController.createProjectController);
-
-const projectIdValidator = (req: Request, res: Response, next: NextFunction) =>
-  next();
+router.post(
+  "/",
+  sanitizeFields(["name", "description"]),
+  projectController.createProjectController,
+);
 
 // Specific routes first (to avoid conflicts with nested routers)
 router.get(
   "/:projectId/members",
-  projectIdValidator,
+  validateProjectId,
+  canViewProject,
   projectController.getProjectMembersController,
 );
+
 router.post(
   "/:projectId/members",
-  projectIdValidator,
+  validateProjectId,
+  canEditProject,
+  sanitizeFields(["userId"]),
   projectController.addProjectMembersController,
 );
+
 router.delete(
   "/:projectId/members/:profileId",
-  projectIdValidator,
+  validateProjectId,
+  canEditProject,
   projectController.removeMemberFromProjectController,
 );
 
 // Generic project routes
 router.get(
   "/:projectId",
-  projectIdValidator,
+  validateProjectId,
+  canViewProject,
   projectController.getProjectByIdController,
 );
+
 router.patch(
   "/:projectId",
-  projectIdValidator,
+  validateProjectId,
+  canEditProject,
+  sanitizeFields(["name", "description"]),
   projectController.updateProjectController,
 );
+
 router.delete(
   "/:projectId",
-  projectIdValidator,
+  validateProjectId,
+  canEditProject,
   projectController.deleteProjectController,
 );
 
 // Nested routers last (to avoid conflicts with specific routes)
-router.use("/:projectId/channels", projectIdValidator, channelRouter);
-router.use("/:projectId/tasks", projectIdValidator, taskRouter);
+router.use(
+  "/:projectId/channels",
+  validateProjectId,
+  canViewProject,
+  channelRouter,
+);
+router.use("/:projectId/tasks", validateProjectId, canViewProject, taskRouter);
 
 // channel-specific routes are delegated to channelRouter above
 
