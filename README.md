@@ -42,6 +42,8 @@ Guaranteed Delivery: Asynchronous Notifications
 
 User Experience & Polish
 
+    [ ] Frontend: Rewrite in Solid.js 
+
     [ ] Dark Mode: A sleek dark mode option for the user interface.
 
     [ ] Search & Filtering: Implement search functionality for tasks, projects, and messages.
@@ -50,15 +52,14 @@ User Experience & Polish
 
 Technology Stack
 
-The stack is chosen to be scalable, modern, and efficient.
 
 Backend
 
     Framework: Node.js with Express
 
-    Real-Time: ws library for WebSocket communication
+    Real-Time: socketio library for WebSocket communication
 
-    Database: PostgreSQL
+    Database: Google PostgreSQL
 
     ORM: Prisma
 
@@ -66,11 +67,11 @@ Backend
 
 Frontend
 
-    Framework: solid.js 3
+    Framework: solid.js 
 
     Real-Time Client: WebSocket API
 
-    Push Notifications: Firebase Client SDK
+    Push Notifications: Firebase FCM 
 
 DevOps & Cloud
 
@@ -78,8 +79,8 @@ DevOps & Cloud
 
     CI/CD: GitHub Actions
 
-    Frontend Deployment: Vercel
+    Frontend Deployment: FireBase
 
 
-    Backend Deployment: AWS Fargate
+    Backend Deployment: Google Cloud Run
 
