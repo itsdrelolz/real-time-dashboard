@@ -1,31 +1,80 @@
-import { Router, type Request, type Response, type NextFunction } from "express";
+import { Router } from "express";
+
 import * as projectController from "./project.controller";
-import { authMiddleware } from "../../middleware/authMiddleware";
-// numeric param validation removed; ids are UUID strings
+import { authenticateMiddleware } from "../../middleware/authMiddleware";
+import { canViewProject } from "../../middleware/authorization/canViewProject";
+import { canEditProject } from "../../middleware/authorization/canEditProject";
 import channelRouter from "../channels/channel.routes";
+import taskRouter from "../tasks/task.routes";
+import { validateProjectId } from "@/validators/indexValidator";
+import { sanitizeFields } from "@/middleware/sanitizer";
 
 const router: Router = Router();
-router.use(authMiddleware);
+
+router.use(authenticateMiddleware);
 
 router.get("/", projectController.getAllUserProjectsController);
-router.post("/", projectController.createProjectController);
+router.post(
+  "/",
+  sanitizeFields(["name", "description"]),
+  projectController.createProjectController,
+);
 
+// Specific routes first (to avoid conflicts with nested routers)
+router.get(
+  "/:projectId/members",
+  validateProjectId,
+  canViewProject,
+  projectController.getProjectMembersController,
+);
 
-const projectIdValidator = ((req: Request, res: Response, next: NextFunction) => next());
+router.post(
+  "/:projectId/members",
+  validateProjectId,
+  canEditProject,
+  sanitizeFields(["userId"]),
+  projectController.addProjectMembersController,
+);
 
-router.get("/:projectId", projectIdValidator, projectController.getProjectByIdController);
-router.patch("/:projectId", projectIdValidator, projectController.updateProjectController);
-router.delete("/:projectId", projectIdValidator, projectController.deleteProjectController);
+router.delete(
+  "/:projectId/members/:profileId",
+  validateProjectId,
+  canEditProject,
+  projectController.removeMemberFromProjectController,
+);
 
+// Generic project routes
+router.get(
+  "/:projectId",
+  validateProjectId,
+  canViewProject,
+  projectController.getProjectByIdController,
+);
 
-router.use("/:projectId/channels", projectIdValidator, channelRouter);
+router.patch(
+  "/:projectId",
+  validateProjectId,
+  canEditProject,
+  sanitizeFields(["name", "description"]),
+  projectController.updateProjectController,
+);
 
-router.get("/:projectId/members", projectIdValidator, projectController.getProjectMembersController);
-router.post("/:projectId/members", projectIdValidator, projectController.addProjectMembersController);
-router.delete("/:projectId/members/:profileId", projectIdValidator, projectController.removeMemberFromProjectController);
+router.delete(
+  "/:projectId",
+  validateProjectId,
+  canEditProject,
+  projectController.deleteProjectController,
+);
 
+// Nested routers last (to avoid conflicts with specific routes)
+router.use(
+  "/:projectId/channels",
+  validateProjectId,
+  canViewProject,
+  channelRouter,
+);
+router.use("/:projectId/tasks", validateProjectId, canViewProject, taskRouter);
 
 // channel-specific routes are delegated to channelRouter above
-
 
 export default router;

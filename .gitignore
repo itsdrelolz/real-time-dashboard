@@ -21,11 +21,26 @@ yarn-debug.log
 
 
 
-// google firebase emulators 
+
 firebase-debug.log
 firebase.json 
 .firebaserc
 storage.rules
 functions
 
+# Firebase emulators and config
+firebase-debug.log
+firebase-debug.*.log
+firebase-debug.log*
+.firebase/
+/.firebase-*
+/emulator-data/
+/firebase-export/
 
+# Allow committing Firebase config and rules
+!firebase.json
+!.firebaserc
+!storage.rules
+!firestore.rules
+!firestore.indexes.json
+>>>>>>> feature/integrate-firebase

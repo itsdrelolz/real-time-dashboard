@@ -1,27 +1,38 @@
-import type { Priority, Task as PrismaTask, Status } from "@prisma/client";
-import type { PublicProfile } from "./profile.types";
+import { Task, User } from "@prisma/client";
 
-export type Task = PrismaTask;
+type PublicUser = Pick<User, "id" | "username" | "photoURL">;
 
-export type TaskWithDetails = Task & {
-  assignee: PublicProfile | null;
+export type CreateTaskBody = {
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  assigneeId?: string;
+  dueDate?: Date;
 };
 
+export type UpdateTaskBody = {
+  title?: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  assigneeId?: string;
+  dueDate?: Date;
+};
 
+export type BasicTaskResponse = Pick<
+  Task,
+  | "id"
+  | "title"
+  | "description"
+  | "status"
+  | "priority"
+  | "createdAt"
+  | "updatedAt"
+  | "projectId"
+>;
 
-
-
-
-export type CreateTaskData = Pick<Task, "title" | "channelId"> & // Belongs to a Channel
-  Partial<Pick<Task, "description" | "priority" | "status" | "assigneeId">>;
-
-
-
-  export type UpdateTaskData = 
-  | { title: string; description?: string; status?: Status; priority?: Priority; assigneeId?: string }
-  | { title?: string; description: string; status?: Status; priority?: Priority; assigneeId?: string }
-  | { title?: string; description?: string; status: Status; priority?: Priority; assigneeId?: string }
-  | { title?: string; description?: string; status?: Status; priority: Priority; assigneeId?: string }
-  | { title?: string; description?: string; status?: Status; priority?: Priority; assigneeId: string };
-
-
+export type TaskDetailsResponse = BasicTaskResponse & {
+  assignee: PublicUser;
+  creator: PublicUser;
+};

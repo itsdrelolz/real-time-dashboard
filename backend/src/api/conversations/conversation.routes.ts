@@ -1,31 +1,62 @@
+import { authenticateMiddleware } from "@/middleware/authMiddleware";
 import { Router } from "express";
-import { authMiddleware } from "../../middleware/authMiddleware";
 import {
-  getDMEligibleUsersController,
   createConversationController,
-  getUserConversationsController,
-  canCreateDMController
+  getConversationsController,
+  getConversationController,
+  updateConversationController,
+  deleteConversationController,
+  addParticipantController,
+  removeParticipantController,
 } from "./conversation.controller";
-import conversationMessageRouter from "../messages/conversation-message.routes";
+import { sanitizeFields } from "@/middleware/sanitizer";
+import { canConversate } from "@/middleware/authorization/canConversate";
+import { validateConversationId } from "@/validators/indexValidator";
 
 const router: Router = Router();
 
-// All routes require authentication
-router.use(authMiddleware);
+router.use(authenticateMiddleware);
 
-// Get users eligible for DM (share at least one project)
-router.get("/dm-eligible", getDMEligibleUsersController);
+// Conversation management routes
+router.get("/", getConversationsController);
+router.post(
+  "/",
+  sanitizeFields(["name", "description"]),
+  createConversationController,
+);
+router.get(
+  "/:id",
+  validateConversationId,
+  canConversate,
+  getConversationController,
+);
+router.put(
+  "/:id",
+  validateConversationId,
+  canConversate,
+  sanitizeFields(["name", "description"]),
+  updateConversationController,
+);
+router.delete(
+  "/:id",
+  validateConversationId,
+  canConversate,
+  deleteConversationController,
+);
 
-// Check if two users can create a DM
-router.get("/can-create-dm", canCreateDMController);
-
-// Create a new conversation/DM
-router.post("/", createConversationController);
-
-// Get all conversations for the current user
-router.get("/", getUserConversationsController);
-
-// Conversation messages routes
-router.use("/:conversationId/messages", conversationMessageRouter);
+// Participant management
+router.post(
+  "/:id/participants",
+  validateConversationId,
+  canConversate,
+  sanitizeFields(["userId"]),
+  addParticipantController,
+);
+router.delete(
+  "/:id/participants/:userId",
+  validateConversationId,
+  canConversate,
+  removeParticipantController,
+);
 
 export default router;

@@ -1,50 +1,33 @@
-import type { Prisma } from "@prisma/client";
-import type {
-  Project as PrismaProject,
-  ProjectMember as PrismaProjectMember,
-} from "@prisma/client";
-import type { PublicProfile } from "./profile.types";
+import { Project, User, Task, Channel } from "@prisma/client";
 
-export type Project = PrismaProject;
-export type ProjectMember = PrismaProjectMember;
-
-export type ProjectMemberWithProfile = ProjectMember & {
-  profile: PublicProfile;
+export type CreateProjectBody = {
+  name: string;
+  description?: string;
 };
 
-export type CreateProjectData = Pick<Project, "name" | "ownerId">;
-export type AddProjectMemberData = Pick<
-  ProjectMember,
-  "projectId" | "profileId"
+export type UpdateProjectBody = {
+  name?: string;
+  description?: string;
+};
+
+export type AddProjectMemberBody = {
+  username: string;
+};
+
+export type UpdateProjectMemberBody = {
+  username: string;
+};
+
+type PublicUser = Pick<User, "id" | "username" | "photoURL">;
+
+export type BasicProjectResponse = Pick<
+  Project,
+  "id" | "name" | "description" | "createdAt"
 >;
-export type UpdateProjectDetailsData = Partial<Pick<Project, "name">>;
 
-export type ProjectSummaryPayload = Pick<Project, "id" | "name">;
-
-const detailedProjectInclude = {
-  owner: {
-    select: { id: true, username: true, firstName: true, lastName: true },
-  },
-  members: {
-    include: {
-      profile: {
-        select: { id: true, username: true, firstName: true, lastName: true },
-      },
-    },
-  },
-
-  channels: {
-    include: {
-      tasks: true,
-    },
-  },
-};
-
-
-export type DetailedProjectPayload = Prisma.ProjectGetPayload<{
-  include: typeof detailedProjectInclude;
-}>;
-
-export type ProjectMemberProfile = {
-  profile: PublicProfile | null;
+export type ProjectDetailsResponse = BasicProjectResponse & {
+  creator: PublicUser;
+  members: PublicUser[];
+  tasks: Task[];
+  channels: Channel[];
 };

@@ -1,17 +1,23 @@
-import type { Channel as PrismaChannel } from "@prisma/client";
+import { Channel, Message } from "@prisma/client";
 
-export type Channel = PrismaChannel;
+export type CreateChannelBody = {
+  name: string;
+  description?: string;
+};
 
+export type UpdateChannelBody = {
+  name?: string;
+  description?: string;
+};
 
-export type CreateChannelData = Pick<Channel, "name" | "projectId" | "topic">;
+export type BasicChannelResponse = Pick<
+  Channel,
+  "id" | "name" | "description" | "createdAt" | "projectId"
+>;
 
-
-
-export type UpdateChannelData = 
-    | { name: string; topic?: string }
-    | { name?: string; topic: string }
-    | { name: string; topic: string };
-
-
-
-
+/**
+ * Include the messages for the channel along with author details for the messages
+ */
+export type ChannelDetailsResponse = BasicChannelResponse & {
+  messages: Message[];
+};
