@@ -3,36 +3,12 @@ import { channelService } from "./channel.service";
 import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { validateChannel } from "@/validators/channelValidator";
 
-export async function getChannelByIdController(
-  req: AuthenticatedRequest,
-  res: Response,
-) {
-  try {
-    const channelId = req.params.channelId;
-
-    if (!channelId) {
-      return res.status(400).json({ error: "Invalid Channel ID." });
-    }
-
-    const channel = await channelService.getChannelById(channelId);
-
-    if (!channel) {
-      return res.status(404).json({ error: "Channel not found." });
-    }
-
-    return res.status(200).json({ channel });
-  } catch (error) {
-    console.error("Error retrieving channel: ", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
 export async function createChannelController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
-    const projectId = req.params.projectId;
+    const workspaceId = req.params.workspaceId;
     const validationResult = validateChannel(req.body);
     if (!validationResult.success) {
       return res.status(400).json({
@@ -47,34 +23,32 @@ export async function createChannelController(
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!projectId || !validatedData.name) {
+    if (!workspaceId || !validatedData.name) {
       return res.status(400).json({
         error:
-          "Missing required fields: valid projectId and name are required.",
+          "Missing required fields: valid workspaceId and name are required.",
       });
     }
 
-    const newChannel = await channelService.createChannel(projectId, userId, {
+    const newChannel = await channelService.createChannel(workspaceId, userId, {
       name: validatedData.name,
       description: validatedData.description,
     });
 
-    return res
-      .status(201)
-      .json({ message: "Channel created successfully", channel: newChannel });
+    return res.status(201).json(newChannel);
   } catch (error) {
-    console.error("Error creating channel: ", error);
+    console.error("Error creating channel:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-// considers a duplicate channel name error
+
 export async function updateChannelController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
     const channelId = req.params.channelId;
-    const projectId = req.params.projectId;
+    const workspaceId = req.params.workspaceId;
     const userId = req.user?.uid;
     const validationResult = validateChannel(req.body);
     if (!validationResult.success) {
@@ -89,28 +63,29 @@ export async function updateChannelController(
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!channelId || !projectId) {
+    if (!channelId || !workspaceId) {
       return res
         .status(400)
-        .json({ error: "Invalid channel ID or project ID." });
+        .json({ error: "Invalid channel ID or workspace ID." });
     }
 
-    // option of either name or description is required
-    if (!validatedData.name && !validatedData.description) {
-      return res
-        .status(400)
-        .json({ error: "Channel name or description is required." });
+    if (!validatedData.name) {
+      return res.status(400).json({
+        error: "Missing required fields: name is required.",
+      });
     }
 
     const updated = await channelService.updateChannel(
-      projectId,
+      workspaceId,
       channelId,
       userId,
-      { name: validatedData.name, description: validatedData.description },
+      {
+        name: validatedData.name,
+        description: validatedData.description,
+      },
     );
-    return res
-      .status(200)
-      .json({ message: "Channel updated successfully", channel: updated });
+
+    return res.status(200).json(updated);
   } catch (error) {
     console.error("Error updating channel:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -123,39 +98,67 @@ export async function deleteChannelController(
 ) {
   try {
     const channelId = req.params.channelId;
+    const workspaceId = req.params.workspaceId;
+    const userId = req.user?.uid;
 
-    if (!channelId) {
-      return res.status(400).json({ error: "Invalid Channel ID." });
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const channel = await channelService.getChannelById(channelId);
-    if (!channel) {
-      return res.status(404).json({ error: "Channel not found." });
+    if (!channelId || !workspaceId) {
+      return res
+        .status(400)
+        .json({ error: "Invalid channel ID or workspace ID." });
     }
 
-    await channelService.deleteChannel(channelId);
+    await channelService.deleteChannel(workspaceId, channelId, userId);
+
     return res.status(204).send();
   } catch (error) {
-    console.error("Error deleting channel: ", error);
+    console.error("Error deleting channel:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
-export async function getAllChannelsForProjectController(
+export async function getChannelsController(
   req: AuthenticatedRequest,
   res: Response,
 ) {
   try {
-    const projectId = req.params.projectId;
+    const workspaceId = req.params.workspaceId;
 
-    if (!projectId) {
-      return res.status(400).json({ error: "Project ID is required" });
+    if (!workspaceId) {
+      return res.status(400).json({ error: "Workspace ID is required" });
     }
 
-    const channels = await channelService.getChannelsByProjectId(projectId);
+    const channels = await channelService.getChannelsByWorkspaceId(workspaceId);
     return res.status(200).json({ channels });
   } catch (error) {
-    console.error("Error getting channels for project:", error);
+    console.error("Error getting channels for workspace:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getChannelByIdController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const channelId = req.params.channelId;
+
+    if (!channelId) {
+      return res.status(400).json({ error: "Channel ID is required" });
+    }
+
+    const channel = await channelService.getChannelById(channelId);
+
+    if (!channel) {
+      return res.status(404).json({ error: "Channel not found" });
+    }
+
+    return res.status(200).json(channel);
+  } catch (error) {
+    console.error("Error getting channel by id:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

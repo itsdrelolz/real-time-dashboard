@@ -14,9 +14,9 @@ class ChannelService {
     try {
       const channels = await prisma.channel.findMany({
         where: {
-          project: {
+          workspace: {
             members: {
-              some: { id: userId },
+              some: { userId: userId },
             },
           },
         },
@@ -44,35 +44,36 @@ class ChannelService {
   }
 
   public async createChannel(
-    projectId: string,
+    workspaceId: string,
     userId: string,
     data: CreateChannelBody,
   ): Promise<Channel> {
     try {
-      // First verify that the user is the owner of the project
-      const project = await prisma.project.findFirst({
+      // First verify that the user is the owner of the workspace
+      const workspace = await prisma.workspace.findFirst({
         where: {
-          id: projectId,
+          id: workspaceId,
           creatorId: userId,
         },
       });
 
-      if (!project) {
+      if (!workspace) {
         throw new Error(
-          "Unauthorized: Only project owners can create channels",
+          "Unauthorized: Only workspace owners can create channels",
         );
       }
 
-      const channel = await prisma.channel.create({
+      const newChannel = await prisma.channel.create({
         data: {
           name: data.name,
           description: data.description,
-          project: {
-            connect: { id: projectId },
+          workspace: {
+            connect: { id: workspaceId },
           },
         },
       });
-      return channel;
+
+      return newChannel;
     } catch (error) {
       console.error("Failed to create channel", error);
       throw error;
@@ -80,71 +81,106 @@ class ChannelService {
   }
 
   public async updateChannel(
-    projectId: string,
+    workspaceId: string,
     channelId: string,
     userId: string,
     data: UpdateChannelBody,
   ): Promise<Channel> {
     try {
-      // First verify that the user is the owner of the project
-      const project = await prisma.project.findFirst({
+      // First verify that the user is the owner of the workspace
+      const workspace = await prisma.workspace.findFirst({
         where: {
-          id: projectId,
+          id: workspaceId,
           creatorId: userId,
         },
       });
 
-      if (!project) {
+      if (!workspace) {
         throw new Error(
-          "Unauthorized: Only project owners can update channels",
+          "Unauthorized: Only workspace owners can update channels",
         );
       }
 
-      // Verify that the channel belongs to this project
+      // Verify that the channel belongs to this workspace
       const existingChannel = await prisma.channel.findFirst({
         where: {
           id: channelId,
-          projectId: projectId,
+          workspaceId: workspaceId,
         },
       });
 
       if (!existingChannel) {
-        throw new Error("Channel not found in this project");
+        throw new Error("Channel not found in this workspace");
       }
 
-      const channel = await prisma.channel.update({
+      const updatedChannel = await prisma.channel.update({
         where: { id: channelId },
-        data: data,
+        data: {
+          name: data.name,
+          description: data.description,
+        },
       });
-      return channel;
+
+      return updatedChannel;
     } catch (error) {
       console.error("Failed to update channel", error);
       throw error;
     }
   }
 
-  public async deleteChannel(channelId: string): Promise<Channel> {
+  public async deleteChannel(
+    workspaceId: string,
+    channelId: string,
+    userId: string,
+  ): Promise<Channel> {
     try {
-      const channel = await prisma.channel.delete({
+      // First verify that the user is the owner of the workspace
+      const workspace = await prisma.workspace.findFirst({
+        where: {
+          id: workspaceId,
+          creatorId: userId,
+        },
+      });
+
+      if (!workspace) {
+        throw new Error(
+          "Unauthorized: Only workspace owners can delete channels",
+        );
+      }
+
+      // Verify that the channel belongs to this workspace
+      const existingChannel = await prisma.channel.findFirst({
+        where: {
+          id: channelId,
+          workspaceId: workspaceId,
+        },
+      });
+
+      if (!existingChannel) {
+        throw new Error("Channel not found in this workspace");
+      }
+
+      const deletedChannel = await prisma.channel.delete({
         where: { id: channelId },
       });
-      return channel;
+
+      return deletedChannel;
     } catch (error) {
       console.error("Failed to delete channel", error);
       throw error;
     }
   }
 
-  public async getChannelsByProjectId(
-    projectId: string,
+  public async getChannelsByWorkspaceId(
+    workspaceId: string,
   ): Promise<BasicChannelResponse[]> {
     try {
       const channels = await prisma.channel.findMany({
-        where: { projectId },
+        where: { workspaceId },
       });
       return channels as BasicChannelResponse[];
     } catch (error) {
-      console.error("Failed to get channels by project id", error);
+      console.error("Failed to get channels by workspace id", error);
       throw error;
     }
   }

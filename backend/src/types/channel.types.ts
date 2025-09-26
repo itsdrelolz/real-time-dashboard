@@ -12,7 +12,7 @@ export type UpdateChannelBody = {
 
 export type BasicChannelResponse = Pick<
   Channel,
-  "id" | "name" | "description" | "createdAt" | "projectId"
+  "id" | "name" | "description" | "createdAt" | "workspaceId"
 >;
 
 /**

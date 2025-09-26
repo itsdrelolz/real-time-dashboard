@@ -2,7 +2,7 @@
   "name": "team-task",
   "version": "1.0.0",
   "private": true,
-  "description": "A monorepo for the team-task project",
+  "description": "A monorepo for the real-time dashboard",
   "scripts": {
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd client && npm run dev",

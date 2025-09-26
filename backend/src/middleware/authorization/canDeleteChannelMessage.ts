@@ -3,8 +3,8 @@ import { AuthenticatedRequest } from "../authMiddleware";
 import { Response, NextFunction } from "express";
 
 /*
- * For channel messages: Only project owner OR message creator can delete
- * Channel messages belong to a project, so project owner has override rights
+ * For channel messages: Only workspace owner OR message creator can delete
+ * Channel messages belong to a workspace, so workspace owner has override rights
  */
 
 export const canDeleteChannelMessage = async (
@@ -21,14 +21,14 @@ export const canDeleteChannelMessage = async (
       .json({ error: "Invalid message ID or missing user ID." });
   }
 
-  // Get message with author and channel info (including project)
+  // Get message with author and channel info (including workspace)
   const message = await prisma.message.findUnique({
     where: { id: messageId },
     include: {
       author: true,
       channel: {
         include: {
-          project: true,
+          workspace: true,
         },
       },
     },
@@ -46,13 +46,13 @@ export const canDeleteChannelMessage = async (
   // Check if user is message creator
   const isMessageCreator = message.authorId === userId;
 
-  // Check if user is project owner
-  const isProjectOwner = message.channel.project.creatorId === userId;
+  // Check if user is workspace owner
+  const isWorkspaceOwner = message.channel.workspace.creatorId === userId;
 
-  if (!isMessageCreator && !isProjectOwner) {
+  if (!isMessageCreator && !isWorkspaceOwner) {
     return res.status(403).json({
       error:
-        "Forbidden: You can only delete your own messages or messages in channels of projects you own.",
+        "Forbidden: You can only delete your own messages or messages in channels of workspaces you own.",
     });
   }
 

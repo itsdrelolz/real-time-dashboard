@@ -4,7 +4,7 @@ import { Response, NextFunction } from "express";
 
 /*
  * For conversation messages: Only message creator can delete
- * Conversation messages are independent, no project owner override
+ * Conversation messages are independent, no workspace owner override
  */
 
 export const canDeleteConversationMessage = async (

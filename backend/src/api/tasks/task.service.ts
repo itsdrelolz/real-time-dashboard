@@ -1,23 +1,18 @@
-import {
-  CreateTaskBody,
-  UpdateTaskBody,
-  BasicTaskResponse,
-  TaskDetailsResponse,
-} from "../../types/task.types";
+import {BasicTaskResponse, CreateTaskBody, TaskDetailsResponse, UpdateTaskBody,} from "../../types/task.types";
 import prisma from "../../utils/prismaClient";
-import { Task } from "@prisma/client";
+import {Task} from "@prisma/client";
 
 class TaskService {
-  public async getTaskSummariesForProject(
-    projectId: string,
+  public async getTaskSummariesForWorkspace(
+    workspaceId: string,
   ): Promise<BasicTaskResponse[]> {
     try {
       const tasks = await prisma.task.findMany({
-        where: { projectId },
+        where: { workspaceId },
       });
       return tasks as BasicTaskResponse[];
     } catch (error) {
-      console.error("Failed to get task summaries for project", error);
+      console.error("Failed to get task summaries for workspace", error);
       throw error;
     }
   }
@@ -29,8 +24,8 @@ class TaskService {
       const task = await prisma.task.findUnique({
         where: { id: taskId },
         include: {
-          assignee: true,
           creator: true,
+          assignee: true,
         },
       });
       return task as TaskDetailsResponse;
@@ -41,34 +36,31 @@ class TaskService {
   }
 
   public async createTask(
-    projectId: string,
+    workspaceId: string,
     userId: string,
     taskData: CreateTaskBody,
   ): Promise<Task> {
     try {
-      // first verify that the user is the creator of the project
-      const project = await prisma.project.findFirst({
+      // first verify that the user is a member of the workspace
+      const workspace = await prisma.workspace.findFirst({
         where: {
-          id: projectId,
-          creatorId: userId,
+          id: workspaceId,
           members: {
-            some: {
-              id: userId,
-            },
+            some: { userId: userId },
           },
         },
       });
-      if (!project) {
-        throw new Error("Project not found");
+      if (!workspace) {
+        throw new Error("Workspace not found or user not a member");
       }
-      const task = await prisma.task.create({
-        data: {
-          ...taskData,
-          projectId: projectId,
-          creatorId: userId,
-        },
+
+      return await prisma.task.create({
+          data: {
+              ...taskData,
+              workspaceId: workspaceId,
+              creatorId: userId,
+          },
       });
-      return task;
     } catch (error) {
       console.error("Failed to create task", error);
       throw error;
@@ -77,14 +69,14 @@ class TaskService {
 
   public async updateTask(
     taskId: string,
+    userId: string,
     taskData: UpdateTaskBody,
   ): Promise<Task> {
     try {
-      const task = await prisma.task.update({
-        where: { id: taskId },
-        data: taskData,
+        return await prisma.task.update({
+          where: {id: taskId},
+          data: taskData,
       });
-      return task;
     } catch (error) {
       console.error("Failed to update task", error);
       throw error;
@@ -93,12 +85,38 @@ class TaskService {
 
   public async deleteTask(taskId: string): Promise<Task> {
     try {
-      const task = await prisma.task.delete({
-        where: { id: taskId },
+        return await prisma.task.delete({
+          where: {id: taskId},
       });
-      return task;
     } catch (error) {
       console.error("Failed to delete task", error);
+      throw error;
+    }
+  }
+
+  public async assignTask(
+    taskId: string,
+    assigneeId: string,
+  ): Promise<Task> {
+    try {
+        return await prisma.task.update({
+          where: {id: taskId},
+          data: {assigneeId},
+      });
+    } catch (error) {
+      console.error("Failed to assign task", error);
+      throw error;
+    }
+  }
+
+  public async unassignTask(taskId: string): Promise<Task> {
+    try {
+        return await prisma.task.update({
+          where: {id: taskId},
+          data: {assigneeId: null},
+      });
+    } catch (error) {
+      console.error("Failed to unassign task", error);
       throw error;
     }
   }

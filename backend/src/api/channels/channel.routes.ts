@@ -3,8 +3,8 @@ import * as channelController from "./channel.controller";
 import { authenticateMiddleware } from "../../middleware/authMiddleware";
 import messageRouter from "../messages/message.routes";
 import { sanitizeFields } from "@/middleware/sanitizer";
-import { canViewProject } from "@/middleware/authorization/canViewProject";
-import { canEditProject } from "@/middleware/authorization/canEditProject";
+import { canViewWorkspace } from "@/middleware/authorization/canViewWorkspace";
+import { canEditWorkspace } from "@/middleware/authorization/canEditWorkspace";
 import { validateChannelId } from "@/validators/indexValidator";
 const router: Router = Router({ mergeParams: true });
 
@@ -12,32 +12,32 @@ router.use(authenticateMiddleware);
 
 router.get(
   "/",
-  canViewProject,
-  channelController.getAllChannelsForProjectController,
+  canViewWorkspace,
+  channelController.getChannelsController,
 );
 router.post(
   "/",
-  canEditProject,
+  canEditWorkspace,
   sanitizeFields(["name", "description"]),
   channelController.createChannelController,
 );
 router.get(
   "/:channelId",
   validateChannelId,
-  canViewProject,
+  canViewWorkspace,
   channelController.getChannelByIdController,
 );
 router.put(
   "/:channelId",
   validateChannelId,
-  canEditProject,
+  canEditWorkspace,
   sanitizeFields(["name", "description"]),
   channelController.updateChannelController,
 );
 router.delete(
   "/:channelId",
   validateChannelId,
-  canEditProject,
+  canEditWorkspace,
   channelController.deleteChannelController,
 );
 

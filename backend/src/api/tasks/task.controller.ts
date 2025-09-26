@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { taskService } from "./task.service";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 import { validateTask } from "@/validators/taskValidator";
 
 export async function createTaskController(
@@ -10,34 +10,33 @@ export async function createTaskController(
   try {
     const result = validateTask(req.body);
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: "Invalid task payload", details: result.error.message });
+      return res.status(400).json({
+        error: "Invalid task payload",
+        details: result.error.message,
+      });
     }
     const validatedData = result.data;
-    const { projectId } = req.params;
+    const { workspaceId } = req.params;
     const userId = req.user?.uid;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!projectId || !validatedData.title) {
+    if (!workspaceId || !validatedData.title) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const newTask = await taskService.createTask(projectId, userId, {
+    const newTask = await taskService.createTask(workspaceId, userId, {
       title: validatedData.title,
       description: validatedData.description,
-      assigneeId: validatedData.assigneeId,
       status: validatedData.status,
       priority: validatedData.priority,
+      assigneeId: validatedData.assigneeId,
       dueDate: validatedData.dueDate,
     });
 
-    return res
-      .status(201)
-      .json({ message: "Task created successfully", task: newTask });
+    return res.status(201).json(newTask);
   } catch (error) {
     console.error("Error creating task:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -52,32 +51,18 @@ export async function getTaskByIdController(
     const { taskId } = req.params;
 
     if (!taskId) {
-      return res.status(400).json({ error: "Invalid Task ID" });
+      return res.status(400).json({ error: "Task ID is required" });
     }
 
     const task = await taskService.getTaskById(taskId);
-    return res.status(200).json({ task });
-  } catch (error) {
-    console.error("Error getting task:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
 
-export async function getAllTasksForProjectController(
-  req: AuthenticatedRequest,
-  res: Response,
-) {
-  try {
-    const { projectId } = req.params;
-
-    if (!projectId) {
-      return res.status(400).json({ error: "Invalid Project ID" });
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
     }
 
-    const tasks = await taskService.getTaskSummariesForProject(projectId);
-    return res.status(200).json({ tasks });
+    return res.status(200).json(task);
   } catch (error) {
-    console.error("Error getting tasks:", error);
+    console.error("Error getting task by id:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -88,31 +73,36 @@ export async function updateTaskController(
 ) {
   try {
     const { taskId } = req.params;
-    const validationResult = validateTask(req.body);
-    if (!validationResult.success) {
-      return res.status(400).json({
-        error: "Invalid task payload",
-        details: validationResult.error.message,
-      });
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
-    const validatedData = validationResult.data;
 
     if (!taskId) {
-      return res.status(400).json({ error: "Invalid Task ID" });
+      return res.status(400).json({ error: "Task ID is required" });
     }
 
-    const updatedTask = await taskService.updateTask(taskId, {
+    const result = validateTask(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        error: "Invalid task payload",
+        details: result.error.message,
+      });
+    }
+
+    const validatedData = result.data;
+
+    const updatedTask = await taskService.updateTask(taskId, userId, {
       title: validatedData.title,
       description: validatedData.description,
-      assigneeId: validatedData.assigneeId,
       status: validatedData.status,
       priority: validatedData.priority,
+      assigneeId: validatedData.assigneeId,
       dueDate: validatedData.dueDate,
     });
 
-    return res
-      .status(200)
-      .json({ message: "Task updated successfully", task: updatedTask });
+    return res.status(200).json(updatedTask);
   } catch (error) {
     console.error("Error updating task:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -125,15 +115,91 @@ export async function deleteTaskController(
 ) {
   try {
     const { taskId } = req.params;
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     if (!taskId) {
-      return res.status(400).json({ error: "Invalid Task ID" });
+      return res.status(400).json({ error: "Task ID is required" });
     }
 
     await taskService.deleteTask(taskId);
+
     return res.status(204).send();
   } catch (error) {
     console.error("Error deleting task:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getTasksController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { workspaceId } = req.params;
+
+    if (!workspaceId) {
+      return res.status(400).json({ error: "Invalid Workspace ID" });
+    }
+
+    const tasks = await taskService.getTaskSummariesForWorkspace(workspaceId);
+    return res.status(200).json({ tasks });
+  } catch (error) {
+    console.error("Error getting tasks for workspace:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function assignTaskController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { taskId } = req.params;
+    const { assigneeId } = req.body;
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!taskId || !assigneeId) {
+      return res.status(400).json({ error: "Task ID and assignee ID are required" });
+    }
+
+    const updatedTask = await taskService.assignTask(taskId, assigneeId);
+
+    return res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error("Error assigning task:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function unassignTaskController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const { taskId } = req.params;
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!taskId) {
+      return res.status(400).json({ error: "Task ID is required" });
+    }
+
+    const updatedTask = await taskService.unassignTask(taskId);
+
+    return res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error("Error unassigning task:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

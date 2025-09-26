@@ -43,3 +43,10 @@ export type MessageDetailsResponse = BasicMessageResponse & {
   channel?: BasicChannelResponse;
   conversation?: BasicConversationResponse;
 };
+
+export type ConversationMessageResponse = BasicMessageResponse & {
+    conversation: BasicConversationResponse;
+}
+
+
+

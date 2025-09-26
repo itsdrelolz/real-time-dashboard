@@ -19,7 +19,7 @@ export const canViewChannelMessages = async (
   const channel = await prisma.channel.findUnique({
     where: { id: channelId },
     include: {
-      project: {
+      workspace: {
         include: {
           members: true,
         },
@@ -31,15 +31,15 @@ export const canViewChannelMessages = async (
     return res.status(404).json({ error: "Channel not found." });
   }
 
-  const isProjectMember = channel.project.members.some(
-    (member) => member.id === userId,
+  const isWorkspaceMember = channel.workspace.members.some(
+    (member) => member.userId === userId,
   );
-  const isProjectOwner = channel.project.creatorId === userId;
+  const isWorkspaceOwner = channel.workspace.creatorId === userId;
 
-  if (!isProjectMember && !isProjectOwner) {
+  if (!isWorkspaceMember && !isWorkspaceOwner) {
     return res.status(403).json({
       error:
-        "Forbidden: You must be a member of the project to view channel messages.",
+        "Forbidden: You must be a member of the workspace to view channel messages.",
     });
   }
 

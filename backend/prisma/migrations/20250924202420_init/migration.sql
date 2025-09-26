@@ -7,7 +7,7 @@
   - You are about to drop the `messages` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `profiles` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `project_members` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `projects` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `workspaces` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `tasks` table. If the table is not empty, all the data it contains will be lost.
 
 */

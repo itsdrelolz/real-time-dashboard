@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Backend service for the project",
+  "description": "Backend service for the real-time dashboard",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",

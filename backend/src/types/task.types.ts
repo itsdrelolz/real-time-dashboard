@@ -29,7 +29,7 @@ export type BasicTaskResponse = Pick<
   | "priority"
   | "createdAt"
   | "updatedAt"
-  | "projectId"
+  | "workspaceId"
 >;
 
 export type TaskDetailsResponse = BasicTaskResponse & {

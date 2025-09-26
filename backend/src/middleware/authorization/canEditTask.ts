@@ -3,7 +3,7 @@ import { AuthenticatedRequest } from "../authMiddleware";
 import { Response, NextFunction } from "express";
 
 /*
- * any user who is a member of the project can create a task
+ * any user who is a member of the workspace can create a task
  */
 
 // You can create a function like this:
@@ -15,10 +15,10 @@ export const canEditTask = async (
   const userId = req.user?.uid;
   const taskId = req.params.taskId;
 
-  // Get the task with its project info
+  // Get the task with its workspace info
   const task = await prisma.task.findUnique({
     where: { id: taskId },
-    include: { project: true },
+    include: { workspace: true },
   });
 
   if (!task) {
@@ -27,14 +27,14 @@ export const canEditTask = async (
 
   // Check if user is either:
   // 1. The task creator, OR
-  // 2. The project owner
+  // 2. The workspace owner
   const isTaskCreator = task.creatorId === userId;
-  const isProjectOwner = task.project.creatorId === userId;
+  const isWorkspaceOwner = task.workspace.creatorId === userId;
 
-  if (!isTaskCreator && !isProjectOwner) {
+  if (!isTaskCreator && !isWorkspaceOwner) {
     return res.status(403).json({
       error:
-        "Forbidden: You can only edit tasks you created or tasks in projects you own",
+        "Forbidden: You can only edit tasks you created or tasks in workspaces you own",
     });
   }
 

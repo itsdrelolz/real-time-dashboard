@@ -1,9 +1,7 @@
 import { Server } from "socket.io";
-import { projectService } from "../api/projects/project.service";
+import { workspaceService } from "@/api/workspaces/workspace.service";
 import { messageService } from "../api/messages/message.service";
 import { channelService } from "../api/channels/channel.service";
-import { notificationService } from "../api/notifications/notification.service";
-import { fcmService } from "../services/fcm.service";
 import prisma from "../utils/prismaClient";
 import type { AuthenticatedSocket } from "./index";
 
@@ -34,30 +32,30 @@ export function registerMessageHandlers(
   });
 
   /*
-   * This function is used to join the project room for the socket.
-   * It is used to join the project room for the socket.
+   * This function is used to join the workspace room for the socket.
+   * It is used to join the workspace room for the socket.
    */
 
-  const joinProjectRoom = async (projectId: string) => {
+  const joinWorkspaceRoom = async (workspaceId: string) => {
     try {
       console.log(
-        `User ${userId} attempting to join project room ${projectId}`,
+        `User ${userId} attempting to join workspace room ${workspaceId}`,
       );
-      const project = await projectService.getProjectById(projectId);
-      const isMember = project?.members.some((member) => member.id === userId);
+      const workspace = await workspaceService.getWorkspaceById(workspaceId);
+      const isMember = workspace?.members.some((member) => member.id === userId);
 
       if (isMember) {
-        await socket.join(`project-${projectId}`);
+        await socket.join(`workspace-${workspaceId}`);
         console.log(
-          `User ${userId} successfully joined room for project ${projectId}`,
+          `User ${userId} successfully joined room for workspace ${workspaceId}`,
         );
       } else {
         console.warn(
-          `Attempt by user ${userId} to join unauthorized project room ${projectId}`,
+          `Attempt by user ${userId} to join unauthorized workspace room ${workspaceId}`,
         );
       }
     } catch (error) {
-      console.error(`Error joining project room for user ${userId}:`, error);
+      console.error(`Error joining workspace room for user ${userId}:`, error);
     }
   };
 
@@ -86,95 +84,34 @@ export function registerMessageHandlers(
         undefined,
       );
 
-      // Get channel and project info
+      // Get channel and workspace info
       const channel = await channelService.getChannelById(data.channelId);
       if (!channel) {
         console.log(`Channel ${data.channelId} not found`);
         return;
       }
 
-      const project = await projectService.getProjectById(channel.projectId);
-      if (!project) {
-        console.log(`Project ${channel.projectId} not found`);
+      const workspace = await workspaceService.getWorkspaceById(channel.workspaceId);
+      if (!workspace) {
+        console.log(`Workspace ${channel.workspaceId} not found`);
         return;
       }
 
-      // Get all project members
-      const members = await projectService.getProjectMembers(channel.projectId);
+      // Get all workspace members
+      const members = await workspaceService.getWorkspaceMembers(channel.workspaceId);
 
       // Send to online users via WebSocket
       console.log(
-        `Broadcasting message to project room project-${channel.projectId}`,
+        `Broadcasting message to workspace room workspace-${channel.workspaceId}`,
       );
-      io.to(`project-${channel.projectId}`).emit("messageCreated", newMessage);
-
-      // Send to offline users via FCM + notifications
-      const offlineMembers = members.filter(member => member.id !== userId);
-      
-      for (const member of offlineMembers) {
-        const isOnline = await isUserOnline(member.id);
-
-        if (!isOnline) {
-          // Send FCM notification
-          if (member.fcmToken) {
-            try {
-              await fcmService.sendNotification(member.fcmToken!, {
-                title: `New message in #${channel.name}`,
-                body: `${newMessage.author.username}: ${data.content}`,
-                data: {
-                  messageId: newMessage.id,
-                  channelId: data.channelId,
-                  projectId: channel.projectId,
-                  type: "message",
-                  channelName: channel.name,
-                  authorName: newMessage.author.username,
-                },
-                icon: "ic_notification",
-                sound: "default",
-              });
-            } catch (error) {
-              console.error(
-                `Failed to send FCM to user ${member.id}:`,
-                error,
-              );
-              // If FCM fails, the token might be invalid, remove it
-              if (error && typeof error === 'object' && 'code' in error && 
-                  (error.code === 'messaging/invalid-registration-token' || 
-                   error.code === 'messaging/registration-token-not-registered')) {
-                await notificationService.saveUserNotificationToken(member.id, null);
-              }
-            }
-          }
-
-          // Create database notification
-          try {
-            await notificationService.createMessageNotification(
-              newMessage.id,
-              member.id,
-              `New message in #${channel.name}`,
-              `${newMessage.author.username}: ${data.content}`,
-              {
-                channelId: data.channelId,
-                projectId: channel.projectId,
-                channelName: channel.name,
-                authorName: newMessage.author.username,
-              },
-            );
-          } catch (error) {
-            console.error(
-              `Failed to create notification for user ${member.id}:`,
-              error,
-            );
-          }
-        }
-      }
+      io.to(`workspace-${channel.workspaceId}`).emit("messageCreated", newMessage);
     } catch (error) {
       console.error("Error handling new message:", error);
       socket.emit("messageError", { message: "Could not send message." });
     }
   };
 
-  socket.on("joinProjectRoom", joinProjectRoom);
+  socket.on("joinWorkspaceRoom", joinWorkspaceRoom);
   socket.on("newChannelMessage", handleNewChannelMessage);
 }
 

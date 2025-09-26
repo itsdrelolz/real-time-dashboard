@@ -3,7 +3,7 @@ import apiFetch from "./apiClient";
 
 
 export const getProjects = async () => {
-    const projects = await apiFetch("/projects");
+    const projects = await apiFetch("/workspaces");
     return projects;
 }
 
@@ -16,7 +16,7 @@ export const createProject = async (project: ProjectData) => {
     if (!project || !project.name || !project.ownerId) {
         throw new Error("Project name and owner ID are required");
     }
-    const newProject = await apiFetch("/projects", {
+    const newProject = await apiFetch("/workspaces", {
         method: "POST",
         body: JSON.stringify(project),
     });

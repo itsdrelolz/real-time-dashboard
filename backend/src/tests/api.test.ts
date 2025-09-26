@@ -18,7 +18,7 @@ describe("API Health Check", () => {
 describe("Authentication Required Routes", () => {
   it("should return 401 for protected routes without auth", async () => {
     const protectedRoutes = [
-      "/api/projects",
+      "/api/workspaces",
       "/api/conversations",
       "/api/messages",
       "/api/notifications",

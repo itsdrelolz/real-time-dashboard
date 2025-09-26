@@ -22,7 +22,7 @@ export const canEditMessage = async (
       author: true,
       channel: {
         include: {
-          project: true,
+          workspace: true,
         },
       },
       conversation: true,
@@ -35,13 +35,13 @@ export const canEditMessage = async (
 
   const isMessageCreator = message.authorId === userId;
 
-  // For channel messages, project owner can also edit
-  const isProjectOwner = message.channel?.project?.creatorId === userId;
+  // For channel messages, workspace owner can also edit
+  const isWorkspaceOwner = message.channel?.workspace?.creatorId === userId;
 
-  if (!isMessageCreator && !isProjectOwner) {
+  if (!isMessageCreator && !isWorkspaceOwner) {
     return res.status(403).json({
       error:
-        "Forbidden: You can only edit your own messages or messages in channels of projects you own.",
+        "Forbidden: You can only edit your own messages or messages in channels of workspaces you own.",
     });
   }
 

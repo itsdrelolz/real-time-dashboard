@@ -1,141 +1,160 @@
 // datasource db defines the database connection details.
 datasource db {
-provider     = "postgresql"
-url          = env("DATABASE_URL")
-relationMode = "prisma"
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 generator client {
-provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
-
+// =============================================
+//              USER & AUTH
+// =============================================
 model User {
-  id            String    @id
-  email         String?   @unique
-  username      String   @unique
-  photoURL      String?
-  fcmToken      String?   @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id
+  email     String?  @unique
+  username  String   @unique
+  photoURL  String?
+  fcmToken  String?  @unique // For Push Notifications (Firebase Cloud Messaging)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Project relationships
-  createdProjects Project[] @relation("ProjectCreator")
-  memberOf        Project[] @relation("ProjectMembers")
-  
+  createdWorkspaces Workspace[]       @relation("WorkspaceCreator")
+  workspaceMembers  WorkspaceMember[] // Explicit N:M relation for members
+
+  // Communication
+  authoredMessages    Message[]
+  conversationMembers ConversationParticipant[] @relation("ConversationParticipants")
   // Task relationships
-  createdTasks    Task[]    @relation("TaskCreator")
-  assignedTo      Task[]    @relation("TaskAssignee")
-  
-  // Communication relationships
-  authored        Message[] @relation("MessageAuthor")
-  conversations   Conversation[] @relation("ConversationParticipants")
-  
-  // Notification relationships
-  notifications   Notification[] @relation("NotificationRecipient")
-  notificationSettings NotificationSettings? @relation("UserNotificationSettings")
-  
-  // Presence and activity
-  presence        UserPresence? @relation("UserPresence")
-  messageReads    MessageReadStatus[] @relation("MessageReadStatus")
+  createdTasks        Task[]                    @relation("TaskCreator")
+  assignedTasks       Task[]                    @relation("TaskAssignee")
+
+  // Presence and activity (Stored in Redis, but persisted here for history)
+  presence            UserPresence?
+  messageReadStatuses MessageReadStatus[]
 }
 
 // =============================================
-//              PROJECT & TASK MODELS
+//              WORKSPACE & TASK MODELS (Simplified)
 // =============================================
-model Project {
-id          String    @id @default(uuid())
-name        String
-description String?
-createdAt   DateTime  @default(now())
-updatedAt   DateTime  @updatedAt
 
-  creator     User      @relation("ProjectCreator", fields: [creatorId], references: [id])
-  creatorId   String
-  members     User[]    @relation("ProjectMembers")
-  tasks       Task[]
-  channels    Channel[]
-  
-  // Notification relationships
-  notifications Notification[] @relation("NotificationProject")
-  
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator   User              @relation("WorkspaceCreator", fields: [creatorId], references: [id])
+  creatorId String
+  members   WorkspaceMember[] // Explicit relation to members
+  channels  Channel[]
+  tasks     Task[]
+
   @@index([creatorId])
+}
+
+// Explicit N:M relationship for Workspace Members
+model WorkspaceMember {
+  userId      String
+  workspaceId String
+  joinedAt    DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@id([userId, workspaceId])
+  @@index([workspaceId])
 }
 
 model Task {
-id          String   @id @default(uuid())
-title       String
-description String?
-status      String   @default("pending") // e.g., pending, in_progress, completed
-priority    String   @default("medium")  // e.g., low, medium, high
-dueDate     DateTime?
-createdAt   DateTime @default(now())
-updatedAt   DateTime @updatedAt
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      String    @default("pending")
+  priority    String    @default("medium")
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-creator     User     @relation("TaskCreator", fields: [creatorId], references: [id])
-creatorId   String
-assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
-assigneeId  String?
+  creator    User    @relation("TaskCreator", fields: [creatorId], references: [id])
+  creatorId  String
+  assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigneeId String?
 
-  project     Project  @relation(fields: [projectId], references: [id])
-  projectId   String
-  
-  // Notification relationships
-  notifications Notification[] @relation("NotificationTask")
-  
+  // Tasks belong directly to a Workspace (Project)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+
   @@index([creatorId])
   @@index([assigneeId])
-  @@index([projectId])
+  @@index([workspaceId])
 }
 
 // =============================================
 //              COMMUNICATION MODELS
 // =============================================
+
+// Channel is for group communication within a Workspace
 model Channel {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  project     Project   @relation(fields: [projectId], references: [id])
-  projectId   String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
   messages    Message[]
-  
-  @@index([projectId])
+
+  @@index([workspaceId])
   @@index([createdAt])
 }
 
+// Conversation is for Direct Messages (DMs)
 model Conversation {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  participants User[]   @relation("ConversationParticipants")
+  // Explicit N:M relation for participants to simplify queries (Max 2 participants)
+  participants ConversationParticipant[]
   messages     Message[]
-  
+
   @@index([createdAt])
+}
+
+model ConversationParticipant {
+  userId         String
+  conversationId String
+
+  user         User         @relation("ConversationParticipants", fields: [userId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  @@id([userId, conversationId])
+  @@index([conversationId])
 }
 
 model Message {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   content   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  author    User      @relation("MessageAuthor", fields: [authorId], references: [id])
-  authorId  String
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
 
-  // A message belongs to either a channel OR a conversation, never both
-  channel         Channel?      @relation(fields: [channelId], references: [id])
-  channelId       String?
-  conversation    Conversation? @relation(fields: [conversationId], references: [id])
-  conversationId  String?
-  
-  // Notification and read status relationships
-  notifications   Notification[] @relation("NotificationMessage")
-  readStatuses    MessageReadStatus[] @relation("MessageReadStatus")
-  
+  // Message belongs to either a channel OR a conversation (Direct Message)
+  channel        Channel?      @relation(fields: [channelId], references: [id])
+  channelId      String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId String?
+
+  readStatuses MessageReadStatus[] // Used for "read receipts"
+
   @@index([authorId])
   @@index([channelId])
   @@index([conversationId])
@@ -143,101 +162,29 @@ model Message {
 }
 
 // =============================================
-//              NOTIFICATION MODELS
+//              ACTIVITY & PRESENCE
 // =============================================
-model Notification {
-  id        String    @id @default(uuid())
-  type      String    // e.g., "message", "task_assigned", "task_updated", "project_invite"
-  title     String
-  body      String
-  data      Json?     // Additional data for the notification
-  read      Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
 
-  recipient   User     @relation("NotificationRecipient", fields: [recipientId], references: [id])
-  recipientId String
-  
-  
-  messageId     String?
-  message       Message? @relation("NotificationMessage", fields: [messageId], references: [id])
-  taskId        String?
-  task          Task?    @relation("NotificationTask", fields: [taskId], references: [id])
-  projectId     String?
-  project       Project? @relation("NotificationProject", fields: [projectId], references: [id])
-  
-  @@index([recipientId])
-  @@index([read])
-  @@index([createdAt])
-  @@index([type])
-  @@index([messageId])
-  @@index([taskId])
-  @@index([projectId])
-}
-
-// =============================================
-//              PRESENCE & ACTIVITY MODELS
-// =============================================
-model UserPresence {
-  id        String    @id @default(uuid())
-  status    String    @default("offline") // offline, online, idle, away
-  lastSeen  DateTime  @default(now())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  user   User   @relation("UserPresence", fields: [userId], references: [id])
-  userId String @unique
-  
-  @@index([userId])
-  @@index([status])
-  @@index([lastSeen])
-}
-
+// MessageReadStatus simplifies tracking read receipts
 model MessageReadStatus {
-  id        String    @id @default(uuid())
-  readAt    DateTime  @default(now())
-  createdAt DateTime  @default(now())
-
-  user      User      @relation("MessageReadStatus", fields: [userId], references: [id])
   userId    String
-  message   Message   @relation("MessageReadStatus", fields: [messageId], references: [id])
   messageId String
+  readAt    DateTime @default(now())
 
-  @@unique([userId, messageId])
-  @@index([userId])
-  @@index([messageId])
+  user    User    @relation(fields: [userId], references: [id])
+  message Message @relation(fields: [messageId], references: [id])
+
+  @@id([userId, messageId])
 }
 
-// =============================================
-//              NOTIFICATION SETTINGS
-// =============================================
-model NotificationSettings {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+// UserPresence will contain a single record per user
+model UserPresence {
+  userId    String   @id @unique
+  status    String   @default("offline") // offline, online, idle, away (Crucial real-time data)
+  lastSeen  DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // User relationship
-  user   User   @relation("UserNotificationSettings", fields: [userId], references: [id])
-  userId String @unique
+  user User @relation(fields: [userId], references: [id])
 
-  // Notification preferences
-  messageNotifications    Boolean @default(true)
-  taskNotifications       Boolean @default(true)
-  projectNotifications    Boolean @default(true)
-  mentionNotifications    Boolean @default(true)
-  dueDateReminders       Boolean @default(true)
-  
-  // FCM preferences
-  fcmEnabled             Boolean @default(true)
-  soundEnabled           Boolean @default(true)
-  vibrationEnabled       Boolean @default(true)
-  
-  // Quiet hours (24-hour format)
-  quietHoursStart        String? // e.g., "22:00"
-  quietHoursEnd          String? // e.g., "08:00"
-  quietHoursEnabled      Boolean @default(false)
-  
-  @@index([userId])
+  @@index([status])
 }
-
-

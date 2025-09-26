@@ -3,7 +3,7 @@ import { authenticateMiddleware } from "../../middleware/authMiddleware";
 import * as taskController from "./task.controller";
 import { sanitizeFields } from "@/middleware/sanitizer";
 import { canEditTask } from "@/middleware/authorization/canEditTask";
-import { canViewProject } from "@/middleware/authorization/canViewProject";
+import { canViewWorkspace } from "@/middleware/authorization/canViewWorkspace";
 import { validateTaskId } from "@/validators/indexValidator";
 
 const router: Router = Router();
@@ -12,7 +12,7 @@ router.use(authenticateMiddleware);
 
 router.post(
   "/",
-  canViewProject,
+  canViewWorkspace,
   sanitizeFields([
     "title",
     "description",
@@ -23,11 +23,11 @@ router.post(
   ]),
   taskController.createTaskController,
 );
-router.get("/", canViewProject, taskController.getAllTasksForProjectController);
+router.get("/", canViewWorkspace, taskController.getTasksController);
 router.get(
   "/:taskId",
   validateTaskId,
-  canViewProject,
+  canViewWorkspace,
   taskController.getTaskByIdController,
 );
 router.patch(
@@ -49,6 +49,19 @@ router.delete(
   validateTaskId,
   canEditTask,
   taskController.deleteTaskController,
+);
+router.post(
+  "/:taskId/assign",
+  validateTaskId,
+  canEditTask,
+  sanitizeFields(["assigneeId"]),
+  taskController.assignTaskController,
+);
+router.post(
+  "/:taskId/unassign",
+  validateTaskId,
+  canEditTask,
+  taskController.unassignTaskController,
 );
 
 export default router;

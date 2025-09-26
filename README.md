@@ -10,17 +10,16 @@ This project is built on three core systems working together to create a sophist
 
     Real-Time Layer: A WebSocket server that manages online presence and broadcasts live updates to all connected clients.
 
-    Asynchronous Notification System: A safety net using a database-backed inbox and push notifications (FCM) to ensure no messages or updates are ever missed.
 
 App Features & Roadmap
 
 Foundation: Core API & Data Model
 
-    [ ] Project & Task CRUD: Full create, read, update, and delete functionality for projects and their associated tasks.
+    [ ] Workspace & Task CRUD: Full create, read, update, and delete functionality for workspaces and their associated tasks.
 
     [ ] User Authentication & Profiles: Secure user registration and login, with customizable user profiles.
 
-    [ ] Social System: Ability for users to find and connect with others to collaborate on projects.
+    [ ] Social System: Ability for users to find and connect with others to collaborate on workspaces.
 
     [ ] Image Uploading: Support for uploading user avatars and attaching images to messages.
 
@@ -28,30 +27,25 @@ The Live Experience: Real-Time Layer
 
     [ ] Online Presence Indicators: Show which users are currently online, offline, or idle.
 
-    [ ] Live Channel Messaging: Instantaneous message delivery in project channels for all online users.
+    [ ] Live Channel Messaging: Instantaneous message delivery in workspace channels for all online users.
 
     [ ] Real-Time UI Updates: Instantly reflect changes like new tasks or status updates without a page refresh.
 
 Guaranteed Delivery: Asynchronous Notifications
 
-    [ ] Offline Inbox System: Store all notifications (new messages, task assignments) in the database for users who are offline.
-
-    [ ] Fetch on Reconnect: Deliver all missed notifications to a user the moment they come back online.
-
-    [ ] FCM Push Notifications: Send push notifications to alert users of important, direct updates when the app is closed.
+    [ ] Fetch on Reconnect: For a webapp, this means users who have a tab minimized or backgrounded will receive all missed messages and updates upon returning.
 
 User Experience & Polish
 
-    [ ] Frontend: Rewrite in Solid.js 
+    [ ] Frontend: Solid.js 
 
     [ ] Dark Mode: A sleek dark mode option for the user interface.
 
-    [ ] Search & Filtering: Implement search functionality for tasks, projects, and messages.
+    [ ] Search & Filtering: Implement search functionality for tasks, workspaces, and messages.
 
     [ ] Robust Testing & CI/CD: Build out a comprehensive test suite and a fully automated CI/CD pipeline for deployments.
 
 Technology Stack
-
 
 Backend
 
@@ -60,18 +54,21 @@ Backend
     Real-Time: socketio library for WebSocket communication
 
     Database: Google PostgreSQL
+    
+    Datastore: Redis for caching and session management
 
     ORM: Prisma
-
-    Push Notifications: Firebase Admin SDK (FCM)
+    
 
 Frontend
 
     Framework: solid.js 
 
     Real-Time Client: WebSocket API
+    
+    State Management: solid-js/store
 
-    Push Notifications: Firebase FCM 
+Authentication: Firebase Authentication
 
 DevOps & Cloud
 
@@ -81,6 +78,6 @@ DevOps & Cloud
 
     Frontend Deployment: FireBase
 
-
     Backend Deployment: Google Cloud Run
+
 
