@@ -11,7 +11,6 @@ import type { AuthenticatedSocket } from "./index";
 * This function registers the message handlers for the socket.
 * It is used to handle the messages for the socket.
 * 
-
 */
 
 export function registerMessageHandlers(
@@ -110,52 +109,62 @@ export function registerMessageHandlers(
       io.to(`project-${channel.projectId}`).emit("messageCreated", newMessage);
 
       // Send to offline users via FCM + notifications
-      for (const member of members) {
-        if (member.id !== userId) {
-          // Don't send notification to sender
-          const isOnline = await isUserOnline(member.id);
+      const offlineMembers = members.filter(member => member.id !== userId);
+      
+      for (const member of offlineMembers) {
+        const isOnline = await isUserOnline(member.id);
 
-          if (!isOnline) {
-            // Send FCM notification
-            if (member.fcmToken) {
-              try {
-                await fcmService.sendNotification(member.fcmToken, {
-                  title: `New message in #${channel.name}`,
-                  body: `${newMessage.author.username}: ${data.content}`,
-                  data: {
-                    messageId: newMessage.id,
-                    channelId: data.channelId,
-                    projectId: channel.projectId,
-                    type: "message",
-                  },
-                });
-              } catch (error) {
-                console.error(
-                  `Failed to send FCM to user ${member.id}:`,
-                  error,
-                );
-              }
-            }
-
-            // Create database notification
+        if (!isOnline) {
+          // Send FCM notification
+          if (member.fcmToken) {
             try {
-              await notificationService.createMessageNotification(
-                newMessage.id,
-                member.id,
-                `New message in #${channel.name}`,
-                `${newMessage.author.username}: ${data.content}`,
-                {
+              await fcmService.sendNotification(member.fcmToken!, {
+                title: `New message in #${channel.name}`,
+                body: `${newMessage.author.username}: ${data.content}`,
+                data: {
+                  messageId: newMessage.id,
                   channelId: data.channelId,
                   projectId: channel.projectId,
+                  type: "message",
                   channelName: channel.name,
+                  authorName: newMessage.author.username,
                 },
-              );
+                icon: "ic_notification",
+                sound: "default",
+              });
             } catch (error) {
               console.error(
-                `Failed to create notification for user ${member.id}:`,
+                `Failed to send FCM to user ${member.id}:`,
                 error,
               );
+              // If FCM fails, the token might be invalid, remove it
+              if (error && typeof error === 'object' && 'code' in error && 
+                  (error.code === 'messaging/invalid-registration-token' || 
+                   error.code === 'messaging/registration-token-not-registered')) {
+                await notificationService.saveUserNotificationToken(member.id, null);
+              }
             }
+          }
+
+          // Create database notification
+          try {
+            await notificationService.createMessageNotification(
+              newMessage.id,
+              member.id,
+              `New message in #${channel.name}`,
+              `${newMessage.author.username}: ${data.content}`,
+              {
+                channelId: data.channelId,
+                projectId: channel.projectId,
+                channelName: channel.name,
+                authorName: newMessage.author.username,
+              },
+            );
+          } catch (error) {
+            console.error(
+              `Failed to create notification for user ${member.id}:`,
+              error,
+            );
           }
         }
       }

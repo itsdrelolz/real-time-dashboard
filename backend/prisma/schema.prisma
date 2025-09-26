@@ -13,7 +13,7 @@ provider = "prisma-client-js"
 model User {
   id            String    @id
   email         String?   @unique
-  username      String?   @unique
+  username      String   @unique
   photoURL      String?
   fcmToken      String?   @unique
   createdAt     DateTime  @default(now())
@@ -33,6 +33,7 @@ model User {
   
   // Notification relationships
   notifications   Notification[] @relation("NotificationRecipient")
+  notificationSettings NotificationSettings? @relation("UserNotificationSettings")
   
   // Presence and activity
   presence        UserPresence? @relation("UserPresence")
@@ -205,6 +206,38 @@ model MessageReadStatus {
   @@unique([userId, messageId])
   @@index([userId])
   @@index([messageId])
+}
+
+// =============================================
+//              NOTIFICATION SETTINGS
+// =============================================
+model NotificationSettings {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // User relationship
+  user   User   @relation("UserNotificationSettings", fields: [userId], references: [id])
+  userId String @unique
+
+  // Notification preferences
+  messageNotifications    Boolean @default(true)
+  taskNotifications       Boolean @default(true)
+  projectNotifications    Boolean @default(true)
+  mentionNotifications    Boolean @default(true)
+  dueDateReminders       Boolean @default(true)
+  
+  // FCM preferences
+  fcmEnabled             Boolean @default(true)
+  soundEnabled           Boolean @default(true)
+  vibrationEnabled       Boolean @default(true)
+  
+  // Quiet hours (24-hour format)
+  quietHoursStart        String? // e.g., "22:00"
+  quietHoursEnd          String? // e.g., "08:00"
+  quietHoursEnabled      Boolean @default(false)
+  
+  @@index([userId])
 }
 
 

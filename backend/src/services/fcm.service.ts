@@ -1,5 +1,5 @@
-import * as admin from "firebase-admin";
 import { Message, MulticastMessage } from "firebase-admin/messaging";
+import { messaging } from "../firebaseAdmin";
 import { FCMNotificationPayload } from "../types/notification.types";
 
 class FcmService {
@@ -40,7 +40,7 @@ class FcmService {
     };
 
     try {
-      const response = await admin.messaging().send(message);
+      const response = await messaging.send(message);
       console.log("FCM notification sent successfully:", response);
       return response;
     } catch (error) {
@@ -86,7 +86,7 @@ class FcmService {
     };
 
     try {
-      const response = await admin.messaging().sendEachForMulticast(message);
+      const response = await messaging.sendEachForMulticast(message);
       console.log(
         `FCM multicast sent: ${response.successCount} success, ${response.failureCount} failures`,
       );
@@ -122,7 +122,7 @@ class FcmService {
     };
 
     try {
-      const response = await admin.messaging().send(message);
+      const response = await messaging.send(message);
       console.log("FCM topic notification sent successfully:", response);
       return response;
     } catch (error) {
@@ -137,7 +137,7 @@ class FcmService {
     topic: string,
   ): Promise<void> {
     try {
-      const response = await admin.messaging().subscribeToTopic(tokens, topic);
+      const response = await messaging.subscribeToTopic(tokens, topic);
       console.log(`Successfully subscribed to topic ${topic}:`, response);
     } catch (error) {
       console.error("Error subscribing to topic:", error);
@@ -151,9 +151,7 @@ class FcmService {
     topic: string,
   ): Promise<void> {
     try {
-      const response = await admin
-        .messaging()
-        .unsubscribeFromTopic(tokens, topic);
+      const response = await messaging.unsubscribeFromTopic(tokens, topic);
       console.log(`Successfully unsubscribed from topic ${topic}:`, response);
     } catch (error) {
       console.error("Error unsubscribing from topic:", error);
@@ -165,7 +163,7 @@ class FcmService {
   public async validateToken(token: string): Promise<boolean> {
     try {
       // Try to send a test message (dry run)
-      await admin.messaging().send(
+      await messaging.send(
         {
           token,
           notification: { title: "Test", body: "Test" },

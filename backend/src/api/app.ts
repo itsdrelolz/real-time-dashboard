@@ -10,8 +10,17 @@ import { default as messageRouter } from "./messages/message.routes";
 import helmet from "helmet";
 import { errorHandler } from "../middleware/errorHandler";
 import { default as notificationsRouter } from "./notifications/notification.routes";
+import { globalLimiter } from "../middleware/rateLimit";
+
 const app: Application = express();
+
+
+
+app.disable('x-powered-by');
 app.use(helmet());
+
+// App wide rate limiting
+app.use(globalLimiter);
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL,

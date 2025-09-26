@@ -1,10 +1,49 @@
 import { rateLimit } from "express-rate-limit";
 
-export const limiter = rateLimit({
+// Global rate limiter - light protection for all API endpoints
+export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-  standardHeaders: "draft-8", // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-  ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive
-  // store: ... , // Redis, Memcached, etc. See below.
+  limit: 1000, // High limit for general API use
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message: {
+    error: "Too many requests from this IP, please try again later.",
+  },
+});
+
+// Strict rate limiter for authentication-related endpoints
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 10, // Strict limit for auth operations
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message: {
+    error: "Too many authentication attempts, please try again later.",
+  },
+});
+
+// Message rate limiter - for real-time messaging
+export const messageLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 30, // 30 messages per minute per IP
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message: {
+    error: "Too many messages sent, please slow down.",
+  },
+});
+
+// File upload rate limiter
+export const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 20, // 20 uploads per 15 minutes
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message: {
+    error: "Too many file uploads, please try again later.",
+  },
 });

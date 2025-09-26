@@ -15,10 +15,14 @@ import { canDeleteConversationMessage } from "@/middleware/authorization/canDele
 import { canEditMessage } from "@/middleware/authorization/canEditMessage";
 import { canViewChannelMessages } from "@/middleware/authorization/canViewChannelMessages";
 import { canViewConversationMessages } from "@/middleware/authorization/canViewConversationMessages";
+import { messageLimiter } from "@/middleware/rateLimit";
 
 const router: Router = Router();
 
 router.use(authenticateMiddleware);
+
+// Apply message-specific rate limiting
+router.use(messageLimiter);
 
 // Specific routes first (to avoid conflicts with generic :id routes)
 // Conversation messages

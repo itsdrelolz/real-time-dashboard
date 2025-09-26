@@ -7,11 +7,11 @@ import {
 
 class NotificationService {
   // Save user's FCM token
-  public async saveUserNotificationToken(userId: string, token: string) {
+  public async saveUserNotificationToken(userId: string, token: string | null) {
     try {
       const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: { fcmToken: token },
+        data: { fcmToken: token || null },
       });
       return updatedUser;
     } catch (error) {
